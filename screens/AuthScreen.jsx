@@ -7,12 +7,14 @@ import {
   StyleSheet,
   Alert,
   Switch,
+  ActivityIndicator,
 } from "react-native";
 import { signup } from "../firebase/firebaseConfig";
 
 export default function AuthScreen() {
   const [isSignup, setIsSignup] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,9 +45,19 @@ export default function AuthScreen() {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     if (isSignup && !isExistingUser) {
-      Alert.alert("Success", "Signed up successfully!");
-      const user = await signup({ email, password });
+      const result = await signup({ email, password });
+      setLoading(false);
+      console.log("==========xxx result xxx============");
+      console.log(result);
+      console.log("====================================");
+
+      if (result.status === "ok") {
+        Alert.alert("Success", "Signed up successfully!");
+      } else {
+        Alert.alert("Signup failed:", result.message);
+      }
     } else {
       Alert.alert("Success", "Logged in successfully!");
       console.log("====================================");
@@ -54,6 +66,13 @@ export default function AuthScreen() {
       console.log("====================================");
     }
   };
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2e8b57" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -216,5 +235,15 @@ const styles = StyleSheet.create({
   brand: {
     color: "#2e8b57",
     fontWeight: "bold",
+    elevation: 2,
+    // textShadowColor: "#000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff", // Optional: match your app theme
   },
 });
