@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, getReactNativePersistence ,initializeAuth} from "firebase/auth";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAeYnIoSeivCEmRpclgvrim-MRQljti3ok",
@@ -13,14 +14,23 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
-export const signUP = getAuth(app);
-export const auth = getAuth();
+ 
+const auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
+ 
 
-export function signup({email,password}) {
+export async function signup({ email, password }) {
+    console.log('====================================');
+    console.log('from firebase page', email, password);
+    console.log('====================================');
     createUserWithEmailAndPassword(auth, email, password)
+
         .then((userCredential) => {
             // Signed up 
             const user = userCredential.user;
+
+            return user
             // ...
         })
         .catch((error) => {
