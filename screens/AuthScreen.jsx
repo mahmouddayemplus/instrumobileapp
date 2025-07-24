@@ -1,28 +1,45 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Switch } from 'react-native';
 
 export default function AuthScreen() {
   const [isSignup, setIsSignup] = useState(true);
   const [isExistingUser, setIsExistingUser] = useState(false);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = () => {
-    if (!email || !password || (isSignup && !isExistingUser && !confirmPassword)) {
-      Alert.alert('Error', 'Please fill in all fields.');
-      return;
+  const [errors, setErrors] = useState({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!emailRegex.test(email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    if (!password || password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     if (isSignup && !isExistingUser && password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match.');
-      return;
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    if (isSignup && !isExistingUser) {
-      Alert.alert('Success', 'Signed up successfully!');
-    } else {
-      Alert.alert('Success', 'Logged in successfully!');
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validate()) {
+      if (isSignup && !isExistingUser) {
+        Alert.alert('Success', 'Signed up successfully!');
+      } else {
+        Alert.alert('Success', 'Logged in successfully!');
+      }
     }
   };
 
@@ -33,33 +50,47 @@ export default function AuthScreen() {
       </Text>
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.email && styles.inputError]}
         placeholder="Email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={text => {
+          setEmail(text);
+          if (errors.email) setErrors(prev => ({ ...prev, email: null }));
+        }}
         autoCapitalize="none"
         keyboardType="email-address"
         placeholderTextColor="#888"
       />
+      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
       <TextInput
-        style={styles.input}
-        placeholder="Password"
+        style={[styles.input, errors.password && styles.inputError]}
+        placeholder="Password (6 characters at least)"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={text => {
+          setPassword(text);
+          if (errors.password) setErrors(prev => ({ ...prev, password: null }));
+        }}
         secureTextEntry
         placeholderTextColor="#888"
       />
+      {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
       {isSignup && !isExistingUser && (
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          placeholderTextColor="#888"
-        />
+        <>
+          <TextInput
+            style={[styles.input, errors.confirmPassword && styles.inputError]}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={text => {
+              setConfirmPassword(text);
+              if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: null }));
+            }}
+            secureTextEntry
+            placeholderTextColor="#888"
+          />
+          {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+        </>
       )}
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
@@ -83,6 +114,7 @@ export default function AuthScreen() {
       <TouchableOpacity onPress={() => {
         setIsSignup(prev => !prev);
         setIsExistingUser(false);
+        setErrors({});
       }}>
         <Text style={styles.switchText}>
           {isSignup ? 'Switch to Login Only' : 'Switch to Sign Up'}
@@ -113,8 +145,16 @@ const styles = StyleSheet.create({
     borderColor: GREEN,
     borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 8,
     color: '#000',
+  },
+  inputError: {
+    borderColor: 'red',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 8,
+    marginLeft: 4,
   },
   button: {
     backgroundColor: GREEN,
