@@ -12,6 +12,9 @@ import { useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
+import { getUser, removeUser } from "./helper/authStorage";
+import { useState, useEffect } from 'react';
+import {setAuthenticated} from './store/authSlice'
 
 import Home from './screens/Home';
 import Tools from './screens/Utils';
@@ -31,11 +34,13 @@ function HomeTabs() {
               name="logout"
               size={24}
               color="#2e7d32"
-              onPress={() => {
+              onPress={async () => {
                 // Handle profile icon press
                 dispatch(logout());
+                await removeUser();
+
                 console.log('Logout pressed');
-               }}
+              }}
             />
           </View>
         ),
@@ -109,16 +114,36 @@ function HomeTabs() {
   );
 }
 function RootStack() {
+  const [isTryingLogin, setIsTryingLogin] = useState(true);
+   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  const dispatch = useDispatch();
 
-  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  useEffect(() => {
+    const checkLogin = async () => {
+      const user = await getUser();
 
+      if (user) {
+       dispatch(setAuthenticated(true)); // ✅ Dispatch to Redux once
+        console.log('User loaded from AsyncStorage:', user);
+      }
+      setIsTryingLogin(false);
+    };
+
+    checkLogin();
+  }, [dispatch]);
+
+  if (isTryingLogin) {
+    return   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 18 }}>Loading... </Text>
+      </View>
+  }
+ 
   return (
 
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-
-
+        animation: 'slide_from_right', // Optional: Add slide animation
       }}
     >
       {
@@ -126,7 +151,6 @@ function RootStack() {
           <Stack.Screen
             name="HomeTabs"
             component={HomeTabs}
-
 
           />
         ) : (
@@ -140,7 +164,7 @@ export default function App() {
 
   return (
 
-    <SafeAreaProvider   >
+    <SafeAreaProvider >
       <Provider store={store}>
         <NavigationContainer>
           <RootStack />

@@ -59,9 +59,7 @@ export async function signup({ email, password }) {
 }
 
 export async function signin({ email, password }) {
-  console.log('=======from sign in page=========');
-  console.log(email, password);
-  console.log('====================================');
+ 
   const auth = getAuth();
 try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);

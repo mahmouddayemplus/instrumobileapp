@@ -19,6 +19,7 @@ const authSlice = createSlice({
         emailVerified: firebaseUser.emailVerified,
         displayName: firebaseUser.displayName,
         photoURL: firebaseUser.photoURL,
+        token: firebaseUser.token,
       };
       state.isAuthenticated = true;
     },
@@ -26,8 +27,11 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
     },
+      setAuthenticated: (state, action) => {
+      state.isAuthenticated = action.payload;
+    }
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout,setAuthenticated } = authSlice.actions;
 export default authSlice.reducer;

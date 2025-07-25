@@ -2,6 +2,14 @@ import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { login } from "../store/authSlice";
+import { storeUser } from "../helper/authStorage";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 
 import {
   View,
@@ -56,18 +64,19 @@ export default function AuthScreen() {
     if (isSignup && !isExistingUser) {
       const result = await signup({ email, password });
       setLoading(false);
-      console.log("==========xxx result xxx============");
-      console.log(result);
-      console.log("====================================");
 
       if (result.status === "ok") {
-         const dispatchPayload = {
+        const dispatchPayload = {
           uid: result.message.uid,
           email: result.message.email,
           emailVerified: result.message.emailVerified,
           displayName: result.message.displayName,
           photoURL: result.message.photoURL,
+          token: result.message.accessToken,
         };
+        console.log("========== result.message.token ============");
+        console.log(result.message.accessToken);
+        console.log("====================================");
 
         dispatch(login(dispatchPayload)); // result.message contains user object
         // navigation.navigate("HomeTabs"); // Navigate to Home after login
@@ -81,18 +90,30 @@ export default function AuthScreen() {
     } else {
       const result = await signin({ email, password });
       setLoading(false);
- 
 
       if (result.status === "ok") {
-         const dispatchPayload = {
+        const user = {
+          emailL: result.message.email,
+          token: result.message.accessToken,
+        };
+        console.log("============ user =============");
+        console.log(user);
+        console.log("====================================");
+
+        storeUser(user);
+        // Navigate to home or update Redux state
+
+        const dispatchPayload = {
           uid: result.message.uid,
           email: result.message.email,
           emailVerified: result.message.emailVerified,
           displayName: result.message.displayName,
           photoURL: result.message.photoURL,
+          token: result.message.accessToken,
         };
 
         dispatch(login(dispatchPayload)); // result.message contains user object
+        // navigation.replace("HomeTabs");
         // navigation.navigate("HomeTabs"); // Navigate to Home after login
       } else if (result.error && result.message.includes("user not found")) {
         Alert.alert("User not found", "Please sign up first.");
@@ -112,94 +133,107 @@ export default function AuthScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcomeText}>
-        <Text style={styles.brand}>Instrumentation Toolbox</Text>
-      </Text>
-      <Text style={styles.title}>
-        {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}
-      </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.welcomeText}>
+            <Text style={styles.brand}>Instrumentation Toolbox</Text>
+          </Text>
+          <Text style={styles.title}>
+            {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}
+          </Text>
 
-      <TextInput
-        style={[styles.input, errors.email && styles.inputError]}
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => {
-          setEmail(text);
-          if (errors.email) setErrors((prev) => ({ ...prev, email: null }));
-        }}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholderTextColor="#888"
-      />
-      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-
-      <TextInput
-        style={[styles.input, errors.password && styles.inputError]}
-        placeholder="Password (6 characters at least)"
-        value={password}
-        onChangeText={(text) => {
-          setPassword(text);
-          if (errors.password)
-            setErrors((prev) => ({ ...prev, password: null }));
-        }}
-        secureTextEntry
-        placeholderTextColor="#888"
-      />
-      {errors.password && (
-        <Text style={styles.errorText}>{errors.password}</Text>
-      )}
-
-      {isSignup && !isExistingUser && (
-        <>
           <TextInput
-            style={[styles.input, errors.confirmPassword && styles.inputError]}
-            placeholder="Confirm Password"
-            value={confirmPassword}
+            style={[styles.input, errors.email && styles.inputError]}
+            placeholder="Email"
+            value={email}
             onChangeText={(text) => {
-              setConfirmPassword(text);
-              if (errors.confirmPassword)
-                setErrors((prev) => ({ ...prev, confirmPassword: null }));
+              setEmail(text);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: null }));
+            }}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholderTextColor="#888"
+          />
+          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+
+          <TextInput
+            style={[styles.input, errors.password && styles.inputError]}
+            placeholder="Password (6 characters at least)"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (errors.password)
+                setErrors((prev) => ({ ...prev, password: null }));
             }}
             secureTextEntry
             placeholderTextColor="#888"
           />
-          {errors.confirmPassword && (
-            <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+          {errors.password && (
+            <Text style={styles.errorText}>{errors.password}</Text>
           )}
-        </>
-      )}
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>
-          {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}
-        </Text>
-      </TouchableOpacity>
+          {isSignup && !isExistingUser && (
+            <>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.confirmPassword && styles.inputError,
+                ]}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  if (errors.confirmPassword)
+                    setErrors((prev) => ({ ...prev, confirmPassword: null }));
+                }}
+                secureTextEntry
+                placeholderTextColor="#888"
+              />
+              {errors.confirmPassword && (
+                <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+              )}
+            </>
+          )}
 
-      {isSignup && (
-        <View style={styles.switchContainer}>
-          <Text>Already have an account?</Text>
-          <Switch
-            value={isExistingUser}
-            onValueChange={setIsExistingUser}
-            trackColor={{ false: "#ccc", true: "#7ccf7c" }}
-            thumbColor={isExistingUser ? "#2e8b57" : "#f4f3f4"}
-          />
-        </View>
-      )}
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>
+              {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}
+            </Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => {
-          setIsSignup((prev) => !prev);
-          setIsExistingUser(false);
-          setErrors({});
-        }}
-      >
-        <Text style={styles.switchText}>
-          {isSignup ? "Switch to Login Only" : "Switch to Sign Up"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+          {isSignup && (
+            <View style={styles.switchContainer}>
+              <Text>Already have an account?</Text>
+              <Switch
+                value={isExistingUser}
+                onValueChange={setIsExistingUser}
+                trackColor={{ false: "#ccc", true: "#7ccf7c" }}
+                thumbColor={isExistingUser ? "#2e8b57" : "#f4f3f4"}
+              />
+            </View>
+          )}
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsSignup((prev) => !prev);
+              setIsExistingUser(false);
+              setErrors({});
+            }}
+          >
+            <Text style={styles.switchText}>
+              {isSignup ? "Switch to Login Only" : "Switch to Sign Up"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
