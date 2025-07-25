@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { login } from "../store/authSlice";
+
 import {
   View,
   Text,
@@ -9,12 +13,15 @@ import {
   Switch,
   ActivityIndicator,
 } from "react-native";
-import { signup } from "../firebase/firebaseConfig";
+import { signup, signin } from "../firebase/firebaseConfig";
 
 export default function AuthScreen() {
+  const dispatch = useDispatch();
+
   const [isSignup, setIsSignup] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,16 +61,46 @@ export default function AuthScreen() {
       console.log("====================================");
 
       if (result.status === "ok") {
-        Alert.alert("Success", "Signed up successfully!");
+         const dispatchPayload = {
+          uid: result.message.uid,
+          email: result.message.email,
+          emailVerified: result.message.emailVerified,
+          displayName: result.message.displayName,
+          photoURL: result.message.photoURL,
+        };
+
+        dispatch(login(dispatchPayload)); // result.message contains user object
+        // navigation.navigate("HomeTabs"); // Navigate to Home after login
+      } else if (result.error && result.message.includes("already in use")) {
+        Alert.alert("User already exists", "Please log in instead.");
+        setIsExistingUser(true);
+        setIsSignup(false);
       } else {
         Alert.alert("Signup failed:", result.message);
       }
     } else {
-      Alert.alert("Success", "Logged in successfully!");
-      console.log("====================================");
-      console.log(email, password);
+      const result = await signin({ email, password });
+      setLoading(false);
+ 
 
-      console.log("====================================");
+      if (result.status === "ok") {
+         const dispatchPayload = {
+          uid: result.message.uid,
+          email: result.message.email,
+          emailVerified: result.message.emailVerified,
+          displayName: result.message.displayName,
+          photoURL: result.message.photoURL,
+        };
+
+        dispatch(login(dispatchPayload)); // result.message contains user object
+        // navigation.navigate("HomeTabs"); // Navigate to Home after login
+      } else if (result.error && result.message.includes("user not found")) {
+        Alert.alert("User not found", "Please sign up first.");
+        setIsSignup(true);
+        setIsExistingUser(false);
+      } else {
+        Alert.alert("Login failed:", result.message);
+      }
     }
   };
   if (loading) {
@@ -77,7 +114,7 @@ export default function AuthScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>
-        👋 Welcome to <Text style={styles.brand}>Instrumentation Toolbox</Text>
+        <Text style={styles.brand}>Instrumentation Toolbox</Text>
       </Text>
       <Text style={styles.title}>
         {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}

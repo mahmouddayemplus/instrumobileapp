@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, getReactNativePersistence, initializeAuth } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, getReactNativePersistence, initializeAuth, signInWithEmailAndPassword } from "firebase/auth";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 const {
@@ -10,9 +10,7 @@ const {
   firebaseMessagingSenderId,
   firebaseAppId,
 } = Constants.expoConfig.extra;
-console.log('=========firebaseApiKey=============');
-console.log(firebaseApiKey);
-console.log('====================================');
+ 
 
 const firebaseConfig = {
   apiKey: firebaseApiKey,
@@ -40,8 +38,7 @@ const auth = initializeAuth(app, {
 
 
 export async function signup({ email, password }) {
-  console.log('from firebase page', email, password);
-
+ 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -52,7 +49,31 @@ export async function signup({ email, password }) {
       message: user,
     };
   } catch (error) {
-    console.log('Signup Error:', error.message);
+ 
+    return {
+      status: 'error',
+      error: true,
+      message: error.message,
+    };
+  }
+}
+
+export async function signin({ email, password }) {
+  console.log('=======from sign in page=========');
+  console.log(email, password);
+  console.log('====================================');
+  const auth = getAuth();
+try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    return {
+      status: 'ok',
+      error: false,
+      message: user,
+    };
+  } catch (error) {
+    console.log('Signin Error:', error.message);
 
     return {
       status: 'error',
