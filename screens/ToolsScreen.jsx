@@ -6,7 +6,6 @@ import ToolComponent from "../components/ToolComponent";
 const ToolsScreen = () => {
   return (
     <SafeAreaView>
-
       <View
         style={{
           flexDirection: "row",
@@ -18,14 +17,36 @@ const ToolsScreen = () => {
           iconName="thermometer"
           titleLine1="PT100"
           titleLine2="Calculator"
+          screenName="PT100Calculator"
+        />
+        <ToolComponent
+          iconName="pulse"
+          titleLine1="Thermocouple-k Type"
+          titleLine2="Calculator"
+          screenName="Thermocouple"
+        />
+
+
+      </View>
+            <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <ToolComponent
+          iconName="funnel"
+          titleLine1="Pressure"
+          titleLine2="Converter"
           screenName="BooksScreen"
         />
 
         <ToolComponent
-          iconName="calculator" 
+          iconName="calculator"
           titleLine1="Weigh Feeder"
           titleLine2="Correction Factor"
-          screenName="ProfileScreen"
+          screenName="WeighFeeder"
         />
       </View>
       <View
@@ -43,34 +64,13 @@ const ToolsScreen = () => {
         />
 
         <ToolComponent
-          iconName="flash" 
+          iconName="flash"
           titleLine1="3PH-Motor Current"
           titleLine2="Calculator"
           screenName="ProfileScreen"
         />
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
-        <ToolComponent
-          iconName="funnel"
-          titleLine1="Pressure"
-          titleLine2="Converter"
-          screenName="BooksScreen"
-        />
 
-        <ToolComponent
-          iconName="pulse" 
-          titleLine1="Thermocouple-k Type"
-          titleLine2="Calculator"
-          screenName="ProfileScreen"
-        />
-      </View>
- 
     </SafeAreaView>
   );
 };

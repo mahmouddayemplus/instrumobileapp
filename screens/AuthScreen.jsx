@@ -74,9 +74,7 @@ export default function AuthScreen() {
           photoURL: result.message.photoURL,
           token: result.message.accessToken,
         };
-        console.log("========== result.message.token ============");
-        console.log(result.message.accessToken);
-        console.log("====================================");
+ 
 
         dispatch(login(dispatchPayload)); // result.message contains user object
         // navigation.navigate("HomeTabs"); // Navigate to Home after login
@@ -96,9 +94,7 @@ export default function AuthScreen() {
           emailL: result.message.email,
           token: result.message.accessToken,
         };
-        console.log("============ user =============");
-        console.log(user);
-        console.log("====================================");
+ 
 
         storeUser(user);
         // Navigate to home or update Redux state

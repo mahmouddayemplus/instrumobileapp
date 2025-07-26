@@ -14,7 +14,10 @@ import { useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
 import { getUser, removeUser } from "./helper/authStorage";
 import { useState, useEffect } from 'react';
-import {setAuthenticated} from './store/authSlice'
+import { setAuthenticated } from './store/authSlice'
+import PT100Calculator from './screens/PT100Calculator';
+import WeighFeeder from './screens/WeighFeeder';
+import Thermocouple from './screens/Thermocouple';
 
 import Home from './screens/Home';
 import ToolsScreen from './screens/ToolsScreen';
@@ -39,7 +42,6 @@ function HomeTabs() {
                 dispatch(logout());
                 await removeUser();
 
-                console.log('Logout pressed');
               }}
             />
           </View>
@@ -47,6 +49,28 @@ function HomeTabs() {
 
       }}
     >
+
+      <Tab.Screen
+        name="ToolsScreen"
+        component={ToolsScreen}
+        options={{
+          title: 'Tools',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name="toolbox"
+              size={focused ? size + 4 : size}
+              color={focused ? '#43ad49ff' : color} // Green when focused
+            />
+          ),
+          tabBarLabelStyle: {
+            fontSize: 12,
+          },
+          tabBarActiveTintColor: '#2e7d32', // Dark green
+          tabBarInactiveTintColor: '#999',
+        }}
+
+
+      />
       <Tab.Screen
         name="Home"
         component={Home}
@@ -89,33 +113,12 @@ function HomeTabs() {
       />
 
 
-      <Tab.Screen
-        name="ToolsScreen"
-        component={ToolsScreen}
-        options={{
-          title: 'Tools',
-          tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name="toolbox"
-              size={focused ? size + 4 : size}
-              color={focused ? '#43ad49ff' : color} // Green when focused
-            />
-          ),
-          tabBarLabelStyle: {
-            fontSize: 12,
-          },
-          tabBarActiveTintColor: '#2e7d32', // Dark green
-          tabBarInactiveTintColor: '#999',
-        }}
-
-
-      />
     </Tab.Navigator>
   );
 }
 function RootStack() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -123,8 +126,7 @@ function RootStack() {
       const user = await getUser();
 
       if (user) {
-       dispatch(setAuthenticated(true)); // ✅ Dispatch to Redux once
-        console.log('User loaded from AsyncStorage:', user);
+        dispatch(setAuthenticated(true)); // ✅ Dispatch to Redux once
       }
       setIsTryingLogin(false);
     };
@@ -133,26 +135,85 @@ function RootStack() {
   }, [dispatch]);
 
   if (isTryingLogin) {
-    return   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 18 }}>Loading... </Text>
-      </View>
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 18 }}>Loading... </Text>
+    </View>
   }
- 
+
   return (
 
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
         animation: 'slide_from_right', // Optional: Add slide animation
       }}
     >
       {
         isAuthenticated ? (
-          <Stack.Screen
-            name="HomeTabs"
-            component={HomeTabs}
+          <>
 
-          />
+            <Stack.Screen
+              name="HomeTabs"
+              component={HomeTabs}
+              options={{
+                headerShown: false
+              }}
+
+            />
+            <Stack.Screen
+              name="PT100Calculator"
+              component={PT100Calculator}
+              options={({ navigation }) => ({
+                title: "PT100 Calculator",
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="Thermocouple"
+              component={Thermocouple}
+              options={({ navigation }) => ({
+                title: "Thermocouple K-type ",
+               
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="WeighFeeder"
+              component={WeighFeeder}
+              options={({ navigation }) => ({
+                title: "Weigh Feeder Calibration",
+               
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+          </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />
         )

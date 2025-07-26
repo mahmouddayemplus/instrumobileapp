@@ -3,14 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const USER_KEY = 'user';
 
 export async function storeUser(user) {
-  console.log('=========== xxxx ==========');
-  console.log('Storing user:', user);
-  console.log('====================================');
+ 
 
   try {
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
-    console.log('User stored successfully xxxx', user);
-  } catch (e) {
+   } catch (e) {
     console.log('Error storing user', e);
   }
 }
