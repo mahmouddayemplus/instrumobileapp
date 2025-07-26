@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react';
 import {setAuthenticated} from './store/authSlice'
 
 import Home from './screens/Home';
-import Tools from './screens/Utils';
+import ToolsScreen from './screens/ToolsScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -90,8 +90,8 @@ function HomeTabs() {
 
 
       <Tab.Screen
-        name="Tools"
-        component={Tools}
+        name="ToolsScreen"
+        component={ToolsScreen}
         options={{
           title: 'Tools',
           tabBarIcon: ({ color, size, focused }) => (
