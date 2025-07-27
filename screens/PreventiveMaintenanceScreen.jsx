@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import {colors} from '../constants/color'
 import {
   View,
   Text,
@@ -97,7 +98,7 @@ export default PreventiveMaintenanceScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   button: {
-    backgroundColor: "#3478f6",
+    backgroundColor: colors.primary,
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,

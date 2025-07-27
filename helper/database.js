@@ -3,19 +3,19 @@ import * as SQLite from 'expo-sqlite';
 let db;
 
 export const initDb = async () => {
-  try {
-    db = await SQLite.openDatabaseAsync('pmTasks.db');
-    await db.execAsync(`
+    try {
+        db = await SQLite.openDatabaseAsync('pmTasks.db');
+        await db.execAsync(`
       CREATE TABLE IF NOT EXISTS tasks (
         id TEXT PRIMARY KEY NOT NULL,
         section TEXT NOT NULL,
         "order" INTEGER
       );
     `);
-    console.log('✅ Table created successfully');
-  } catch (error) {
-    console.error('❌ Error initializing DB:', error);
-  }
+        console.log('✅ Table created successfully');
+    } catch (error) {
+        console.error('❌ Error initializing DB:', error);
+    }
 };
 // export const saveTasksToSQLite = (tasks) => {
 //   return new Promise((resolve, reject) => {
@@ -35,17 +35,17 @@ export const initDb = async () => {
 
 export const saveTasksToSQLite = async (id, section, order) => {
     console.log('========= saveTasksToSQLite ===============');
-    console.log(id,section,order);
+    console.log(id, section, order);
     console.log('====================================');
-  try {
-    await db.runAsync(
-      `INSERT INTO tasks (id, section, "order") VALUES (?, ?, ?);`,
-      [id, section, order]
-    );
-    console.log('✅ Task inserted');
-  } catch (error) {
-    console.error('❌ Insert error:', error);
-  }
+    try {
+        await db.runAsync(
+            `INSERT OR REPLACE INTO tasks (id, section, "order") VALUES (?, ?, ?);`,
+            [id, section, order]
+        );
+        console.log('✅ Task inserted');
+    } catch (error) {
+        console.error('❌ Insert error:', error);
+    }
 };
 
 
@@ -63,11 +63,11 @@ export const saveTasksToSQLite = async (id, section, order) => {
 // };
 
 export const getTasksFromSQLite = async () => {
-  try {
-    const result = await db.getAllAsync(`SELECT * FROM tasks ORDER BY "order" ASC;`);
-    return result; // array of rows
-  } catch (error) {
-    console.error('❌ Fetch error:', error);
-    return [];
-  }
+    try {
+        const result = await db.getAllAsync(`SELECT * FROM tasks ORDER BY "order" ASC;`);
+        return result; // array of rows
+    } catch (error) {
+        console.error('❌ Fetch error:', error);
+        return [];
+    }
 };
