@@ -1,4 +1,7 @@
 import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 import { getAuth, createUserWithEmailAndPassword, getReactNativePersistence, initializeAuth, signInWithEmailAndPassword } from "firebase/auth";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -10,7 +13,7 @@ const {
   firebaseMessagingSenderId,
   firebaseAppId,
 } = Constants.expoConfig.extra;
- 
+
 
 const firebaseConfig = {
   apiKey: firebaseApiKey,
@@ -38,7 +41,7 @@ const auth = initializeAuth(app, {
 
 
 export async function signup({ email, password }) {
- 
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -49,7 +52,7 @@ export async function signup({ email, password }) {
       message: user,
     };
   } catch (error) {
- 
+
     return {
       status: 'error',
       error: true,
@@ -59,9 +62,9 @@ export async function signup({ email, password }) {
 }
 
 export async function signin({ email, password }) {
- 
+
   const auth = getAuth();
-try {
+  try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -80,3 +83,20 @@ try {
     };
   }
 }
+export const db = getFirestore(app);
+
+// Firestore → SQLite local DB
+const updateLocalTasks = async () => {
+  const querySnapshot = await getDocs(collection(db, "pmTasks"));
+  const tasks = [];
+
+  querySnapshot.forEach((doc) => {
+    tasks.push({ id: doc.id, ...doc.data() });
+  });
+
+  // Clear old and insert new into SQLite
+  await saveTasksToSQLite(tasks);
+};
+
+ 
+ 
