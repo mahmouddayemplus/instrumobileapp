@@ -39,7 +39,7 @@ const ToolsScreen = () => {
           iconName="funnel"
           titleLine1="Pressure"
           titleLine2="Converter"
-          screenName="BooksScreen"
+          screenName="PressureConverter"
         />
 
         <ToolComponent
@@ -49,7 +49,7 @@ const ToolsScreen = () => {
           screenName="WeighFeeder"
         />
       </View>
-      <View
+      {/* <View
         style={{
           flexDirection: "row",
           flexWrap: "wrap",
@@ -69,7 +69,7 @@ const ToolsScreen = () => {
           titleLine2="Calculator"
           screenName="ProfileScreen"
         />
-      </View>
+      </View> */}
 
     </SafeAreaView>
   );

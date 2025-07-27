@@ -18,6 +18,7 @@ import { setAuthenticated } from './store/authSlice'
 import PT100Calculator from './screens/PT100Calculator';
 import WeighFeeder from './screens/WeighFeeder';
 import Thermocouple from './screens/Thermocouple';
+import PressureConverter from './screens/PressureConverter';
 
 import Home from './screens/Home';
 import ToolsScreen from './screens/ToolsScreen';
@@ -200,6 +201,24 @@ function RootStack() {
               component={WeighFeeder}
               options={({ navigation }) => ({
                 title: "Weigh Feeder Calibration",
+               
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="PressureConverter"
+              component={PressureConverter}
+              options={({ navigation }) => ({
+                title: "Pressure Converter",
                
                 headerRight: () => (
                   <MaterialCommunityIcons

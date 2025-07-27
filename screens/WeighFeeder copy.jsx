@@ -36,13 +36,18 @@ const WeighFeeder = () => {
     const factor = parseFloat(oldCorrectionFactor);
 
     if (!isNaN(error) && !isNaN(weight) && !isNaN(total) && factor !== 0) {
- 
-      const newFactor = (weight / total ) * factor;
+      const newFactor = (weight / total) * factor;
       setResult(newFactor.toFixed(4));
-   
     } else {
       setResult("Invalid input");
     }
+  };
+  const getErrorColor = (value) => {
+    const err = parseFloat(value);
+    if (err >= -0.5 && err <= 0.5) return "green";
+    if ((err > 0.5 && err <= 2.5) || (err < -0.5 && err >= -2.5))
+      return "orange";
+    return "red";
   };
 
   return (
@@ -72,10 +77,14 @@ const WeighFeeder = () => {
           </View>
           {error !== null && (
             <>
-              <Text style={styles.resultText}>Error: {error}%</Text>
-              {/* <Text style={styles.resultText}>Result: {result}</Text> */}
+              <Text
+                style={[styles.resultText, { color: getErrorColor(error) }]}
+              >
+                Error: {error}%
+              </Text>
             </>
           )}
+
           <View style={{ marginTop: 10, marginBottom: 10 }}>
             <TouchableOpacity style={styles.button} onPress={calculateError}>
               <Text style={styles.buttonText}>Calculate Error</Text>

@@ -43,12 +43,18 @@ const WeighFeeder = () => {
       setResult("Invalid input");
     }
   };
+  const getErrorColor = (value) => {
+    const err = parseFloat(value);
+    if (err >= -0.5 && err <= 0.5) return "green";
+    if ((err > 0.5 && err <= 2.5) || (err < -0.5 && err >= -2.5))
+      return "orange";
+    return "red";
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scroll}>
- 
           <View style={styles.card}>
             <Text style={styles.label}>Actual weight (kg)</Text>
             <TextInput
@@ -69,9 +75,14 @@ const WeighFeeder = () => {
             <TouchableOpacity style={styles.button} onPress={calculateError}>
               <Text style={styles.buttonText}>Calculate Error</Text>
             </TouchableOpacity>
-
             {error !== null && (
-              <Text style={styles.resultText}>Error: {error}%</Text>
+              <>
+                <Text
+                  style={[styles.resultText, { color: getErrorColor(error) }]}
+                >
+                  Error: {error}%
+                </Text>
+              </>
             )}
           </View>
 
