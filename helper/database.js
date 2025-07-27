@@ -17,21 +17,7 @@ export const initDb = async () => {
         console.error('❌ Error initializing DB:', error);
     }
 };
-// export const saveTasksToSQLite = (tasks) => {
-//   return new Promise((resolve, reject) => {
-//     db.transaction((tx) => {
-//       tx.executeSql('DELETE FROM tasks'); // clear old data
-//       tasks.forEach((task) => {
-//         tx.executeSql(
-//           'INSERT INTO tasks (id, section, "order") VALUES (?, ?, ?)',
-//           [task.id, task.section, task.order]
-//         );
-//       });
-//     },
-//     reject,
-//     resolve);
-//   });
-// };
+ 
 
 export const saveTasksToSQLite = async (id, section, order) => {
     console.log('========= saveTasksToSQLite ===============');
@@ -48,19 +34,7 @@ export const saveTasksToSQLite = async (id, section, order) => {
     }
 };
 
-
-// export const getTasksFromSQLite = () => {
-//   return new Promise((resolve, reject) => {
-//     db.transaction((tx) => {
-//       tx.executeSql(
-//         'SELECT * FROM tasks ORDER BY "order"',
-//         [],
-//         (_, result) => resolve(result.rows._array),
-//         (_, error) => reject(error)
-//       );
-//     });
-//   });
-// };
+ 
 
 export const getTasksFromSQLite = async () => {
     try {
