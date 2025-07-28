@@ -98,5 +98,20 @@ const updateLocalTasks = async () => {
   await saveTasksToSQLite(tasks);
 };
 
+
+const updateDetailedlTasks = async () => {
+  const querySnapshot = await getDocs(collection(db, "allTasks"));
+  const tasks = [];
+
+  querySnapshot.forEach((doc) => {
+    tasks.push({ id: doc.id, ...doc.data() });
+  });
+  console.log('========== yy all tasks   =============');
+  console.log(tasks);
+  console.log('====================================');
+  // Clear old and insert new into SQLite
+  // await saveTasksToSQLite(tasks);
+};
+updateDetailedlTasks();
  
  
