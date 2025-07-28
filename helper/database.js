@@ -2,9 +2,17 @@ import * as SQLite from 'expo-sqlite';
 
 let db;
 
-export const initDb = async () => {
+export const initDb = async ( update =false) => {
+    console.log('========= xxxxxxxxxx initDb xxxxxxxx===============');
+    console.log(update);
+    console.log('====================================');
+
     try {
         db = await SQLite.openDatabaseAsync('pmTasks.db');
+        if (update) {
+        await db.execAsync(`DROP TABLE IF EXISTS tasks;`);
+        }
+
         await db.execAsync(`
       CREATE TABLE IF NOT EXISTS tasks (
         id TEXT PRIMARY KEY NOT NULL,
@@ -17,12 +25,13 @@ export const initDb = async () => {
         console.error('❌ Error initializing DB:', error);
     }
 };
- 
+
 
 export const saveTasksToSQLite = async (id, section, order) => {
     console.log('========= saveTasksToSQLite ===============');
     console.log(id, section, order);
     console.log('====================================');
+
     try {
         await db.runAsync(
             `INSERT OR REPLACE INTO tasks (id, section, "order") VALUES (?, ?, ?);`,
@@ -34,7 +43,7 @@ export const saveTasksToSQLite = async (id, section, order) => {
     }
 };
 
- 
+
 
 export const getTasksFromSQLite = async () => {
     try {

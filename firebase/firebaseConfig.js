@@ -87,7 +87,7 @@ export const db = getFirestore(app);
 
 // Firestore → SQLite local DB
 const updateLocalTasks = async () => {
-  const querySnapshot = await getDocs(collection(db, "pmTasks"));
+  const querySnapshot = await getDocs(collection(db, "PMTasks"));
   const tasks = [];
 
   querySnapshot.forEach((doc) => {
