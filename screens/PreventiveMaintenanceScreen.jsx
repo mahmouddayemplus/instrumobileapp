@@ -40,7 +40,9 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
   const updateFromFirestore = async () => {
     setLoading(true);
     try {
-      const querySnapshot = await getDocs(collection(db, "pmTasks"));
+      await initDb(true);
+
+      const querySnapshot = await getDocs(collection(db, "PMTasks"));
       const tasks = [];
       querySnapshot.forEach((doc) => {
         tasks.push({ id: doc.id, ...doc.data() });
