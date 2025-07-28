@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getAuth, createUserWithEmailAndPassword, getReactNativePersistence, initializeAuth, signInWithEmailAndPassword } from "firebase/auth";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
@@ -99,19 +100,55 @@ const updateLocalTasks = async () => {
 };
 
 
-const updateDetailedlTasks = async () => {
-  const querySnapshot = await getDocs(collection(db, "allTasks"));
-  const tasks = [];
+const updateDetailedTasks = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "allTasks"));
+    const tasks = [];
 
-  querySnapshot.forEach((doc) => {
-    tasks.push({ id: doc.id, ...doc.data() });
-  });
-  console.log('========== yy all tasks   =============');
-  console.log(tasks);
-  console.log('====================================');
-  // Clear old and insert new into SQLite
-  // await saveTasksToSQLite(tasks);
+    querySnapshot.forEach((doc) => {
+      tasks.push({ id: doc.id, ...doc.data() });
+      console.log('====================================');
+      console.log(doc.data());
+      console.log('====================================');
+    });
+
+    // Save to cache
+    await storeData('cached_tasks', tasks);
+
+    console.log("Tasks fetched and cached successfully");
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+  }
 };
-updateDetailedlTasks();
+
  
+updateDetailedTasks();
+
+const storeData = async (key, value) => {
+  console.log('====================================');
+  console.log('from storeData',key,value);
+  console.log('====================================');
+  try {
+    const jsonValue = JSON.stringify(value);
+    console.log('============ jsonValue ===============');
+    console.log(jsonValue);
+    console.log('====================================');
+    await AsyncStorage.setItem(key, jsonValue);
+  } catch (e) {
+    console.error('Error saving to storage', e);
+  }
+};
  
+
+export const loadData = async (key) => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(key);
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (e) {
+    console.error('Failed to load data from cache', e);
+    return null;
+  }
+};
+
+ 
+  // const cached  = await loadData('cached_tasks');

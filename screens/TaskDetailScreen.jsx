@@ -1,10 +1,27 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState ,useEffect} from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-
+import { loadData } from "../firebase/firebaseConfig";
 const TaskDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const [tasks,setTasks] = useState([]);
+  useEffect(() => {
+    const fetchCachedTasks = async () => {
+      const cached = await loadData("cached_tasks");
+      if (cached) {
+        setTasks(cached); // set state with tasks
+        console.log('========= mahmoud abdeldayem= ccc ===============');
+        console.log(tasks[0].tasks);
+        console.log('====================================');
+      } else {
+        console.log("No cached data found");
+      }
+    };
+
+    fetchCachedTasks();
+  }, []);
+  // your helper
 
   const { task } = route.params;
   useLayoutEffect(() => {
