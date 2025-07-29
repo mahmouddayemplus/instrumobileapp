@@ -5,7 +5,7 @@ import { loadData } from "../firebase/firebaseConfig";
 const TaskDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const [tasks, setTasks] = useState();
+  const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
     const fetchCachedTasks = async () => {
@@ -28,7 +28,7 @@ const TaskDetailScreen = () => {
     if (cached) {
       setTasks(cached); // set state with tasks
       console.log("========= Eyad Ammar Mazen===============");
-      console.log(tasks );
+      console.log(tasks[0] );
       console.log("====================================");
     } else {
       console.log("No cached data found");
@@ -42,7 +42,7 @@ const TaskDetailScreen = () => {
   return (
     <View style={styles.container}>
       <Button title="update" onPress={handlePress} />
-      <Text style={styles.title}>Task Details</Text>
+      <Text style={styles.title}>'...,,'</Text>
       <Text style={styles.item}>Section: {task.section}</Text>
       <Text style={styles.item}>ID: {task.id}</Text>
       {/* Add more fields as needed */}
