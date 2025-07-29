@@ -1,51 +1,150 @@
 import { StyleSheet, Text, View, Button } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { loadData } from "../firebase/firebaseConfig";
+import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
+import SectionTasksListComponent from "../components/SectionTasksListComponent ";
+import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
+import { TouchableOpacity } from "react-native";
+import { writeAllTasksToFirestore } from "../firebase/fireStoreBulkWrite";
 const TaskDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(null);
+  const [sectionTasks, setSectionTasks] = useState({});
+  const { task } = route.params;
+  const taskId = task.id; // Assuming task has an id field
 
   useEffect(() => {
-    const fetchCachedTasks = async () => {
-      const cached = await loadData("cached_tasks");
+    const fetchTasks = async () => {
+      let cached = await loadData("cached_tasks");
+
+      if (!cached) {
+        console.log("No cached data found, fetching from Firestore...");
+        await updateDetailedTasks(); // Fetch from Firestore and store in AsyncStorage
+        cached = await loadData("cached_tasks"); // Load again after update
+      }
+
       if (cached) {
-        setTasks(cached); // set state with tasks
-        console.log("========= mohamed ===============");
-        console.log(tasks );
-        console.log("====================================");
+        setTasks(cached);
+        console.log("Tasks loaded:", cached);
       } else {
-        console.log("No cached data found");
+        console.log("Failed to fetch or load cached tasks.");
       }
     };
 
-    fetchCachedTasks();
+    fetchTasks();
   }, []);
-  // your helper
-  async function handlePress() {
+
+  const handlePress = async () => {
+    await updateDetailedTasks();
     const cached = await loadData("cached_tasks");
+
     if (cached) {
-      setTasks(cached); // set state with tasks
-      console.log("========= Eyad Ammar Mazen===============");
-      console.log(tasks[0] );
-      console.log("====================================");
+      setTasks(cached);
+      console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
     } else {
-      console.log("No cached data found");
+      console.log("No cached data found after update");
     }
-  }
-  const { task } = route.params;
+  };
+
   useLayoutEffect(() => {
-    navigation.setOptions({ title: ` ${task.section}` });
+    navigation.setOptions({
+      title: `${task.section}`,
+      headerRight: () => (
+        <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
+          <Ionicons name="refresh" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+    });
   }, [navigation, task]);
 
+  // if (!tasks) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <Text style={{ fontSize: 18 }}>Loading... </Text>
+  //     </View>
+  //   );
+  // }
+  useEffect(() => {
+    if (tasks && taskId) {
+      console.log("========= Filtering Tasks ================");
+      console.log("All Tasks:", tasks);
+      console.log("taskId:", taskId);
+
+      const taskById = tasks.filter((t) => t.id === taskId);
+      console.log("Task found:", taskById);
+      setSectionTasks(taskById);
+    }
+  }, [tasks, taskId]); // only runs when tasks or taskId change
+
+  const shouldWriteData = false; // Toggle manually
+
+  useEffect(() => {
+    if (shouldWriteData) {
+      const demoData = [
+        {
+          sectionId: "raw_mill",
+          tags: [
+            {
+              tag: "331WF1",
+              title: "Limestone weigh feeder",
+              tasks: [
+                { id: "t1", description: "Check valve", status: "pending" },
+                { id: "t2", description: "Clean filter", status: "done" },
+              ],
+            },
+            {
+              tag: "331WF2",
+              title: "Limestone weigh feeder",
+              tasks: [
+                { id: "t1", description: "maintain Loadcell", status: "pending" },
+                { id: "t2", description: "check Tachometer ", status: "done" },
+              ],
+            },
+          ],
+        },
+         {
+          sectionId: "limestone_crusher",
+          tags: [
+            {
+              tag: "211BF1",
+              title: "Bag Filter",
+              tasks: [
+                { id: "t1", description: "Check valve", status: "pending" },
+                { id: "t2", description: "Clean filter", status: "done" },
+              ],
+            },
+            {
+              tag: "211ST1",
+              title: "Limestone Stacker",
+              tasks: [
+                { id: "t1", description: "maintain Loadcell", status: "pending" },
+                { id: "t2", description: "check Tachometer ", status: "done" },
+              ],
+            },
+          ],
+        },
+
+
+       
+      ];
+
+      writeAllTasksToFirestore(demoData);
+    }
+  }, [shouldWriteData]);
+
+  if (!sectionTasks) {
+    return (
+      <View>
+        <Text>Loading task details...</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
-      <Button title="update" onPress={handlePress} />
-      <Text style={styles.title}>'...,,'</Text>
-      <Text style={styles.item}>Section: {task.section}</Text>
-      <Text style={styles.item}>ID: {task.id}</Text>
-      {/* Add more fields as needed */}
+      {/* <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/> */}
+
+      <SectionTasksListComponent data={sectionTasks} />
     </View>
   );
 };
