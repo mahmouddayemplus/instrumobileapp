@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
 import AuthScreen from './screens/AuthScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -39,11 +39,26 @@ function HomeTabs() {
               name="logout"
               size={24}
               color="#2e7d32"
-              onPress={async () => {
-                // Handle profile icon press
-                dispatch(logout());
-                await removeUser();
-
+              onPress={() => {
+                Alert.alert(
+                  "Confirm Logout",
+                  "Are you sure you want to log out?",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Logout",
+                      style: "destructive",
+                      onPress: async () => {
+                        dispatch(logout());
+                        await removeUser();
+                      },
+                    },
+                  ],
+                  { cancelable: true }
+                );
               }}
             />
           </View>
@@ -73,6 +88,25 @@ function HomeTabs() {
 
 
       />
+
+      <Tab.Screen
+        name="PMTasks"
+        component={PreventiveMaintenanceScreen}
+        options={{
+          title: 'PM Tasks',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name="calendar-check"
+              size={focused ? size + 4 : size}
+              color={focused ? '#43ad49ff' : color} // green focus
+            />
+          ),
+
+
+          tabBarActiveTintColor: '#2e7d32',
+          tabBarInactiveTintColor: '#999',
+        }}
+      />
       <Tab.Screen
         name="SparesScreen"
         component={SparesScreen}
@@ -92,26 +126,6 @@ function HomeTabs() {
           tabBarInactiveTintColor: '#999',
         }}
 
-
-
-      />
-      <Tab.Screen
-        name="PMTasks"
-        component={PreventiveMaintenanceScreen}
-        options={{
-          title: 'PM Tasks',
-          tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name="calendar-check"
-              size={focused ? size + 4 : size}
-              color={focused ? '#43ad49ff' : color} // green focus
-            />
-          ),
-
-
-          tabBarActiveTintColor: '#2e7d32',
-          tabBarInactiveTintColor: '#999',
-        }}
       />
 
 
@@ -184,7 +198,7 @@ function RootStack() {
               component={Thermocouple}
               options={({ navigation }) => ({
                 title: "Thermocouple K-type ",
-               
+
                 headerRight: () => (
                   <MaterialCommunityIcons
                     name="home"
@@ -202,7 +216,7 @@ function RootStack() {
               component={WeighFeeder}
               options={({ navigation }) => ({
                 title: "Weigh Feeder Calibration",
-               
+
                 headerRight: () => (
                   <MaterialCommunityIcons
                     name="home"
@@ -220,7 +234,7 @@ function RootStack() {
               component={PressureConverter}
               options={({ navigation }) => ({
                 title: "Pressure Converter",
-               
+
                 headerRight: () => (
                   <MaterialCommunityIcons
                     name="home"
@@ -238,7 +252,7 @@ function RootStack() {
               component={TaskDetailScreen}
               options={({ navigation }) => ({
                 title: " TaskDetailScreen",
-               
+
                 headerRight: () => (
                   <MaterialCommunityIcons
                     name="home"
