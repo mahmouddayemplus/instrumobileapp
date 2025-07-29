@@ -1,7 +1,7 @@
 import { FlatList, View, Text, StyleSheet } from "react-native";
 import { colors } from "../constants/color";
 
-const SectionTasksList = ({ data }) => {
+const SectionTasksListComponent  = ({ data }) => {
   console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:", data[0].tags);
 
 
@@ -41,7 +41,7 @@ const SectionTasksList = ({ data }) => {
   );
 };
 
-export default SectionTasksList;
+export default SectionTasksListComponent;
 const styles = StyleSheet.create({
   tagContainer: {
     marginVertical: 10,

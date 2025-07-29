@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Button } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
-import SectionTasksList from "../components/SectionTasksList ";
+import SectionTasksListComponent from "../components/SectionTasksListComponent ";
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from "react-native";
 import { writeAllTasksToFirestore } from "../firebase/fireStoreBulkWrite";
@@ -144,7 +144,7 @@ const TaskDetailScreen = () => {
     <View style={styles.container}>
       {/* <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/> */}
 
-      <SectionTasksList data={sectionTasks} />
+      <SectionTasksListComponent data={sectionTasks} />
     </View>
   );
 };
