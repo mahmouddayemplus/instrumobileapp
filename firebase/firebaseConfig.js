@@ -99,8 +99,9 @@ const updateLocalTasks = async () => {
   await saveTasksToSQLite(tasks);
 };
 
+/* use it to get detailed tasks from firestore */
 
-const updateDetailedTasks = async () => {
+export const updateDetailedTasks = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, "allTasks"));
     const tasks = [];
@@ -122,7 +123,7 @@ const updateDetailedTasks = async () => {
 };
 
  
-updateDetailedTasks();
+//  updateDetailedTasks();
 
 const storeData = async (key, value) => {
   console.log('====================================');
