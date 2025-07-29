@@ -2,15 +2,19 @@ import { StyleSheet, Text, View, Button } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
-import SectionTasksListComponent from "../components/SectionTasksListComponent ";
+ import AreaTasksListComponent from '../components/AreaTasksListComponent'
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from "react-native";
 import { writeAllTasksToFirestore } from "../firebase/fireStoreBulkWrite";
+import {demoData} from '../firebase/demoData'
 const TaskDetailScreen = () => {
+  console.log('============= demoData =============');
+  console.log(demoData);
+  console.log('====================================');
   const route = useRoute();
   const navigation = useNavigation();
   const [tasks, setTasks] = useState(null);
-  const [sectionTasks, setSectionTasks] = useState({});
+  const [areaTasks, setAreaTasks] = useState(null);
   const { task } = route.params;
   const taskId = task.id; // Assuming task has an id field
 
@@ -58,85 +62,43 @@ const TaskDetailScreen = () => {
     });
   }, [navigation, task]);
 
-  // if (!tasks) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-  //       <Text style={{ fontSize: 18 }}>Loading... </Text>
-  //     </View>
-  //   );
-  // }
+ 
   useEffect(() => {
     if (tasks && taskId) {
-      console.log("========= Filtering Tasks ================");
+      console.log("=========  Filtering Tasks  ================");
       console.log("All Tasks:", tasks);
       console.log("taskId:", taskId);
 
-      const taskById = tasks.filter((t) => t.id === taskId);
+      const taskById = tasks.filter((t) => t.sectionId === taskId);
+
       console.log("Task found:", taskById);
-      setSectionTasks(taskById);
+
+      if (taskById.length !== 0) {
+        setAreaTasks(taskById);
+      }
     }
   }, [tasks, taskId]); // only runs when tasks or taskId change
 
-  const shouldWriteData = false; // Toggle manually
+
+
+
+  const shouldWriteData = true; // Toggle manually
 
   useEffect(() => {
     if (shouldWriteData) {
-      const demoData = [
-        {
-          sectionId: "raw_mill",
-          tags: [
-            {
-              tag: "331WF1",
-              title: "Limestone weigh feeder",
-              tasks: [
-                { id: "t1", description: "Check valve", status: "pending" },
-                { id: "t2", description: "Clean filter", status: "done" },
-              ],
-            },
-            {
-              tag: "331WF2",
-              title: "Limestone weigh feeder",
-              tasks: [
-                { id: "t1", description: "maintain Loadcell", status: "pending" },
-                { id: "t2", description: "check Tachometer ", status: "done" },
-              ],
-            },
-          ],
-        },
-         {
-          sectionId: "limestone_crusher",
-          tags: [
-            {
-              tag: "211BF1",
-              title: "Bag Filter",
-              tasks: [
-                { id: "t1", description: "Check valve", status: "pending" },
-                { id: "t2", description: "Clean filter", status: "done" },
-              ],
-            },
-            {
-              tag: "211ST1",
-              title: "Limestone Stacker",
-              tasks: [
-                { id: "t1", description: "maintain Loadcell", status: "pending" },
-                { id: "t2", description: "check Tachometer ", status: "done" },
-              ],
-            },
-          ],
-        },
-
-
-       
-      ];
+      // const demoData =  
 
       writeAllTasksToFirestore(demoData);
     }
   }, [shouldWriteData]);
+  console.log("====================================");
+  console.log(areaTasks);
+  console.log("====================================");
 
-  if (!sectionTasks) {
+  if (!areaTasks) {
     return (
-      <View>
-        <Text>Loading task details...</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: 18 }}>Loading...No Tasks Found </Text>
       </View>
     );
   }
@@ -144,7 +106,7 @@ const TaskDetailScreen = () => {
     <View style={styles.container}>
       {/* <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/> */}
 
-      <SectionTasksListComponent data={sectionTasks} />
+      <AreaTasksListComponent data={areaTasks} />
     </View>
   );
 };
