@@ -3,17 +3,16 @@ import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
 import SectionTasksList from "../components/SectionTasksList ";
-import { Ionicons } from '@expo/vector-icons'; // or use Feather, MaterialIcons, etc.
-import { TouchableOpacity } from 'react-native';
-import {writeAllTasksToFirestore} from "../firebase/fireStoreBulkWrite"
+import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
+import { TouchableOpacity } from "react-native";
+import { writeAllTasksToFirestore } from "../firebase/fireStoreBulkWrite";
 const TaskDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const [tasks, setTasks] = useState(null);
-  const[sectionTasks, setSectionTasks] = useState({});
-    const { task } = route.params;
-    const taskId = task.id ; // Assuming task has an id field
-  
+  const [sectionTasks, setSectionTasks] = useState({});
+  const { task } = route.params;
+  const taskId = task.id; // Assuming task has an id field
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -48,21 +47,16 @@ const TaskDetailScreen = () => {
     }
   };
 
-
-
- useLayoutEffect(() => {
-  navigation.setOptions({
-    title: `${task.section}`,
-    headerRight: () => (
-      <TouchableOpacity
-        onPress={handlePress}
-        style={{ marginRight: 15 }}
-      >
-        <Ionicons name="refresh" size={24} color="black" />
-      </TouchableOpacity>
-    ),
-  });
-}, [navigation, task]);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: `${task.section}`,
+      headerRight: () => (
+        <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
+          <Ionicons name="refresh" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, task]);
 
   // if (!tasks) {
   //   return (
@@ -72,62 +66,85 @@ const TaskDetailScreen = () => {
   //   );
   // }
   useEffect(() => {
-  if (tasks && taskId) {
-    console.log("========= Filtering Tasks ================");
-    console.log("All Tasks:", tasks);
-    console.log("taskId:", taskId);
+    if (tasks && taskId) {
+      console.log("========= Filtering Tasks ================");
+      console.log("All Tasks:", tasks);
+      console.log("taskId:", taskId);
 
-    const taskById = tasks.filter(t => t.sectionId === taskId);
-    console.log('Task found:', taskById);
-    setSectionTasks(taskById);
-     
+      const taskById = tasks.filter((t) => t.id === taskId);
+      console.log("Task found:", taskById);
+      setSectionTasks(taskById);
+    }
+  }, [tasks, taskId]); // only runs when tasks or taskId change
+
+  const shouldWriteData = false; // Toggle manually
+
+  useEffect(() => {
+    if (shouldWriteData) {
+      const demoData = [
+        {
+          sectionId: "raw_mill",
+          tags: [
+            {
+              tag: "331WF1",
+              title: "Limestone weigh feeder",
+              tasks: [
+                { id: "t1", description: "Check valve", status: "pending" },
+                { id: "t2", description: "Clean filter", status: "done" },
+              ],
+            },
+            {
+              tag: "331WF2",
+              title: "Limestone weigh feeder",
+              tasks: [
+                { id: "t1", description: "maintain Loadcell", status: "pending" },
+                { id: "t2", description: "check Tachometer ", status: "done" },
+              ],
+            },
+          ],
+        },
+         {
+          sectionId: "limestone_crusher",
+          tags: [
+            {
+              tag: "211BF1",
+              title: "Bag Filter",
+              tasks: [
+                { id: "t1", description: "Check valve", status: "pending" },
+                { id: "t2", description: "Clean filter", status: "done" },
+              ],
+            },
+            {
+              tag: "211ST1",
+              title: "Limestone Stacker",
+              tasks: [
+                { id: "t1", description: "maintain Loadcell", status: "pending" },
+                { id: "t2", description: "check Tachometer ", status: "done" },
+              ],
+            },
+          ],
+        },
+
+
+       
+      ];
+
+      writeAllTasksToFirestore(demoData);
+    }
+  }, [shouldWriteData]);
+
+  if (!sectionTasks) {
+    return (
+      <View>
+        <Text>Loading task details...</Text>
+      </View>
+    );
   }
-}, [tasks ,taskId]); // only runs when tasks or taskId change
-
-const shouldWriteData = false; // Toggle manually
-
-useEffect(() => {
-  if (shouldWriteData) {
-    const demoData = [
-      {
-        sectionId: "raw_mill",
-        tag: "331WF2",
-        title: "Limestone weigh feeder",
-        tasks: [
-          { id: "t1", description: "Check valve", status: "pending" },
-          { id: "t2", description: "Clean filter", status: "done" },
-        ],
-      },
-      {
-        sectionId: "limestone_crusher",
-        tag: "211ST1",
-        title: "Crusher fan maintenance",
-        tasks: [
-          { id: "t1", description: "Lubricate fan", status: "pending" },
-        ],
-      },
-    ];
-
-    writeAllTasksToFirestore(demoData);
-  }
-}, [shouldWriteData]);
-
-
-
-if (!sectionTasks) {
-  return (
-    <View>
-      <Text>Loading task details...</Text>
-    </View>
-  );
-}
   return (
     <View style={styles.container}>
       {/* <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/> */}
- 
 
       <SectionTasksList data={sectionTasks} />
-
     </View>
   );
 };
