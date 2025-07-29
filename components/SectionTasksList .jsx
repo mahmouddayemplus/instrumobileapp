@@ -2,12 +2,14 @@ import { FlatList, View, Text, StyleSheet } from "react-native";
 import { colors } from "../constants/color";
 
 const SectionTasksList = ({ data }) => {
-    console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:", data);
-    
+  console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:", data);
+
   const renderTagItem = ({ item }) => (
     <View style={styles.tagContainer}>
-      <Text style={styles.heading}>Tag: {item.tag}</Text>
-      <Text style={styles.title}>Title: {item.title}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={styles.heading}>Tag: {item.tag}</Text>
+        <Text style={styles.title}>|  {item.title}</Text>
+      </View>
 
       <FlatList
         data={item.tasks}
@@ -74,4 +76,3 @@ const styles = StyleSheet.create({
     color: "orange",
   },
 });
-

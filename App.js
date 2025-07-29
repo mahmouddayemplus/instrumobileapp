@@ -20,7 +20,7 @@ import WeighFeeder from './screens/WeighFeeder';
 import Thermocouple from './screens/Thermocouple';
 import PressureConverter from './screens/PressureConverter';
 import TaskDetailScreen from './screens/TaskDetailScreen';
-
+import SparesScreen from './screens/SparesScreen';
 import Home from './screens/Home';
 import ToolsScreen from './screens/ToolsScreen';
 const Stack = createNativeStackNavigator();
@@ -59,7 +59,7 @@ function HomeTabs() {
           title: 'Tools',
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
-              name="toolbox"
+              name="tools"
               size={focused ? size + 4 : size}
               color={focused ? '#43ad49ff' : color} // Green when focused
             />
@@ -74,13 +74,13 @@ function HomeTabs() {
 
       />
       <Tab.Screen
-        name="Home"
-        component={Home}
+        name="SparesScreen"
+        component={SparesScreen}
         options={{
-          title: 'Home',
+          title: 'Spare Parts',
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
-              name="home"
+              name="toolbox"
               size={focused ? size + 4 : size}
               color={focused ? '#43ad49ff' : color} // Green when focused
             />

@@ -5,6 +5,7 @@ import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // C
 import SectionTasksList from "../components/SectionTasksList ";
 import { Ionicons } from '@expo/vector-icons'; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from 'react-native';
+import {writeAllTasksToFirestore} from "../firebase/fireStoreBulkWrite"
 const TaskDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -49,9 +50,19 @@ const TaskDetailScreen = () => {
 
 
 
-  useLayoutEffect(() => {
-    navigation.setOptions({ title: `${task.section}` });
-  }, [navigation, task]);
+ useLayoutEffect(() => {
+  navigation.setOptions({
+    title: `${task.section}`,
+    headerRight: () => (
+      <TouchableOpacity
+        onPress={handlePress}
+        style={{ marginRight: 15 }}
+      >
+        <Ionicons name="refresh" size={24} color="black" />
+      </TouchableOpacity>
+    ),
+  });
+}, [navigation, task]);
 
   // if (!tasks) {
   //   return (
@@ -72,6 +83,37 @@ const TaskDetailScreen = () => {
      
   }
 }, [tasks ,taskId]); // only runs when tasks or taskId change
+
+const shouldWriteData = false; // Toggle manually
+
+useEffect(() => {
+  if (shouldWriteData) {
+    const demoData = [
+      {
+        sectionId: "raw_mill",
+        tag: "331WF2",
+        title: "Limestone weigh feeder",
+        tasks: [
+          { id: "t1", description: "Check valve", status: "pending" },
+          { id: "t2", description: "Clean filter", status: "done" },
+        ],
+      },
+      {
+        sectionId: "limestone_crusher",
+        tag: "211ST1",
+        title: "Crusher fan maintenance",
+        tasks: [
+          { id: "t1", description: "Lubricate fan", status: "pending" },
+        ],
+      },
+    ];
+
+    writeAllTasksToFirestore(demoData);
+  }
+}, [shouldWriteData]);
+
+
+
 if (!sectionTasks) {
   return (
     <View>
@@ -81,7 +123,7 @@ if (!sectionTasks) {
 }
   return (
     <View style={styles.container}>
-      <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/>
+      {/* <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/> */}
  
 
       <SectionTasksList data={sectionTasks} />
