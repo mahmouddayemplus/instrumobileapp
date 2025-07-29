@@ -2,11 +2,17 @@ import { StyleSheet, Text, View, Button } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
-
+import SectionTasksList from "../components/SectionTasksList ";
+import { Ionicons } from '@expo/vector-icons'; // or use Feather, MaterialIcons, etc.
+import { TouchableOpacity } from 'react-native';
 const TaskDetailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const [tasks, setTasks] = useState(null);
+  const[sectionTasks, setSectionTasks] = useState({});
+    const { task } = route.params;
+    const taskId = task.id ; // Assuming task has an id field
+  
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -35,33 +41,51 @@ const TaskDetailScreen = () => {
 
     if (cached) {
       setTasks(cached);
-      console.log("Updated tasks loaded:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", cached);
+      console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
     } else {
       console.log("No cached data found after update");
     }
   };
 
-  const { task } = route.params;
+
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: `${task.section}` });
   }, [navigation, task]);
 
-  if (!tasks) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18 }}>Loading... </Text>
-      </View>
-    );
-  }
+  // if (!tasks) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <Text style={{ fontSize: 18 }}>Loading... </Text>
+  //     </View>
+  //   );
+  // }
+  useEffect(() => {
+  if (tasks && taskId) {
+    console.log("========= Filtering Tasks ================");
+    console.log("All Tasks:", tasks);
+    console.log("taskId:", taskId);
 
+    const taskById = tasks.filter(t => t.sectionId === taskId);
+    console.log('Task found:', taskById);
+    setSectionTasks(taskById);
+     
+  }
+}, [tasks ,taskId]); // only runs when tasks or taskId change
+if (!sectionTasks) {
+  return (
+    <View>
+      <Text>Loading task details...</Text>
+    </View>
+  );
+}
   return (
     <View style={styles.container}>
-      <Button title="Update" onPress={handlePress} />
-      <Text style={styles.title}>Task Details</Text>
-      <Text style={styles.item}>Section: {task.section}</Text>
-      <Text style={styles.item}>ID: {task.id}</Text>
-      {/* Add more fields as needed */}
+      <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/>
+ 
+
+      <SectionTasksList data={sectionTasks} />
+
     </View>
   );
 };
