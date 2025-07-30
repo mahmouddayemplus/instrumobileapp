@@ -45,7 +45,7 @@ const TaskDetailScreen = () => {
 
     if (cached) {
       setTasks(cached);
-      console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
+      // console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
     } else {
       console.log("No cached data found after update");
     }
@@ -65,13 +65,13 @@ const TaskDetailScreen = () => {
  
   useEffect(() => {
     if (tasks && taskId) {
-      console.log("=========  Filtering Tasks  ================");
-      console.log("All Tasks:", tasks);
-      console.log("taskId:", taskId);
+      // console.log("=========  Filtering Tasks  ================");
+      // console.log("All Tasks:", tasks);
+      // console.log("taskId:", taskId);
 
       const taskById = tasks.filter((t) => t.sectionId === taskId);
 
-      console.log("Task found:", taskById);
+      // console.log("Task found:", taskById);
 
       if (taskById.length !== 0) {
         setAreaTasks(taskById);
@@ -91,9 +91,9 @@ const TaskDetailScreen = () => {
       writeAllTasksToFirestore(demoData);
     }
   }, [shouldWriteData]);
-  console.log("====================================");
-  console.log(areaTasks);
-  console.log("====================================");
+  // console.log("====================================");
+  // console.log(areaTasks);
+  // console.log("====================================");
 
   if (!areaTasks) {
     return (

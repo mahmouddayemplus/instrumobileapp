@@ -108,9 +108,10 @@ export const updateDetailedTasks = async () => {
 
     querySnapshot.forEach((doc) => {
       tasks.push({ id: doc.id, ...doc.data() });
-      console.log('====================================');
-      console.log(doc.data());
-      console.log('====================================');
+      // console.log('====================================');
+      // // console.log(doc.data());
+      // // console.log(doc.data());
+      // console.log('====================================');
     });
 
     // Save to cache
@@ -126,14 +127,14 @@ export const updateDetailedTasks = async () => {
 //  updateDetailedTasks();
 
 const storeData = async (key, value) => {
-  console.log('====================================');
-  console.log('from storeData',key,value);
-  console.log('====================================');
+  // console.log('====================================');
+  // console.log('from storeData',key,value);
+  // console.log('====================================');
   try {
     const jsonValue = JSON.stringify(value);
-    console.log('============ jsonValue ===============');
-    console.log(jsonValue);
-    console.log('====================================');
+    // console.log('============ jsonValue ===============');
+    // console.log(jsonValue);
+    // console.log('====================================');
     await AsyncStorage.setItem(key, jsonValue);
   } catch (e) {
     console.error('Error saving to storage', e);
