@@ -153,3 +153,42 @@ export const loadData = async (key) => {
 
  
   // const cached  = await loadData('cached_tasks');
+//
+//
+//
+//
+export const updateSpares = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "spares"));
+    const spares = [];
+
+    querySnapshot.forEach((doc) => {
+      spares.push({ id: doc.id, ...doc.data() });
+      // console.log('====================================');
+      // console.log(doc.data());
+      // console.log('====================================');
+    });
+
+    // Save to cache
+    await storeData('cached_spares', spares);
+
+    console.log("spares fetched and cached successfully");
+  } catch (error) {
+    console.error("Error fetching spares:", error);
+  }
+};
+
+ 
+//  Load spares from cache();
+export const loadSpares = async (key) => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(key);
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (e) {
+    console.error('Failed to load data from cache', e);
+    return null;
+  }
+};
+
+
+ 

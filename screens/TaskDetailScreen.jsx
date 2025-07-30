@@ -82,7 +82,7 @@ const TaskDetailScreen = () => {
 
 
 
-  const shouldWriteData = true; // Toggle manually
+  const shouldWriteData = false; // Toggle manually
 
   useEffect(() => {
     if (shouldWriteData) {
@@ -102,6 +102,8 @@ const TaskDetailScreen = () => {
       </View>
     );
   }
+
+
   return (
     <View style={styles.container}>
       {/* <Button title="Update" onPress={handlePress} color={"#43ad49ff"}/> */}
