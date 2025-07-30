@@ -34,9 +34,9 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
   const loadTasksFromDb = async () => {
     const stored = await getTasksFromSQLite();
     setTasks(stored);
-    console.log("========== loadTasksFromDb  ==============");
-    console.log(stored);
-    console.log("====================================");
+    // console.log("========== loadTasksFromDb  ==============");
+    // console.log(stored);
+    // console.log("====================================");
   };
 
   const updateFromFirestore = async () => {

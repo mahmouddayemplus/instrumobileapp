@@ -3,9 +3,9 @@ import * as SQLite from 'expo-sqlite';
 let db;
 
 export const initDb = async ( update =false) => {
-    console.log('========= xxxxxxxxxx initDb xxxxxxxx===============');
-    console.log(update);
-    console.log('====================================');
+    // console.log('========= xxxxxxxxxx initDb xxxxxxxx===============');
+    // console.log(update);
+    // console.log('====================================');
 
     try {
         db = await SQLite.openDatabaseAsync('pmTasks.db');
@@ -28,9 +28,9 @@ export const initDb = async ( update =false) => {
 
 
 export const saveTasksToSQLite = async (id, section, order) => {
-    console.log('========= saveTasksToSQLite ===============');
-    console.log(id, section, order);
-    console.log('====================================');
+    // console.log('========= saveTasksToSQLite ===============');
+    // console.log(id, section, order);
+    // console.log('====================================');
 
     try {
         await db.runAsync(
