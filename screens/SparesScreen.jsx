@@ -1,16 +1,21 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, memo } from "react";
 import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from "react-native";
-import { FlatList, TextInput } from "react-native";
+import { FlatList, TextInput, Image, ActivityIndicator } from "react-native";
+import SpareDetailScreen from './SparesDetailScreen'
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
+  const defaultImage = require("../assets/no-image.webp");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSpares, setFilteredSpares] = useState([]);
   const navigation = useNavigation();
+
+  // const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
 
   useEffect(() => {
     const fetchSpares = async () => {
@@ -48,7 +53,7 @@ const SparesScreen = () => {
       console.log("No cached data found after update");
     }
   };
-
+///////////////////////////////////////////////////////////////////
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Spare Parts",
@@ -81,6 +86,47 @@ const SparesScreen = () => {
     setFilteredSpares(filtered);
   };
   ///////////////////////////////////////////////////////////////
+  const RenderItem = memo(({ item }) => {
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
+    // const defaultImage =
+    // "https://via.placeholder.com/80x80.png?text=No+Image";
+    const defaultImage = require("../assets/no-image.webp");
+
+    return (
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => navigation.navigate('SpareDetailScreen',{item})} // Replace with navigation or action
+      >
+        <View>
+          {!imageLoaded && !imageError && (
+            <ActivityIndicator
+              size="small"
+              color="#888"
+              style={styles.imageLoader}
+            />
+          )}
+          <Image
+            source={imageError ? defaultImage : { uri: imageUrl }}
+            style={styles.itemImage}
+            resizeMode="cover"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+          />
+        </View>
+
+        <View style={styles.textContainer}>
+          <Text style={styles.code}>{item.code}</Text>
+          <Text style={styles.title}>{item.title}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  });
 
   return (
     <View style={styles.container}>
@@ -100,12 +146,11 @@ const SparesScreen = () => {
       <FlatList
         data={filteredSpares}
         keyExtractor={(item) => item.code}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.code}>{item.code}</Text>
-            <Text style={styles.title}>{item.title}</Text>
-          </View>
-        )}
+        renderItem={({ item }) => <RenderItem item={item} />}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
       />
     </View>
   );
@@ -120,12 +165,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: "#fff",
   },
-  item: {
-    marginBottom: 12,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "#f1f1f1",
-  },
+  // item: {
+  //   marginBottom: 12,
+  //   padding: 12,
+  //   borderRadius: 8,
+  //   backgroundColor: "#f1f1f1",
+  // },
   code: {
     fontWeight: "bold",
     fontSize: 16,
@@ -148,5 +193,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     textAlign: "left",
+  },
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#f1f1f1",
+  },
+
+  itemImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 12,
+    backgroundColor: "#e0e0e0",
+  },
+
+  imageLoader: {
+    position: "absolute",
+    top: "40%",
+    left: "40%",
+    zIndex: 1,
+  },
+
+  textContainer: {
+    flex: 1,
+    justifyContent: "center",
   },
 });

@@ -25,6 +25,7 @@ import Home from './screens/Home';
 import ToolsScreen from './screens/ToolsScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+import SpareDetailScreen from './screens/SparesDetailScreen';
 
 
 function HomeTabs() {
@@ -252,6 +253,24 @@ function RootStack() {
               component={TaskDetailScreen}
               options={({ navigation }) => ({
                 title: " TaskDetailScreen",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="SpareDetailScreen"
+              component={SpareDetailScreen}
+              options={({ navigation }) => ({
+                title: " SpareDetailScreen",
 
                 headerRight: () => (
                   <MaterialCommunityIcons
