@@ -4,9 +4,10 @@ import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from "react-native";
-import { FlatList, TextInput, Image, ActivityIndicator } from "react-native";
+import { FlatList, TextInput, ActivityIndicator } from "react-native";
 import SpareDetailScreen from "./SparesDetailScreen";
 import { colors } from "../constants/color";
+import { Image } from "expo-image";
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
@@ -65,17 +66,21 @@ const SparesScreen = () => {
       title: "Spare Parts",
       headerRight: () => (
         <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
-          <Ionicons name="refresh" size={24} color="black" />
+          {loading ? (
+            <ActivityIndicator size={20} color="black" />
+          ) : (
+            <Ionicons name="refresh" size={24} color="black" />
+          )}
         </TouchableOpacity>
       ),
     });
   }, [navigation, spares]);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  if (!spares || spares.length === 0 ||loading) {
+  if (!spares || spares.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18 }}>Loading...  </Text>
+        <Text style={{ fontSize: 18 }}>Loading... </Text>
       </View>
     );
   }
@@ -131,14 +136,15 @@ const SparesScreen = () => {
             />
           )}
           <Image
-            source={imageError ? defaultImage : { uri: imageUrl }}
+            source={imageError ? defaultImage : imageUrl}
             style={styles.itemImage}
-            resizeMode="cover"
+            contentFit="cover" // equivalent to resizeMode
             onLoad={() => setImageLoaded(true)}
             onError={() => {
               setImageError(true);
               setImageLoaded(true);
             }}
+            transition={300} // optional fade-in
           />
         </View>
 
