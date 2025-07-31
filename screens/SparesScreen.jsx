@@ -6,12 +6,13 @@ import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons,
 import { TouchableOpacity } from "react-native";
 import { FlatList, TextInput, Image, ActivityIndicator } from "react-native";
 import SpareDetailScreen from "./SparesDetailScreen";
-import {colors} from '../constants/color'
+import { colors } from "../constants/color";
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
   const defaultImage = require("../assets/no-image.webp");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [loading, setLoading] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSpares, setFilteredSpares] = useState([]);
@@ -43,14 +44,17 @@ const SparesScreen = () => {
 
   //////////////////////////////////////////////////////////////
   const handlePress = async () => {
+    setLoading(true);
+
     await updateSpares();
     const cached = await loadSpares("cached_spares");
+    setLoading(false);
 
     if (cached) {
       setSpares(cached);
       setFilteredSpares(cached);
 
-      console.log("Updated spares loaded:Mazen mazen 77777777777777");
+      console.log("Updated spares loaded: ");
     } else {
       console.log("No cached data found after update");
     }
@@ -68,10 +72,10 @@ const SparesScreen = () => {
   }, [navigation, spares]);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  if (!spares || spares.length === 0) {
+  if (!spares || spares.length === 0 ||loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18 }}>Loading...No Spares Found </Text>
+        <Text style={{ fontSize: 18 }}>Loading...  </Text>
       </View>
     );
   }
