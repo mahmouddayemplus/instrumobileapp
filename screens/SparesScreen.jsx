@@ -5,11 +5,13 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from "react-native";
 import { FlatList, TextInput, Image, ActivityIndicator } from "react-native";
-import SpareDetailScreen from './SparesDetailScreen'
+import SpareDetailScreen from "./SparesDetailScreen";
+import {colors} from '../constants/color'
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
   const defaultImage = require("../assets/no-image.webp");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSpares, setFilteredSpares] = useState([]);
@@ -53,7 +55,7 @@ const SparesScreen = () => {
       console.log("No cached data found after update");
     }
   };
-///////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Spare Parts",
@@ -74,14 +76,30 @@ const SparesScreen = () => {
     );
   }
   /////////////////// handleSearch  ////////////
+  // const handleSearch = (text) => {
+  //   setSearchQuery(text);
+
+  //   const filtered = spares.filter(
+  //     (item) =>
+  //       item.title.toLowerCase().includes(text.toLowerCase()) ||
+  //       item.code.toLowerCase().includes(text.toLowerCase())
+  //   );
+
+  //   setFilteredSpares(filtered);
+  // };
   const handleSearch = (text) => {
     setSearchQuery(text);
 
-    const filtered = spares.filter(
-      (item) =>
+    const filtered = spares.filter((item) => {
+      const matchesSearch =
         item.title.toLowerCase().includes(text.toLowerCase()) ||
-        item.code.toLowerCase().includes(text.toLowerCase())
-    );
+        item.code.toLowerCase().includes(text.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "all" || item.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
 
     setFilteredSpares(filtered);
   };
@@ -98,7 +116,7 @@ const SparesScreen = () => {
     return (
       <TouchableOpacity
         style={styles.item}
-        onPress={() => navigation.navigate('SpareDetailScreen',{item})} // Replace with navigation or action
+        onPress={() => navigation.navigate("SpareDetailScreen", { item })} // Replace with navigation or action
       >
         <View>
           {!imageLoaded && !imageError && (
@@ -127,6 +145,23 @@ const SparesScreen = () => {
       </TouchableOpacity>
     );
   });
+  //////////////////////////////////////////////
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+
+    const filtered = spares.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCategory = category === "all" || item.category === category;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    setFilteredSpares(filtered);
+  };
+  ////////////////////////////////////////////////////////////////////
 
   return (
     <View style={styles.container}>
@@ -142,7 +177,33 @@ const SparesScreen = () => {
           {filteredSpares.length !== 1 ? "s" : ""}
         </Text>
       )}
-
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+          marginBottom: 10,
+        }}
+      >
+        {["all", "general", "plc", "packing"].map((category) => (
+          <TouchableOpacity
+            key={category}
+            style={{
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              backgroundColor:
+                selectedCategory === category ? colors.primary : "#ccc",
+              borderRadius: 8,
+            }}
+            onPress={() => handleCategoryChange(category)}
+          >
+            <Text
+              style={{ color: selectedCategory === category ? "#fff" : "#000" }}
+            >
+              {category.toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <FlatList
         data={filteredSpares}
         keyExtractor={(item) => item.code}
@@ -182,7 +243,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 40,
-    borderColor: "#ccc",
+    borderColor: colors.primary,
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 12,
