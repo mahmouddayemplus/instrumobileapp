@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useLayoutEffect } from "react";
 
 import { colors } from "../constants/color";
 import {
@@ -11,6 +11,8 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
+
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,80 +21,82 @@ import {
   getTasksFromSQLite,
   saveTasksToSQLite,
 } from "../helper/database";
+import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
+import { useNavigation } from "@react-navigation/native";
 
-const PreventiveMaintenanceScreen = ({ navigation }) => {
-  const [tasks, setTasks] = useState([]);
+const PreventiveMaintenanceScreen =   ({ navigation }) => {
+  const [tasks, setTasks] = useState();
   const [loading, setLoading] = useState(false);
+   const [areaTasks, setAreaTasks] = useState(null);
+  //////////////////////////////////////////////////////////
  
-
   useEffect(() => {
-    initDb()
-      .then(() => loadTasksFromDb())
-      .catch((e) => console.error("DB init error", e));
-  }, []);
+    const fetchTasks = async () => {
+      let cached = await loadData("cached_tasks");
 
-  const loadTasksFromDb = async () => {
-    const stored = await getTasksFromSQLite();
-    setTasks(stored);
-    // console.log("========== loadTasksFromDb  ==============");
-    // console.log(stored);
-    // console.log("====================================");
-  };
-
-  const updateFromFirestore = async () => {
-    setLoading(true);
-    try {
-      await initDb(true);
-
-      const querySnapshot = await getDocs(collection(db, "PMTasks"));
-      const tasks = [];
-      querySnapshot.forEach((doc) => {
-        tasks.push({ id: doc.id, ...doc.data() });
-      });
-
-      for (const task of tasks) {
-        await saveTasksToSQLite(task.id, task.section, task.order);
+      if (!cached) {
+        console.log("No cached data found, fetching from Firestore...");
+        await updateDetailedTasks(); // Fetch from Firestore and store in AsyncStorage
+        cached = await loadData("cached_tasks"); // Load again after update
       }
 
-      await loadTasksFromDb();
+      if (cached) {
+        setTasks(cached);
+        console.log("Tasks loaded:xxxxxxxxxxxxxx", cached);
+      } else {
+        console.log("Failed to fetch or load cached tasks.");
+      }
+    };
 
-      Alert.alert("Success", "Task list updated");
-    } catch (err) {
-      Alert.alert("Error", "Failed to fetch data");
-    } finally {
-      setLoading(false);
+    fetchTasks();
+  }, []);
+  ////////////////////  
+      useLayoutEffect(() => {
+        navigation.setOptions({
+          title: "Tasks",
+          headerRight: () => (
+            <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
+              <Ionicons name="refresh" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        });
+      }, [navigation, tasks]);
+  //////////////////////// 
+ 
+///////////////////////////////////////////////////////////////////////////
+  const handlePress = async () => {
+    await updateDetailedTasks();
+    const cached = await loadData("cached_tasks");
+
+    if (cached) {
+      setTasks(cached);
+      // console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
+    } else {
+      console.log("No cached data found after update");
     }
   };
-
+  ///////////////////////////////////////////////////////
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.item}
       onPress={() => navigation.navigate("TaskDetailScreen", { task: item })}
     >
-      <Text style={styles.itemText}>{item.section}</Text>
+      <Text style={styles.itemText}>{item.area}</Text>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={updateFromFirestore}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Updating..." : "Update Task List"}
-        </Text>
-      </TouchableOpacity>
 
-      <FlatList
+
+       <FlatList
         data={tasks}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         numColumns={2}
         columnWrapperStyle={styles.column}
         contentContainerStyle={{ paddingBottom: 100 }}
-      />
+      />  
     </SafeAreaView>
   );
 };
@@ -127,12 +131,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   item: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ffffffff",
     flex: 1,
     marginHorizontal: 4,
     padding: 16,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: "#08ab08ff",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
