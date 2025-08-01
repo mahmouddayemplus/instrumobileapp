@@ -176,6 +176,7 @@ const SparesScreen = () => {
             transition={300} // optional fade-in
           />
         </View>
+        <View style={styles.verticalDivider} />
 
         <View style={styles.textContainer}>
           <Text style={styles.code}>{item.code}</Text>
@@ -187,7 +188,7 @@ const SparesScreen = () => {
           style={styles.favoriteIcon}
         >
           <Ionicons
-            name={favorites.includes(item.code) ? "heart" : "pin-outline"}
+            name={favorites.includes(item.code) ? "heart" : "heart-outline"}
             size={22}
             color={favorites.includes(item.code) ? "red" : "#888"}
           />
@@ -243,33 +244,7 @@ const SparesScreen = () => {
           {filteredSpares.length !== 1 ? "s" : ""}
         </Text>
       )}
-      {/* <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          marginBottom: 10,
-        }}
-      >
-        {["all", "general", "plc", "packing"].map((category) => (
-          <TouchableOpacity
-            key={category}
-            style={{
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              backgroundColor:
-                selectedCategory === category ? colors.primary : "#ccc",
-              borderRadius: 8,
-            }}
-            onPress={() => handleCategoryChange(category)}
-          >
-            <Text
-              style={{ color: selectedCategory === category ? "#fff" : "#000" }}
-            >
-              {category.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View> */}
+
       <View
         style={{
           flexDirection: "row",
@@ -311,15 +286,7 @@ const SparesScreen = () => {
         columnWrapperStyle={styles.row}
       />
 
-      {/* <FlatList
-        data={filteredSpares}
-        keyExtractor={(item) => item.code}
-        renderItem={({ item }) => <RenderItem item={item} />}
-        initialNumToRender={8}
-        maxToRenderPerBatch={8}
-        windowSize={5}
-        removeClippedSubviews={true}
-      /> */}
+ 
     </View>
   );
 };
@@ -354,24 +321,22 @@ const styles = StyleSheet.create({
   item: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
-    padding: 14,
-    borderRadius: 14,
+    marginVertical: 6,
+    padding: 10,
+    borderRadius: 10,
     backgroundColor: "#ffffff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
     elevation: 2,
   },
 
   itemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 16,
-    backgroundColor: "#e0e0e0",
-  },
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    },
 
   imageLoader: {
     position: "absolute",
@@ -382,19 +347,18 @@ const styles = StyleSheet.create({
 
   textContainer: {
     flex: 1,
-    justifyContent: "center",
+   
   },
 
   code: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#222",
-    marginBottom: 4,
-  },
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: "#444",
+   },
 
   title: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 13,
+    color: "#666",
     lineHeight: 20,
   },
 
@@ -405,4 +369,10 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     alignSelf: "flex-start",
   },
+  verticalDivider: {
+  width: 1,
+  height: "80%",
+  backgroundColor: colors.primary,
+  marginHorizontal: 10,
+},
 });

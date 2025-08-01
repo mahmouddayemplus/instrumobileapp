@@ -1,5 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+
 import AuthScreen from './screens/AuthScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -114,8 +116,8 @@ function HomeTabs() {
         options={{
           title: 'Spare Parts',
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name="toolbox"
+            <MaterialIcons 
+              name="inventory"
               size={focused ? size + 4 : size}
               color={focused ? '#43ad49ff' : color} // Green when focused
             />
