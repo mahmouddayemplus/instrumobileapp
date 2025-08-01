@@ -19,10 +19,12 @@ const TaskDetailScreen = () => {
   const taskId = task.id; // Assuming task has an id field
 
   useEffect(() => {
+
     const fetchTasks = async () => {
       let cached = await loadData("cached_tasks");
 
       if (!cached) {
+        
         console.log("No cached data found, fetching from Firestore...");
         await updateDetailedTasks(); // Fetch from Firestore and store in AsyncStorage
         cached = await loadData("cached_tasks"); // Load again after update
@@ -53,7 +55,7 @@ const TaskDetailScreen = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: `${task.section}`,
+      title: `${task.area}`,
       headerRight: () => (
         <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
           <Ionicons name="refresh" size={24} color="black" />

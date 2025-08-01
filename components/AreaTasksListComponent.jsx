@@ -9,8 +9,7 @@ import { colors } from "../constants/color";
 import Icon from "react-native-vector-icons/Feather"; // or MaterialIcons, Ionicons...
 
 const AreaTasksListComponent = ({ data }) => {
-  console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:" );
-  // console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:", data[0]);
+   // console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:", data[0]);
   // const [tasks, setTasks] = useState(item.tasks);
   const handleComplete = () => {};
   const renderTagItem = ({ item }) => (
@@ -43,6 +42,7 @@ const AreaTasksListComponent = ({ data }) => {
       data={data[0].tags}
       keyExtractor={(item) => item.tag}
       renderItem={renderTagItem}
+      contentContainerStyle={{ paddingBottom: 20 }}
     />
   );
 };
@@ -51,39 +51,43 @@ export default AreaTasksListComponent;
 const styles = StyleSheet.create({
   tagContainer: {
     marginVertical: 10,
-    padding: 15,
-    backgroundColor: colors.primaryLight,
-    borderRadius: 10,
+    padding: 16,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
   heading: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1c1c1e",
   },
   title: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: 15,
+    color: "#555",
   },
   taskItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8f8f8",
-    marginVertical: 4,
-    borderRadius: 6,
+    backgroundColor: "#f5f6fa",
+    marginVertical: 6,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     justifyContent: "space-between",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 2,
+    elevation: 1,
   },
   taskText: {
     fontSize: 15,
-  },
-  status: {
-    marginTop: 4,
-    fontWeight: "600",
-  },
-  done: {
-    color: "green",
-  },
-  pending: {
-    color: "orange",
+    flex: 1,
+    color: "#333",
+    paddingRight: 10,
   },
 });

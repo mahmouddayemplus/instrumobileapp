@@ -1,16 +1,24 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { useState, useEffect, useLayoutEffect, memo } from "react";
-import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
+import {
+  loadSpares,
+  updateSpares,
+  storeFavorites,
+  loadFavorites,
+} from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { TouchableOpacity } from "react-native";
 import { FlatList, TextInput, ActivityIndicator } from "react-native";
-import SpareDetailScreen from "./SparesDetailScreen";
 import { colors } from "../constants/color";
 import { Image } from "expo-image";
+import { FlashList } from "@shopify/flash-list";
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
+
+  const [favorites, setFavorites] = useState([]);
+
   const defaultImage = require("../assets/no-image.webp");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(false);
@@ -20,6 +28,27 @@ const SparesScreen = () => {
   const navigation = useNavigation();
 
   // const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
+  //////////////// fetch favorites spares
+  useEffect(() => {
+    const fetchfavorites = async () => {
+      let cached_favorites = await loadFavorites("favorite_spares");
+
+      if (!cached_favorites) {
+        console.log("No favorites cached data found ...");
+      }
+
+      if (cached_favorites) {
+        setFavorites(cached_favorites);
+        // initialize filtered list
+        console.log("favorites found loaded:" + favorites);
+      } else {
+        console.log("Failed to fetch or load cached spares.");
+      }
+    };
+
+    fetchfavorites();
+  }, []);
+  //////////////////////////////////
 
   useEffect(() => {
     const fetchSpares = async () => {
@@ -152,9 +181,31 @@ const SparesScreen = () => {
           <Text style={styles.code}>{item.code}</Text>
           <Text style={styles.title}>{item.title}</Text>
         </View>
+        {/* Favorite Icon */}
+        <TouchableOpacity
+          onPress={() => toggleFavorite(item.code)}
+          style={styles.favoriteIcon}
+        >
+          <Ionicons
+            name={favorites.includes(item.code) ? "heart" : "pin-outline"}
+            size={22}
+            color={favorites.includes(item.code) ? "red" : "#888"}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   });
+  ////////////////////////
+  const toggleFavorite = async (code) => {
+    const updatedFavorites = favorites.includes(code)
+      ? favorites.filter((c) => c !== code)
+      : [...favorites, code];
+    // await storeFavorites("favorite_spares", [...favorites, code]);
+    setFavorites(updatedFavorites); // update state first
+    await storeFavorites("favorite_spares", updatedFavorites); // save updated list
+
+    console.log("Updated Favorites:", updatedFavorites);
+  };
   //////////////////////////////////////////////
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -164,7 +215,12 @@ const SparesScreen = () => {
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.code.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesCategory = category === "all" || item.category === category;
+      const matchesCategory =
+        category === "all"
+          ? true
+          : category === "favorites"
+          ? favorites.includes(item.code)
+          : item.category === category;
 
       return matchesSearch && matchesCategory;
     });
@@ -187,7 +243,7 @@ const SparesScreen = () => {
           {filteredSpares.length !== 1 ? "s" : ""}
         </Text>
       )}
-      <View
+      {/* <View
         style={{
           flexDirection: "row",
           justifyContent: "space-around",
@@ -213,16 +269,57 @@ const SparesScreen = () => {
             </Text>
           </TouchableOpacity>
         ))}
+      </View> */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+          marginBottom: 12,
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
+        {["all", "general", "plc", "packing", "favorites"].map((category) => (
+          <TouchableOpacity
+            key={category}
+            style={{
+              paddingVertical: 6,
+              paddingHorizontal: 7,
+              backgroundColor:
+                selectedCategory === category ? colors.primary : "#e0e0e0",
+              borderRadius: 20,
+            }}
+            onPress={() => handleCategoryChange(category)}
+          >
+            <Text
+              style={{
+                color: selectedCategory === category ? "#fff" : "#333",
+                fontWeight: "500",
+              }}
+            >
+              {category.toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
-      <FlatList
+      <FlashList
+        data={filteredSpares}
+        estimatedItemSize={160}
+        keyExtractor={(item) => item.code}
+        renderItem={({ item }) => <RenderItem item={item} />}
+        numColumns={1}
+        columnWrapperStyle={styles.row}
+      />
+
+      {/* <FlatList
         data={filteredSpares}
         keyExtractor={(item) => item.code}
         renderItem={({ item }) => <RenderItem item={item} />}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
         windowSize={5}
         removeClippedSubviews={true}
-      />
+      /> */}
     </View>
   );
 };
@@ -232,53 +329,47 @@ export default SparesScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f7fa",
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+
+  searchInput: {
+    height: 44,
+    borderColor: colors.primary,
+    borderWidth: 1.2,
+    borderRadius: 12,
+    marginBottom: 10,
+    paddingHorizontal: 12,
     backgroundColor: "#fff",
   },
-  // item: {
-  //   marginBottom: 12,
-  //   padding: 12,
-  //   borderRadius: 8,
-  //   backgroundColor: "#f1f1f1",
-  // },
-  code: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#333",
-  },
-  title: {
-    fontSize: 14,
-    color: "#666",
-  },
-  searchInput: {
-    height: 40,
-    borderColor: colors.primary,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 12,
-    paddingHorizontal: 10,
-  },
+
   resultCount: {
-    marginBottom: 8,
     fontSize: 14,
     color: "#555",
+    marginBottom: 12,
     textAlign: "left",
   },
+
   item: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "#f1f1f1",
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
   itemImage: {
     width: 80,
     height: 80,
-    borderRadius: 8,
-    marginRight: 12,
+    borderRadius: 10,
+    marginRight: 16,
     backgroundColor: "#e0e0e0",
   },
 
@@ -292,5 +383,26 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     justifyContent: "center",
+  },
+
+  code: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#222",
+    marginBottom: 4,
+  },
+
+  title: {
+    fontSize: 14,
+    color: "#555",
+    lineHeight: 20,
+  },
+
+  row: {
+    justifyContent: "space-between",
+  },
+  favoriteIcon: {
+    marginLeft: 10,
+    alignSelf: "flex-start",
   },
 });

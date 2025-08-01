@@ -70,84 +70,76 @@ const PreventiveMaintenanceScreen =   ({ navigation }) => {
 
     if (cached) {
       setTasks(cached);
-      // console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
+      console.log("Updated tasks loaded:xxxxxxx xxxxx", cached);
     } else {
       console.log("No cached data found after update");
     }
   };
   ///////////////////////////////////////////////////////
   const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => navigation.navigate("TaskDetailScreen", { task: item })}
-    >
-      <Text style={styles.itemText}>{item.area}</Text>
-    </TouchableOpacity>
-  );
+  <TouchableOpacity
+    style={styles.card}
+    onPress={() => navigation.navigate("TaskDetailScreen", { task: item })}
+  >
+    <Text style={styles.cardTitle}>{item.area}</Text>
+  </TouchableOpacity>
+);
 
-  return (
-    <SafeAreaView style={styles.container}>
-
-
-       <FlatList
+ return (
+  <SafeAreaView style={styles.container}>
+    {loading ? (
+      <ActivityIndicator size="large" color={colors.primary || "#2e86de"} />
+    ) : (
+      <FlatList
         data={tasks}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         numColumns={2}
-        columnWrapperStyle={styles.column}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />  
-    </SafeAreaView>
-  );
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContainer}
+      />
+    )}
+  </SafeAreaView>
+);
 };
 
 export default PreventiveMaintenanceScreen;
 
+const CARD_WIDTH = (Dimensions.get("window").width - 48) / 2;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f7f9fc",
+    backgroundColor: "#f0f2f5",
+    paddingHorizontal: 16,
+    paddingTop: 10,
   },
-  button: {
-    backgroundColor: colors.primary || "#2e86de",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
+  listContainer: {
+    paddingBottom: 100,
+    paddingTop: 10,
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  column: {
+  row: {
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  item: {
-    backgroundColor: "#ffffffff",
-    flex: 1,
-    marginHorizontal: 4,
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: "#08ab08ff",
-    shadowOffset: { width: 0, height: 1 },
+  card: {
+    width: CARD_WIDTH,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
-    minHeight: 100,
+    shadowRadius: 6,
+    elevation: 4,
+    alignItems: "center",
     justifyContent: "center",
   },
-  itemText: {
-    fontSize: 15,
+  cardTitle: {
+    fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: "#1e1e1e",
     textAlign: "center",
   },
 });

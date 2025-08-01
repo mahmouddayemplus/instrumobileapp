@@ -190,6 +190,30 @@ export const loadSpares = async (key) => {
     return null;
   }
 };
+////////////////////////// Load favorites
+export const loadFavorites = async (key) => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(key);
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (e) {
+    console.error('Failed to load favorites from cache', e);
+    return null;
+  }
+};
 
-
+//////////////////// update to favorites
+export const storeFavorites = async (key, value) => {
+ 
+  try {
+    const jsonValue = JSON.stringify(value);
+    // console.log('============ jsonValue ===============');
+    // console.log(jsonValue);
+    // console.log('====================================');
+    await AsyncStorage.setItem(key, jsonValue);
+  } catch (e) {
+    console.error('Error saving to storage', e);
+  }
+};
+ 
+//////////////////
  
