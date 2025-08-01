@@ -1,5 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { useState, useEffect, useLayoutEffect, memo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Linking } from "react-native";
+import { toggleFavorite } from "../store/favoritesSlice";
+
 import {
   loadSpares,
   updateSpares,
@@ -13,11 +17,16 @@ import { FlatList, TextInput, ActivityIndicator } from "react-native";
 import { colors } from "../constants/color";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
-
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
 
-  const [favorites, setFavorites] = useState([]);
+  const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.items);
+
+  const user = useSelector((state) => state.auth.user);
+  console.log("====================================");
+  console.log(user);
+  console.log("====================================");
 
   const defaultImage = require("../assets/no-image.webp");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -29,25 +38,25 @@ const SparesScreen = () => {
 
   // const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
   //////////////// fetch favorites spares
-  useEffect(() => {
-    const fetchfavorites = async () => {
-      let cached_favorites = await loadFavorites("favorite_spares");
+  // useEffect(() => {
+  //   const fetchfavorites = async () => {
+  //     let cached_favorites = await loadFavorites("favorite_spares");
 
-      if (!cached_favorites) {
-        console.log("No favorites cached data found ...");
-      }
+  //     if (!cached_favorites) {
+  //       console.log("No favorites cached data found ...");
+  //     }
 
-      if (cached_favorites) {
-        setFavorites(cached_favorites);
-        // initialize filtered list
-        console.log("favorites found loaded:" + favorites);
-      } else {
-        console.log("Failed to fetch or load cached spares.");
-      }
-    };
+  //     if (cached_favorites) {
+  //       setFavorites(cached_favorites);
+  //       // initialize filtered list
+  //       console.log("favorites found loaded:" + favorites);
+  //     } else {
+  //       console.log("Failed to fetch or load cached spares.");
+  //     }
+  //   };
 
-    fetchfavorites();
-  }, []);
+  //   fetchfavorites();
+  // }, []);
   //////////////////////////////////
 
   useEffect(() => {
@@ -63,7 +72,6 @@ const SparesScreen = () => {
       if (cached) {
         setSpares(cached);
         setFilteredSpares(cached); // initialize filtered list
-        console.log("spares loaded:");
       } else {
         console.log("Failed to fetch or load cached spares.");
       }
@@ -83,8 +91,6 @@ const SparesScreen = () => {
     if (cached) {
       setSpares(cached);
       setFilteredSpares(cached);
-
-      console.log("Updated spares loaded: ");
     } else {
       console.log("No cached data found after update");
     }
@@ -94,14 +100,27 @@ const SparesScreen = () => {
     navigation.setOptions({
       title: "Spare Parts",
       headerRight: () => (
-        <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
-          {loading ? (
-            <ActivityIndicator size={20} color="black" />
-          ) : (
-            <Ionicons name="refresh" size={24} color="black" />
-          )}
-        </TouchableOpacity>
+        <View style={{flexDirection:'row',justifyContent:"space-between",alignItems:"center"}}>
+          <Text>  {user.email}  </Text>
+          <TouchableOpacity onPress={handlePress} style={{ marginRight: 15,marginLeft:15 }}>
+            {loading ? (
+              <ActivityIndicator size={20} color="black" />
+            ) : (
+              <Ionicons name="refresh" size={24} color="black" />
+            )}
+          </TouchableOpacity>
+        </View>
       ),
+      headerStyle: {
+        height: 60, // reduce height from default ~80 on some devices
+        backgroundColor: "#fff", // optional
+        shadowColor: "transparent", // remove shadow if needed
+        elevation: 0, // for Android
+      },
+      headerTitleStyle: {
+        fontSize: 18, // smaller title text
+        fontWeight: "500",
+      },
     });
   }, [navigation, spares]);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +173,11 @@ const SparesScreen = () => {
     return (
       <TouchableOpacity
         style={styles.item}
-        onPress={() => navigation.navigate("SpareDetailScreen", { item })} // Replace with navigation or action
+        onPress={() =>
+          navigation.navigate("SpareDetailScreen", {
+            item,
+          })
+        } // Replace with navigation or action
       >
         <View>
           {!imageLoaded && !imageError && (
@@ -182,9 +205,16 @@ const SparesScreen = () => {
           <Text style={styles.code}>{item.code}</Text>
           <Text style={styles.title}>{item.title}</Text>
         </View>
-        {/* Favorite Icon */}
+
         <TouchableOpacity
-          onPress={() => toggleFavorite(item.code)}
+          onPress={() => handleShareToWhatsApp(item)}
+          style={styles.favoriteIcon}
+        >
+          <Ionicons name="logo-whatsapp" size={22} color="#25D366" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => dispatch(toggleFavorite(item.code))}
           style={styles.favoriteIcon}
         >
           <Ionicons
@@ -197,16 +227,16 @@ const SparesScreen = () => {
     );
   });
   ////////////////////////
-  const toggleFavorite = async (code) => {
-    const updatedFavorites = favorites.includes(code)
-      ? favorites.filter((c) => c !== code)
-      : [...favorites, code];
-    // await storeFavorites("favorite_spares", [...favorites, code]);
-    setFavorites(updatedFavorites); // update state first
-    await storeFavorites("favorite_spares", updatedFavorites); // save updated list
+  // const toggleFavorite = async (code) => {
+  //   const updatedFavorites = favorites.includes(code)
+  //     ? favorites.filter((c) => c !== code)
+  //     : [...favorites, code];
+  //   // await storeFavorites("favorite_spares", [...favorites, code]);
+  //   setFavorites(updatedFavorites); // update state first
+  //   await storeFavorites("favorite_spares", updatedFavorites); // save updated list
 
-    console.log("Updated Favorites:", updatedFavorites);
-  };
+  //   console.log("Updated Favorites:", updatedFavorites);
+  // };
   //////////////////////////////////////////////
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -228,6 +258,19 @@ const SparesScreen = () => {
 
     setFilteredSpares(filtered);
   };
+  ////////////
+  const handleShareToWhatsApp = (item) => {
+    const message = `Check out this spare part:\n\nCode: ${item.code}\nTitle: ${item.title}\n`;
+
+    const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
+
+    Linking.openURL(url)
+      .then(() => console.log("WhatsApp opened"))
+      .catch(() => {
+        alert("WhatsApp not installed on your device");
+      });
+  };
+
   ////////////////////////////////////////////////////////////////////
 
   return (
@@ -259,10 +302,10 @@ const SparesScreen = () => {
             key={category}
             style={{
               paddingVertical: 6,
-              paddingHorizontal: 7,
+              paddingHorizontal: 5,
               backgroundColor:
                 selectedCategory === category ? colors.primary : "#e0e0e0",
-              borderRadius: 20,
+              borderRadius: 10,
             }}
             onPress={() => handleCategoryChange(category)}
           >
@@ -270,6 +313,7 @@ const SparesScreen = () => {
               style={{
                 color: selectedCategory === category ? "#fff" : "#333",
                 fontWeight: "500",
+                fontSize: 10,
               }}
             >
               {category.toUpperCase()}
@@ -285,8 +329,6 @@ const SparesScreen = () => {
         numColumns={1}
         columnWrapperStyle={styles.row}
       />
-
- 
     </View>
   );
 };
@@ -296,7 +338,7 @@ export default SparesScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
+    backgroundColor: "#f6faf5bc",
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -336,7 +378,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 8,
-    },
+  },
 
   imageLoader: {
     position: "absolute",
@@ -347,14 +389,13 @@ const styles = StyleSheet.create({
 
   textContainer: {
     flex: 1,
-   
   },
 
   code: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: "#444",
-   },
+  },
 
   title: {
     fontSize: 13,
@@ -370,9 +411,9 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   verticalDivider: {
-  width: 1,
-  height: "80%",
-  backgroundColor: colors.primary,
-  marginHorizontal: 10,
-},
+    width: 1,
+    height: "80%",
+    backgroundColor: colors.primary,
+    marginHorizontal: 10,
+  },
 });

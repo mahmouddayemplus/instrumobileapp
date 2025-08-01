@@ -13,7 +13,9 @@ import store from './store/store';  // adjust path as needed
 import { useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
-import { logout } from './store/authSlice';
+import { logout, saveUser } from './store/authSlice';
+import { setFavorites } from './store/favoritesSlice';
+
 import { getUser, removeUser } from "./helper/authStorage";
 import { useState, useEffect } from 'react';
 import { setAuthenticated } from './store/authSlice'
@@ -28,6 +30,7 @@ import ToolsScreen from './screens/ToolsScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 import SpareDetailScreen from './screens/SparesDetailScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 function HomeTabs() {
@@ -146,11 +149,22 @@ function RootStack() {
 
       if (user) {
         dispatch(setAuthenticated(true)); // ✅ Dispatch to Redux once
+        dispatch(saveUser(user))
+        
       }
       setIsTryingLogin(false);
     };
+    const loadFavorites=async()=>{
+      const favorites = useSelector(state => state.favorites.items)
+      const json = await AsyncStorage.getItem('favorite_spares')
+       if (json) dispatch(setFavorites(JSON.parse(json)));
+       console.log('======*****************favorites from store ***********************===============');
+       console.log(favorites);
+       console.log('====================================');
+    }
 
     checkLogin();
+    loadFavorites();
   }, [dispatch]);
 
   if (isTryingLogin) {
@@ -288,7 +302,7 @@ function RootStack() {
             />
           </>
         ) : (
-          <Stack.Screen name="Auth" component={AuthScreen} />
+          <Stack.Screen name="Auth" component={AuthScreen} options={{headerShown:false}} />
         )
       }
     </Stack.Navigator>

@@ -91,7 +91,7 @@ export default function AuthScreen() {
 
       if (result.status === "ok") {
         const user = {
-          emailL: result.message.email,
+          email: result.message.email,
           token: result.message.accessToken,
         };
  

@@ -1,4 +1,7 @@
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect, useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
+import { handleShareToWhatsApp } from "../helper/handleShareToWhatsApp";
+import { Linking } from "react-native";
 import {
   View,
   Text,
@@ -6,16 +9,24 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
+import { useDispatch,useSelector } from "react-redux";
 const defaultImage = require("../assets/no-image.webp");
+import { toggleFavorite } from "../store/favoritesSlice";
 
 const SpareDetailScreen = ({ route }) => {
+  // const [favorites, setFavorites] = useState([]);
+  const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.items);
+
   const { item } = route.params;
+
   const navigation = useNavigation();
 
   const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
+ 
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: item.code });
@@ -23,13 +34,34 @@ const SpareDetailScreen = ({ route }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.scroll}>
-      <Image
-        source={{ uri: imageUrl }}
-        defaultSource={defaultImage}
-        onError={() => console.log("Failed to load image")}
-        style={styles.image}
-        resizeMode="contain"
-      />
+      {/* Image Container with Icons */}
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: imageUrl }}
+          defaultSource={defaultImage}
+          onError={() => console.log("Failed to load image")}
+          style={styles.image}
+          resizeMode="contain"
+        />
+
+        <TouchableOpacity
+          onPress={() =>dispatch(toggleFavorite(item.code))}
+          style={[styles.iconOverlay, { top: 10, right: 50 }]} // Adjust position
+        >
+          <Ionicons
+            name={favorites.includes(item.code) ? "heart" : "heart-outline"}
+            size={26}
+            color={favorites.includes(item.code) ? "red" : "#fff"}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => handleShareToWhatsApp(item)}
+          style={[styles.iconOverlay, { top: 10, right: 10 }]} // Adjust position
+        >
+          <Ionicons name="logo-whatsapp" size={26} color="#25D366" />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.label}>Details</Text>
@@ -40,8 +72,6 @@ const SpareDetailScreen = ({ route }) => {
         <Text style={styles.label}>SAP Code</Text>
         <Text style={styles.value}>{item.code}</Text>
       </View>
-
-      {/* You can add more info cards here like description, location, quantity, etc. */}
     </ScrollView>
   );
 };
@@ -56,13 +86,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#f9f9f9",
   },
-  image: {
-    width: screenWidth - 32,
-    height: 280,
-    borderRadius: 12,
-    backgroundColor: "#e0e0e0",
-    marginBottom: 20,
-  },
+
   card: {
     width: "100%",
     backgroundColor: "#fff",
@@ -84,5 +108,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#333",
     fontWeight: "500",
+  },
+  imageContainer: {
+    flex: 1,
+    width: "100%",
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  image: {
+    width: "100%",
+    height: 250,
+    borderRadius: 8,
+    backgroundColor: "#f4f4f4",
+  },
+
+  iconOverlay: {
+    position: "absolute",
+    padding: 6,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 20,
   },
 });

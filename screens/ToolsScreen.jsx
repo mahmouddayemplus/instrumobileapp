@@ -1,9 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React ,{useLayoutEffect} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToolComponent from "../components/ToolComponent";
+import { useSelector } from "react-redux";
 
-const ToolsScreen = () => {
+const ToolsScreen = ({navigation}) => {
+   const user = useSelector(state=>state.auth.user)
+   console.log('====================================');
+   console.log(user);
+   console.log('====================================');
+ 
   return (
     <SafeAreaView>
       <View
