@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useLayoutEffect } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 
 import { colors } from "../constants/color";
 import {
@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons,
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 import {
   initDb,
   getTasksFromSQLite,
@@ -24,12 +25,13 @@ import {
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
 import { useNavigation } from "@react-navigation/native";
 
-const PreventiveMaintenanceScreen =   ({ navigation }) => {
+const PreventiveMaintenanceScreen = ({ navigation }) => {
+  const user = useSelector((state) => state.auth.user);
   const [tasks, setTasks] = useState();
   const [loading, setLoading] = useState(false);
-   const [areaTasks, setAreaTasks] = useState(null);
+  const [areaTasks, setAreaTasks] = useState(null);
   //////////////////////////////////////////////////////////
- 
+
   useEffect(() => {
     const fetchTasks = async () => {
       let cached = await loadData("cached_tasks");
@@ -50,20 +52,37 @@ const PreventiveMaintenanceScreen =   ({ navigation }) => {
 
     fetchTasks();
   }, []);
-  ////////////////////  
-      useLayoutEffect(() => {
-        navigation.setOptions({
-          title: "Tasks",
-          headerRight: () => (
-            <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
-              <Ionicons name="refresh" size={24} color="black" />
-            </TouchableOpacity>
-          ),
-        });
-      }, [navigation, tasks]);
-  //////////////////////// 
- 
-///////////////////////////////////////////////////////////////////////////
+  ////////////////////
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Tasks",
+      headerTitleStyle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#2e7d32", // custom color
+      },
+      headerRight: () => (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            marginRight: 10,
+          }}
+        >
+          <Text style={{ fontSize: 14, color: "#333" }}>
+            Welcome {user?.displayName || ""}
+          </Text>
+          <TouchableOpacity onPress={handlePress} style={{ marginRight: 15 }}>
+            <Ionicons name="refresh" size={24} color="#2e7d32" />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, tasks]);
+  ////////////////////////
+
+  ///////////////////////////////////////////////////////////////////////////
   const handlePress = async () => {
     await updateDetailedTasks();
     const cached = await loadData("cached_tasks");
@@ -77,30 +96,30 @@ const PreventiveMaintenanceScreen =   ({ navigation }) => {
   };
   ///////////////////////////////////////////////////////
   const renderItem = ({ item }) => (
-  <TouchableOpacity
-    style={styles.card}
-    onPress={() => navigation.navigate("TaskDetailScreen", { task: item })}
-  >
-    <Text style={styles.cardTitle}>{item.area}</Text>
-  </TouchableOpacity>
-);
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate("TaskDetailScreen", { task: item })}
+    >
+      <Text style={styles.cardTitle}>{item.area}</Text>
+    </TouchableOpacity>
+  );
 
- return (
-  <SafeAreaView style={styles.container}>
-    {loading ? (
-      <ActivityIndicator size="large" color={colors.primary || "#2e86de"} />
-    ) : (
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContainer}
-      />
-    )}
-  </SafeAreaView>
-);
+  return (
+    <SafeAreaView style={styles.container}>
+      {loading ? (
+        <ActivityIndicator size="large" color={colors.primary || "#2e86de"} />
+      ) : (
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
+    </SafeAreaView>
+  );
 };
 
 export default PreventiveMaintenanceScreen;

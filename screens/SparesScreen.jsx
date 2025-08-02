@@ -22,11 +22,12 @@ const SparesScreen = () => {
 
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.items);
+  console.log('====================================');
+  console.log(favorites);
+  console.log('====================================');
 
   const user = useSelector((state) => state.auth.user);
-  console.log("====================================");
-  console.log(user);
-  console.log("====================================");
+ 
 
   const defaultImage = require("../assets/no-image.webp");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -35,29 +36,6 @@ const SparesScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSpares, setFilteredSpares] = useState([]);
   const navigation = useNavigation();
-
-  // const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
-  //////////////// fetch favorites spares
-  // useEffect(() => {
-  //   const fetchfavorites = async () => {
-  //     let cached_favorites = await loadFavorites("favorite_spares");
-
-  //     if (!cached_favorites) {
-  //       console.log("No favorites cached data found ...");
-  //     }
-
-  //     if (cached_favorites) {
-  //       setFavorites(cached_favorites);
-  //       // initialize filtered list
-  //       console.log("favorites found loaded:" + favorites);
-  //     } else {
-  //       console.log("Failed to fetch or load cached spares.");
-  //     }
-  //   };
-
-  //   fetchfavorites();
-  // }, []);
-  //////////////////////////////////
 
   useEffect(() => {
     const fetchSpares = async () => {
@@ -99,14 +77,28 @@ const SparesScreen = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Spare Parts",
+      headerTitleStyle: {
+        fontSize: 15,
+        fontWeight: "bold",
+        color: "#2e7d32", // custom color
+      },
       headerRight: () => (
-        <View style={{flexDirection:'row',justifyContent:"space-between",alignItems:"center"}}>
-          <Text>  {user.displayName}  </Text>
-          <TouchableOpacity onPress={handlePress} style={{ marginRight: 15,marginLeft:15 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text> {user.displayName} </Text>
+          <TouchableOpacity
+            onPress={handlePress}
+            style={{ marginRight: 15, marginLeft: 15 }}
+          >
             {loading ? (
               <ActivityIndicator size={20} color="black" />
             ) : (
-              <Ionicons name="refresh" size={24} color="black" />
+              <Ionicons name="refresh" size={24} color="#2e7d32" />
             )}
           </TouchableOpacity>
         </View>
@@ -132,18 +124,7 @@ const SparesScreen = () => {
       </View>
     );
   }
-  /////////////////// handleSearch  ////////////
-  // const handleSearch = (text) => {
-  //   setSearchQuery(text);
 
-  //   const filtered = spares.filter(
-  //     (item) =>
-  //       item.title.toLowerCase().includes(text.toLowerCase()) ||
-  //       item.code.toLowerCase().includes(text.toLowerCase())
-  //   );
-
-  //   setFilteredSpares(filtered);
-  // };
   const handleSearch = (text) => {
     setSearchQuery(text);
 
@@ -187,6 +168,7 @@ const SparesScreen = () => {
               style={styles.imageLoader}
             />
           )}
+
           <Image
             source={imageError ? defaultImage : imageUrl}
             style={styles.itemImage}
@@ -226,17 +208,7 @@ const SparesScreen = () => {
       </TouchableOpacity>
     );
   });
-  ////////////////////////
-  // const toggleFavorite = async (code) => {
-  //   const updatedFavorites = favorites.includes(code)
-  //     ? favorites.filter((c) => c !== code)
-  //     : [...favorites, code];
-  //   // await storeFavorites("favorite_spares", [...favorites, code]);
-  //   setFavorites(updatedFavorites); // update state first
-  //   await storeFavorites("favorite_spares", updatedFavorites); // save updated list
 
-  //   console.log("Updated Favorites:", updatedFavorites);
-  // };
   //////////////////////////////////////////////
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -376,8 +348,9 @@ const styles = StyleSheet.create({
 
   itemImage: {
     width: 70,
-    height: 70,
+    height:70,
     borderRadius: 8,
+    resizeMode: "cover",
   },
 
   imageLoader: {

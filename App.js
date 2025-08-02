@@ -117,9 +117,9 @@ function HomeTabs() {
         name="SparesScreen"
         component={SparesScreen}
         options={{
-          title: 'Spare Parts',
+
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialIcons 
+            <MaterialIcons
               name="inventory"
               size={focused ? size + 4 : size}
               color={focused ? '#43ad49ff' : color} // Green when focused
@@ -150,21 +150,26 @@ function RootStack() {
       if (user) {
         dispatch(setAuthenticated(true)); // ✅ Dispatch to Redux once
         dispatch(saveUser(user))
-        
+
       }
       setIsTryingLogin(false);
     };
-    const loadFavorites=async()=>{
-      const favorites = useSelector(state => state.favorites.items)
+    const loadFavorites = async () => {
+      // const favorites = useSelector(state => state.favorites.items)
+      console.log('====================================');
+      console.log('calling load favorites');
+      console.log('====================================');
       const json = await AsyncStorage.getItem('favorite_spares')
-       if (json) dispatch(setFavorites(JSON.parse(json)));
-       console.log('======*****************favorites from store ***********************===============');
-       console.log(favorites);
-       console.log('====================================');
+      if (json) dispatch(setFavorites(JSON.parse(json)));
+      console.log('======*****************favorites from store ***********************===============');
+      const favorites = useSelector(state => state.favorites.items)
+
+      console.log(favorites);
+      console.log('====================================');
     }
 
-    checkLogin();
     loadFavorites();
+    checkLogin();
   }, [dispatch]);
 
   if (isTryingLogin) {
@@ -302,7 +307,7 @@ function RootStack() {
             />
           </>
         ) : (
-          <Stack.Screen name="Auth" component={AuthScreen} options={{headerShown:false}} />
+          <Stack.Screen name="Auth" component={AuthScreen} options={{ headerShown: false }} />
         )
       }
     </Stack.Navigator>

@@ -13,42 +13,46 @@ const ToolsScreen = ({ navigation }) => {
   console.log(user);
   console.log('====================================');
   const dispatch = useDispatch();
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: "Tools",
-      headerRight: () => (
-        <>
-          <Text>Welcome {user.displayName}</Text>
-          <MaterialCommunityIcons
-            name="logout"
-            size={24}
-            color="#2e7d32"
-            onPress={() => {
-              Alert.alert(
-                "Confirm Logout",
-                "Are you sure you want to log out?",
-                [
-                  {
-                    text: "Cancel",
-                    style: "cancel",
+ useLayoutEffect(() => {
+  navigation.setOptions({
+    title: "Tools",
+    headerTitleStyle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: "#2e7d32", // custom color
+    },
+    headerRight: () => (
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginRight: 10 }}>
+        <Text style={{ fontSize: 14, color: "#333" }}>
+          Welcome {user?.displayName || ""}
+        </Text>
+        <MaterialCommunityIcons
+          name="logout"
+          size={24}
+          color="#2e7d32"
+          onPress={() => {
+            Alert.alert(
+              "Confirm Logout",
+              "Are you sure you want to log out?",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Logout",
+                  style: "destructive",
+                  onPress: async () => {
+                    dispatch(logout());
+                    await removeUser();
                   },
-                  {
-                    text: "Logout",
-                    style: "destructive",
-                    onPress: async () => {
-                      dispatch(logout());
-                      await removeUser();
-                    },
-                  },
-                ],
-                { cancelable: true }
-              );
-            }}
-          />
-        </>
-      ),
-    });
-  }, [navigation]);
+                },
+              ],
+              { cancelable: true }
+            );
+          }}
+        />
+      </View>
+    ),
+  });
+}, [navigation, user]);
 
   return (
     <SafeAreaView>
