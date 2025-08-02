@@ -160,7 +160,7 @@ const SparesScreen = () => {
           })
         } // Replace with navigation or action
       >
-        <View>
+        <View style={styles.imageContainer}>
           {!imageLoaded && !imageError && (
             <ActivityIndicator
               size="small"
@@ -172,13 +172,13 @@ const SparesScreen = () => {
           <Image
             source={imageError ? defaultImage : imageUrl}
             style={styles.itemImage}
-            contentFit="cover" // equivalent to resizeMode
+            contentFit="contain"
             onLoad={() => setImageLoaded(true)}
             onError={() => {
               setImageError(true);
               setImageLoaded(true);
             }}
-            transition={300} // optional fade-in
+            transition={300}
           />
         </View>
         <View style={styles.verticalDivider} />
@@ -346,17 +346,24 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  itemImage: {
-    width: 70,
-    height:70,
+  imageContainer: {
+    width: 80,
+    height: 80,
     borderRadius: 8,
-    resizeMode: "cover",
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  itemImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
 
   imageLoader: {
     position: "absolute",
-    top: "40%",
-    left: "40%",
     zIndex: 1,
   },
 
