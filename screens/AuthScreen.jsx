@@ -32,7 +32,9 @@ export default function AuthScreen() {
   const navigation = useNavigation();
 
   const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
+  const [companyId, setCompanyId] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [errors, setErrors] = useState({});
@@ -62,7 +64,7 @@ export default function AuthScreen() {
   const handleSubmit = async () => {
     setLoading(true);
     if (isSignup && !isExistingUser) {
-      const result = await signup({ email, password });
+      const result = await signup({ email, password, displayName, companyId });
       setLoading(false);
 
       if (result.status === "ok") {
@@ -74,7 +76,6 @@ export default function AuthScreen() {
           photoURL: result.message.photoURL,
           token: result.message.accessToken,
         };
- 
 
         dispatch(login(dispatchPayload)); // result.message contains user object
         // navigation.navigate("HomeTabs"); // Navigate to Home after login
@@ -93,8 +94,8 @@ export default function AuthScreen() {
         const user = {
           email: result.message.email,
           token: result.message.accessToken,
+          displayName: result.message.displayName
         };
- 
 
         storeUser(user);
         // Navigate to home or update Redux state
@@ -195,6 +196,27 @@ export default function AuthScreen() {
               {errors.confirmPassword && (
                 <Text style={styles.errorText}>{errors.confirmPassword}</Text>
               )}
+
+              <TextInput
+                style={[styles.input]}
+                placeholder="Name"
+                value={displayName}
+                onChangeText={(text) => {
+                  setDisplayName(text);
+                }}
+                autoCapitalize="none"
+                placeholderTextColor="#888"
+              />
+              <TextInput
+                style={[styles.input]}
+                placeholder="Id"
+                value={companyId}
+                onChangeText={(text) => {
+                  setCompanyId(text);
+                }}
+                autoCapitalize="none"
+                placeholderTextColor="#888"
+              />
             </>
           )}
 

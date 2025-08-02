@@ -101,7 +101,7 @@ const SparesScreen = () => {
       title: "Spare Parts",
       headerRight: () => (
         <View style={{flexDirection:'row',justifyContent:"space-between",alignItems:"center"}}>
-          <Text>  {user.email}  </Text>
+          <Text>  {user.displayName}  </Text>
           <TouchableOpacity onPress={handlePress} style={{ marginRight: 15,marginLeft:15 }}>
             {loading ? (
               <ActivityIndicator size={20} color="black" />
