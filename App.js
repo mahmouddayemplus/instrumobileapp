@@ -155,16 +155,15 @@ function RootStack() {
       setIsTryingLogin(false);
     };
     const loadFavorites = async () => {
-      // const favorites = useSelector(state => state.favorites.items)
       console.log('====================================');
       console.log('calling load favorites');
       console.log('====================================');
       const json = await AsyncStorage.getItem('favorite_spares')
-      if (json) dispatch(setFavorites(JSON.parse(json)));
-      console.log('======*****************favorites from store ***********************===============');
-      const favorites = useSelector(state => state.favorites.items)
-
-      console.log(favorites);
+      if (json) {
+        const favorites = JSON.parse(json);
+        dispatch(setFavorites(favorites));
+        console.log('Loaded favorites:', favorites);
+      }
       console.log('====================================');
     }
 

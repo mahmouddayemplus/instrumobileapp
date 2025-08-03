@@ -1,127 +1,270 @@
-import { StyleSheet, Text, View ,Alert} from "react-native";
-import React, { use, useLayoutEffect } from "react";
+import { StyleSheet, Text, View, Alert, ScrollView, StatusBar } from "react-native";
+import React, { useLayoutEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToolComponent from "../components/ToolComponent";
 import { useSelector } from "react-redux";
-import { logout, saveUser } from "../store/authSlice";
+import { logout } from "../store/authSlice";
 import { useDispatch } from "react-redux";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getUser, removeUser } from "../helper/authStorage";
+import { removeUser } from "../helper/authStorage";
+import { colors } from "../constants/color";
+
 const ToolsScreen = ({ navigation }) => {
   const user = useSelector((state) => state.auth.user);
-  console.log('====================================');
-  console.log(user);
-  console.log('====================================');
   const dispatch = useDispatch();
- useLayoutEffect(() => {
-  navigation.setOptions({
-    title: "Tools",
-    headerTitleStyle: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: "#2e7d32", // custom color
-    },
-    headerRight: () => (
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginRight: 10 }}>
-        <Text style={{ fontSize: 14, color: "#333" }}>
-          Welcome {user?.displayName || ""}
-        </Text>
-        <MaterialCommunityIcons
-          name="logout"
-          size={24}
-          color="#2e7d32"
-          onPress={() => {
-            Alert.alert(
-              "Confirm Logout",
-              "Are you sure you want to log out?",
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Logout",
-                  style: "destructive",
-                  onPress: async () => {
-                    dispatch(logout());
-                    await removeUser();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Tools & Calculators",
+      headerTitleStyle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: colors.primary,
+      },
+      headerStyle: {
+        backgroundColor: colors.card,
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      headerRight: () => (
+        <View style={styles.headerRight}>
+          <View style={styles.userInfo}>
+            <MaterialCommunityIcons
+              name="account-circle"
+              size={20}
+              color={colors.primary}
+            />
+            <Text style={styles.welcomeText}>
+              {user?.displayName || "User"}
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="logout"
+            size={24}
+            color={colors.primary}
+            style={styles.logoutIcon}
+            onPress={() => {
+              Alert.alert(
+                "Confirm Logout",
+                "Are you sure you want to log out?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Logout",
+                    style: "destructive",
+                    onPress: async () => {
+                      dispatch(logout());
+                      await removeUser();
+                    },
                   },
-                },
-              ],
-              { cancelable: true }
-            );
-          }}
-        />
-      </View>
-    ),
-  });
-}, [navigation, user]);
+                ],
+                { cancelable: true }
+              );
+            }}
+          />
+        </View>
+      ),
+    });
+  }, [navigation, user]);
 
   return (
-    <SafeAreaView>
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <ScrollView 
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <ToolComponent
-          iconName="thermometer"
-          titleLine1="PT100"
-          titleLine2="Calculator"
-          screenName="PT100Calculator"
-        />
-        <ToolComponent
-          iconName="pulse"
-          titleLine1="Thermocouple-k Type"
-          titleLine2="Calculator"
-          screenName="Thermocouple"
-        />
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
-        <ToolComponent
-          iconName="funnel"
-          titleLine1="Pressure"
-          titleLine2="Converter"
-          screenName="PressureConverter"
-        />
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerGradient}>
+            <View style={styles.headerContent}>
+              <MaterialCommunityIcons
+                name="tools"
+                size={40}
+                color={colors.card}
+              />
+              <View style={styles.headerTextContainer}>
+                <Text style={styles.headerTitle}>Industrial Tools</Text>
+                <Text style={styles.headerSubtitle}>
+                  Professional calculators and converters
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
 
-        <ToolComponent
-          iconName="calculator"
-          titleLine1="Weigh Feeder"
-          titleLine2="Correction Factor"
-          screenName="WeighFeeder"
-        />
-      </View>
-      {/* <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
-        <ToolComponent
-          iconName="bar-chart"
-          titleLine1="4-20 mA"
-          titleLine2="scaler"
-          screenName="BooksScreen"
-        />
+        {/* Tools Grid */}
+        <View style={styles.toolsContainer}>
+          <Text style={styles.sectionTitle}>Measurement Tools</Text>
+          <View style={styles.toolsGrid}>
+            <ToolComponent
+              iconName="thermometer"
+              titleLine1="PT100"
+              titleLine2="Calculator"
+              screenName="PT100Calculator"
+            />
+            <ToolComponent
+              iconName="pulse"
+              titleLine1="Thermocouple-k Type"
+              titleLine2="Calculator"
+              screenName="Thermocouple"
+            />
+          </View>
 
-        <ToolComponent
-          iconName="flash"
-          titleLine1="3PH-Motor Current"
-          titleLine2="Calculator"
-          screenName="ProfileScreen"
-        />
-      </View> */}
+          <Text style={styles.sectionTitle}>Conversion Tools</Text>
+          <View style={styles.toolsGrid}>
+            <ToolComponent
+              iconName="funnel"
+              titleLine1="Pressure"
+              titleLine2="Converter"
+              screenName="PressureConverter"
+            />
+            <ToolComponent
+              iconName="calculator"
+              titleLine1="Weigh Feeder"
+              titleLine2="Correction Factor"
+              screenName="WeighFeeder"
+            />
+          </View>
+
+          {/* Coming Soon Section */}
+          <View style={styles.comingSoonSection}>
+            <Text style={styles.comingSoonTitle}>Coming Soon</Text>
+            <View style={styles.comingSoonGrid}>
+              <View style={styles.comingSoonCard}>
+                <MaterialCommunityIcons
+                  name="bar-chart"
+                  size={32}
+                  color={colors.textSecondary}
+                />
+                <Text style={styles.comingSoonText}>4-20 mA Scaler</Text>
+              </View>
+              <View style={styles.comingSoonCard}>
+                <MaterialCommunityIcons
+                  name="flash"
+                  size={32}
+                  color={colors.textSecondary}
+                />
+                <Text style={styles.comingSoonText}>3PH-Motor Current</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default ToolsScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: colors.text,
+    marginLeft: 5,
+    fontWeight: "500",
+  },
+  logoutIcon: {
+    padding: 5,
+  },
+  headerSection: {
+    marginBottom: 20,
+  },
+  headerGradient: {
+    marginHorizontal: 16,
+    borderRadius: 16,
+    padding: 20,
+    backgroundColor: colors.primary,
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerTextContainer: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.card,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: colors.card,
+    opacity: 0.9,
+  },
+  toolsContainer: {
+    paddingHorizontal: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.text,
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  toolsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  comingSoonSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  comingSoonTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    marginBottom: 12,
+  },
+  comingSoonGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  comingSoonCard: {
+    width: "48%",
+    alignItems: "center",
+    padding: 16,
+    marginBottom: 12,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    opacity: 0.6,
+  },
+  comingSoonText: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    textAlign: "center",
+  },
+});

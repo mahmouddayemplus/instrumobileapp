@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 300,
     backgroundColor: colors.card,
+    overflow: 'visible',
   },
   image: {
     width: '100%',
@@ -184,6 +185,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: 80,
     backgroundColor: 'rgba(0,0,0,0.1)',
+    zIndex: 1,
   },
   actionIcons: {
     position: 'absolute',
@@ -191,6 +193,7 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'row',
     gap: 12,
+    zIndex: 10,
   },
   iconButton: {
     width: 44,
@@ -204,6 +207,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    zIndex: 11,
   },
   favoriteActive: {
     backgroundColor: colors.error,
