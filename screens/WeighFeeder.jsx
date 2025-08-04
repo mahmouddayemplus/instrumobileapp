@@ -64,9 +64,10 @@ const WeighFeeder = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <ScrollView
-          contentContainerStyle={[styles.scroll, { minHeight: "100%" }]}
+          contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          bounces={true}
+          alwaysBounceVertical={false}
         >
           {/* Header Section */}
           

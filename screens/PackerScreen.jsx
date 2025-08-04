@@ -69,11 +69,12 @@ const PackerScreen = () => {
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={[styles.scroll]}>
+      <SafeAreaView style={styles.container}>
         <ScrollView
-          contentContainerStyle={[styles.scroll, { minHeight: height }]}
+          contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          bounces={true}
+          alwaysBounceVertical={false}
         >
           {/* Header Section */}
 
