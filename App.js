@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
+
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';
