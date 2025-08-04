@@ -7,6 +7,7 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import { colors } from "../constants/color";
 
@@ -37,25 +38,119 @@ const PT100Calculator = () => {
     }
   };
 
+  const getTemperatureColor = (temp) => {
+    if (isNaN(temp) || temp === "Invalid") return "#F44336";
+    const temperature = parseFloat(temp);
+    if (temperature < 0) return "#2196F3"; // Blue for cold
+    if (temperature > 50) return "#FF5722"; // Orange for hot
+    return "#4CAF50"; // Green for normal
+  };
+
+  const getTemperatureStatus = (temp) => {
+    if (isNaN(temp) || temp === "Invalid") return "Invalid Input";
+    const temperature = parseFloat(temp);
+    if (temperature < 0) return "Cold";
+    if (temperature > 50) return "Hot";
+    return "Normal";
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>PT100 Calculator</Text>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          {/* Header Section */}
+ 
 
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            keyboardType="decimal-pad"
-            placeholder=" Resistance"
-            value={input}
-            onChangeText={handleInputChange}
-          />
-          <Text style={styles.ohmUnit}>Ω</Text>
-        </View>
+          {/* Input Card */}
+          <View style={styles.inputCard}>
+            <Text style={styles.inputLabel}>Resistance Value</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                keyboardType="decimal-pad"
+                placeholder="Enter resistance..."
+                placeholderTextColor="#999"
+                value={input}
+                onChangeText={handleInputChange}
+              />
+              <Text style={styles.ohmUnit}>Ω</Text>
+            </View>
+          </View>
 
-        {result !== null && (
-          <Text style={styles.result}>{result} °C</Text>
-        )}
+          {/* Result Card */}
+          {result !== null && (
+            <View style={styles.resultCard}>
+              <View style={styles.resultHeader}>
+                <Text style={styles.resultTitle}>Temperature</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getTemperatureColor(result) }]}>
+                  <Text style={styles.statusText}>{getTemperatureStatus(result)}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.temperatureDisplay}>
+                <Text style={styles.temperatureLabel}>Calculated Temperature:</Text>
+                <Text style={[styles.temperatureValue, { color: getTemperatureColor(result) }]}>
+                  {result} °C
+                </Text>
+              </View>
+
+              <View style={styles.temperatureInfo}>
+                <Text style={styles.temperatureInfoText}>
+                  {result === "Invalid" 
+                    ? "❌ Invalid resistance value entered"
+                    : parseFloat(result) < 0 
+                    ? "❄️ Temperature is below freezing point"
+                    : parseFloat(result) > 50 
+                    ? "🔥 Temperature is above normal range"
+                    : "✅ Temperature is within normal range"
+                  }
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Reference Values Card */}
+          <View style={styles.referenceCard}>
+            <Text style={styles.referenceTitle}>Common Reference Values</Text>
+            <View style={styles.referenceGrid}>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>0°C</Text>
+                <Text style={styles.refResistance}>100.00 Ω</Text>
+              </View>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>25°C</Text>
+                <Text style={styles.refResistance}>109.73 Ω</Text>
+              </View>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>50°C</Text>
+                <Text style={styles.refResistance}>119.40 Ω</Text>
+              </View>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>100°C</Text>
+                <Text style={styles.refResistance}>138.51 Ω</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* PT100 Info Card */}
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>PT100 Sensor</Text>
+            <Text style={styles.infoText}>
+              PT100 is a platinum resistance temperature sensor with 100Ω resistance at 0°C. 
+              It provides accurate temperature measurements across a wide range.
+            </Text>
+            <View style={styles.specsContainer}>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Base Resistance</Text>
+                <Text style={styles.specValue}>100 Ω at 0°C</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Temperature Coefficient</Text>
+                <Text style={styles.specValue}>0.385 Ω/°C</Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -66,37 +161,122 @@ export default PT100Calculator;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: colors.background || "#F9F9F9",
+    backgroundColor: colors.background || "#F8F9FA",
   },
-  title: {
-    fontSize: 36,
+  scroll: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  headerSection: {
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  headerIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.primary || "#34C759",
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: colors.primary || "#34C759",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  headerIcon: {
+    fontSize: 40,
+  },
+  headerTitle: {
+    fontSize: 28,
     fontWeight: "700",
-    textAlign: "center",
-    marginTop: 40,
-    marginBottom: 30,
-   },
-  result: {
-    fontSize: 26,
-    fontWeight: "500",
-    textAlign: "center",
-    color: colors.primary || "#34C759",
-    backgroundColor: "#eafbee",
-    paddingVertical: 20,
-    borderRadius: 12,
-    marginTop: 10,
+    color: colors.primaryDark || "#1A1A1A",
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  infoCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  infoTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  specsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  specItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  specLabel: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 4,
+  },
+  specValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  inputCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  inputLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border || '#D1D1D6',
+    borderWidth: 2,
+    borderColor: "#E1E5E9",
     borderRadius: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FAFBFC',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 24,
-    alignSelf: 'center',
+    paddingVertical: 16,
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -105,14 +285,120 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 26,
-    color: colors.text || '#1C1C1E',
+    fontSize: 24,
+    color: "#333",
     textAlign: 'center',
-    fontWeight:"bold",
+    fontWeight: "600",
   },
   ohmUnit: {
-    fontSize: 26,
-    color: '#999',
+    fontSize: 24,
+    color: '#666',
     marginLeft: 8,
+    fontWeight: "500",
+  },
+  resultCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  resultTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  temperatureDisplay: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  temperatureLabel: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 8,
+  },
+  temperatureValue: {
+    fontSize: 48,
+    fontWeight: "700",
+  },
+  temperatureInfo: {
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#E1E5E9",
+  },
+  temperatureInfoText: {
+    fontSize: 14,
+    color: "#333",
+    lineHeight: 20,
+  },
+  referenceCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  referenceTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  referenceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  referenceItem: {
+    width: '48%',
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  refTemp: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  refResistance: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
   },
 });

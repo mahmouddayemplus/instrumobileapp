@@ -7,6 +7,7 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import { colors } from "../constants/color";
 
@@ -60,29 +61,134 @@ const Thermocouple = () => {
     }
   };
 
+  const getTemperatureColor = (temp) => {
+    if (isNaN(temp) || temp === "Invalid") return "#F44336";
+    const temperature = parseFloat(temp);
+    if (temperature < 0) return "#2196F3"; // Blue for cold
+    if (temperature > 500) return "#FF5722"; // Orange for hot
+    return "#4CAF50"; // Green for normal
+  };
+
+  const getTemperatureStatus = (temp) => {
+    if (isNaN(temp) || temp === "Invalid") return "Invalid Input";
+    const temperature = parseFloat(temp);
+    if (temperature < 0) return "Cold";
+    if (temperature > 500) return "Hot";
+    return "Normal";
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
-   
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          {/* Input Card */}
+          <View style={styles.inputCard}>
+            <Text style={styles.inputLabel}>Millivolt Value</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                keyboardType="decimal-pad"
+                placeholder="Enter millivolt..."
+                placeholderTextColor="#999"
+                value={input}
+                onChangeText={handleInputChange}
+              />
+              <Text style={styles.mvUnit}>mV</Text>
+            </View>
+          </View>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            keyboardType="decimal-pad"
-            placeholder="millivolt"
-            value={input}
-            onChangeText={handleInputChange}
-          />
-          <Text style={styles.ohmUnit}>mv</Text>
-        </View>
-        <Text style={{ fontSize: 12 }}>
-          Hint : Min. mv = -6.458 at -270 °C ,max. mv = 54.886 at 1372 °C{" "}
-        </Text>
-        <Text style={styles.hint}>
-          Uses standard Type K thermocouple equation (NIST ITS-90) for accurate temperature conversion.
-        </Text>
+          {/* Result Card */}
+          {result !== null && (
+            <View style={styles.resultCard}>
+              <View style={styles.resultHeader}>
+                <Text style={styles.resultTitle}>Temperature</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getTemperatureColor(result) }]}>
+                  <Text style={styles.statusText}>{getTemperatureStatus(result)}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.temperatureDisplay}>
+                <Text style={styles.temperatureLabel}>Calculated Temperature:</Text>
+                <Text style={[styles.temperatureValue, { color: getTemperatureColor(result) }]}>
+                  {result} °C
+                </Text>
+              </View>
 
-        {result !== null && <Text style={styles.result}>{result} °C</Text>}
+              <View style={styles.temperatureInfo}>
+                <Text style={styles.temperatureInfoText}>
+                  {result === "Invalid" 
+                    ? "❌ Millivolt value is outside supported range"
+                    : parseFloat(result) < 0 
+                    ? "❄️ Temperature is below freezing point"
+                    : parseFloat(result) > 500 
+                    ? "🔥 Temperature is in high range"
+                    : "✅ Temperature is within normal range"
+                  }
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Range Info Card */}
+          <View style={styles.rangeCard}>
+            <Text style={styles.rangeTitle}>Type K Thermocouple Range</Text>
+            <View style={styles.rangeGrid}>
+              <View style={styles.rangeItem}>
+                <Text style={styles.rangeLabel}>Minimum</Text>
+                <Text style={styles.rangeValue}>-6.458 mV</Text>
+                <Text style={styles.rangeTemp}>-270°C</Text>
+              </View>
+              <View style={styles.rangeItem}>
+                <Text style={styles.rangeLabel}>Maximum</Text>
+                <Text style={styles.rangeValue}>54.886 mV</Text>
+                <Text style={styles.rangeTemp}>1372°C</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Reference Values Card */}
+          <View style={styles.referenceCard}>
+            <Text style={styles.referenceTitle}>Common Reference Values</Text>
+            <View style={styles.referenceGrid}>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>0°C</Text>
+                <Text style={styles.refMv}>0.000 mV</Text>
+              </View>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>100°C</Text>
+                <Text style={styles.refMv}>4.096 mV</Text>
+              </View>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>200°C</Text>
+                <Text style={styles.refMv}>8.138 mV</Text>
+              </View>
+              <View style={styles.referenceItem}>
+                <Text style={styles.refTemp}>500°C</Text>
+                <Text style={styles.refMv}>20.644 mV</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Info Card */}
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Type K Thermocouple</Text>
+            <Text style={styles.infoText}>
+              Type K thermocouples use Chromel (Ni-Cr) and Alumel (Ni-Al) alloys. 
+              They provide accurate temperature measurements from -270°C to 1372°C 
+              using NIST ITS-90 standard equations.
+            </Text>
+            <View style={styles.specsContainer}>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Temperature Range</Text>
+                <Text style={styles.specValue}>-270°C to 1372°C</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Accuracy</Text>
+                <Text style={styles.specValue}>±1.1°C to ±2.2°C</Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -93,56 +199,256 @@ export default Thermocouple;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background || "#F8F9FA",
+  },
+  scroll: {
     padding: 20,
-    backgroundColor: colors.background || "#F9F9F9",
+    paddingBottom: 40,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: "700",
-    textAlign: "center",
-    marginTop: 40,
-    marginBottom: 30,
+  inputCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  result: {
-    fontSize: 26,
-    fontWeight: "500",
-    textAlign: "center",
-    color: colors.primary || "#34C759",
-    backgroundColor: "#eafbee",
-    paddingVertical: 20,
-    borderRadius: 12,
-    marginTop: 10,
+  inputLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
   },
   inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.border || "#D1D1D6",
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: "#E1E5E9",
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: '#FAFBFC',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 24,
-    alignSelf: "center",
+    paddingVertical: 16,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
   input: {
     flex: 1,
-    fontSize: 26,
-    color: colors.text || "#1C1C1E",
-    textAlign: "center",
-    fontWeight: "bold",
+    fontSize: 24,
+    color: "#333",
+    textAlign: 'center',
+    fontWeight: "600",
   },
-  ohmUnit: {
-    fontSize: 26,
-    color: "#999",
+  mvUnit: {
+    fontSize: 24,
+    color: '#666',
     marginLeft: 8,
+    fontWeight: "500",
   },
-  hint:{
-    fontSize:12
-  }
+  resultCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  resultTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  statusText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  temperatureDisplay: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  temperatureLabel: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 8,
+  },
+  temperatureValue: {
+    fontSize: 48,
+    fontWeight: "700",
+  },
+  temperatureInfo: {
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#E1E5E9",
+  },
+  temperatureInfoText: {
+    fontSize: 14,
+    color: "#333",
+    lineHeight: 20,
+  },
+  rangeCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  rangeTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  rangeGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  rangeItem: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  rangeLabel: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 4,
+  },
+  rangeValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  rangeTemp: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  referenceCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  referenceTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  referenceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  referenceItem: {
+    width: '48%',
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  refTemp: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  refMv: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  infoCard: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  infoTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  specsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  specItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  specLabel: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 4,
+  },
+  specValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
 });

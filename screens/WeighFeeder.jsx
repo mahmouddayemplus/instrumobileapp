@@ -69,11 +69,11 @@ const WeighFeeder = () => {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header Section */}
-
+          
           {/* Error Calculation Card */}
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Error Calculation</Text>
-
+            
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Actual Weight (kg)</Text>
               <TextInput
@@ -108,33 +108,26 @@ const WeighFeeder = () => {
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
                 <Text style={styles.resultTitle}>Error Analysis</Text>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: getErrorColor(error) },
-                  ]}
-                >
+                <View style={[styles.statusBadge, { backgroundColor: getErrorColor(error) }]}>
                   <Text style={styles.statusText}>{getErrorStatus(error)}</Text>
                 </View>
               </View>
-
+              
               <View style={styles.errorDisplay}>
                 <Text style={styles.errorLabel}>Error Percentage:</Text>
-                <Text
-                  style={[styles.errorValue, { color: getErrorColor(error) }]}
-                >
+                <Text style={[styles.errorValue, { color: getErrorColor(error) }]}>
                   {error}%
                 </Text>
               </View>
 
               <View style={styles.errorInfo}>
                 <Text style={styles.errorInfoText}>
-                  {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5
+                  {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5 
                     ? "✅ Weigh feeder is within acceptable range"
-                    : (parseFloat(error) > 0.5 && parseFloat(error) <= 2.5) ||
-                      (parseFloat(error) < -0.5 && parseFloat(error) >= -2.5)
+                    : parseFloat(error) > 0.5 && parseFloat(error) <= 2.5 || parseFloat(error) < -0.5 && parseFloat(error) >= -2.5
                     ? "⚠️ Weight deviation detected - consider calibration"
-                    : "❌ Significant weight error - immediate calibration required"}
+                    : "❌ Significant weight error - immediate calibration required"
+                  }
                 </Text>
               </View>
             </View>
@@ -143,11 +136,9 @@ const WeighFeeder = () => {
           {/* Correction Factor Card */}
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Correction Factor Calculation</Text>
-
+            
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>
-                Current Correction Factor (D02)
-              </Text>
+              <Text style={styles.inputLabel}>Current Correction Factor (D02)</Text>
               <TextInput
                 style={styles.input}
                 keyboardType="decimal-pad"
@@ -172,7 +163,7 @@ const WeighFeeder = () => {
                   <Text style={styles.factorBadgeText}>D02</Text>
                 </View>
               </View>
-
+              
               <View style={styles.factorDisplay}>
                 <Text style={styles.factorLabel}>Updated Factor:</Text>
                 <Text style={styles.factorValue}>{result}</Text>
@@ -180,8 +171,7 @@ const WeighFeeder = () => {
 
               <View style={styles.factorInfo}>
                 <Text style={styles.factorInfoText}>
-                  💡 Apply this new correction factor to improve weigh feeder
-                  accuracy
+                  💡 Apply this new correction factor to improve weigh feeder accuracy
                 </Text>
               </View>
             </View>
@@ -214,7 +204,7 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     marginBottom: 24,
-    alignItems: "center",
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 28,
@@ -225,7 +215,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 16,
     color: "#666",
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 22,
   },
   card: {
@@ -265,7 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     backgroundColor: "#FAFBFC",
     color: "#333",
-    fontWeight: "500",
+    fontWeight: '500',
   },
   button: {
     backgroundColor: colors.primary || "#34C759",
@@ -301,9 +291,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   resultHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
   },
   resultTitle: {
@@ -333,7 +323,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   errorDisplay: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 16,
   },
   errorLabel: {
@@ -358,7 +348,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   factorDisplay: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 16,
   },
   factorLabel: {
