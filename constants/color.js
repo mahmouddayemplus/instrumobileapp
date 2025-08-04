@@ -1,5 +1,5 @@
 export const colors = {
-  primary: '#34C759',         // Vibrant green – actions, highlight
+  primary: '#248A3D',         // Vibrant green – actions, highlight
   primaryDark: '#248A3D',     // Darker version for presses, shadows
   primaryLight: '#A8E6B5',    // Lighter tint for backgrounds, borders
 

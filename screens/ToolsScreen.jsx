@@ -1,11 +1,18 @@
-import { StyleSheet, Text, View, Alert, ScrollView, StatusBar } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import React, { useLayoutEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToolComponent from "../components/ToolComponent";
 import { useSelector } from "react-redux";
 import { logout } from "../store/authSlice";
 import { useDispatch } from "react-redux";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { removeUser } from "../helper/authStorage";
 import { colors } from "../constants/color";
 
@@ -70,7 +77,7 @@ const ToolsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -96,7 +103,6 @@ const ToolsScreen = ({ navigation }) => {
 
         {/* Tools Grid */}
         <View style={styles.toolsContainer}>
-          <Text style={styles.sectionTitle}>Measurement Tools</Text>
           <View style={styles.toolsGrid}>
             <ToolComponent
               iconName="thermometer"
@@ -111,8 +117,6 @@ const ToolsScreen = ({ navigation }) => {
               screenName="Thermocouple"
             />
           </View>
-
-          <Text style={styles.sectionTitle}>Conversion Tools</Text>
           <View style={styles.toolsGrid}>
             <ToolComponent
               iconName="funnel"
@@ -127,28 +131,13 @@ const ToolsScreen = ({ navigation }) => {
               screenName="WeighFeeder"
             />
           </View>
-
-          {/* Coming Soon Section */}
-          <View style={styles.comingSoonSection}>
-            <Text style={styles.comingSoonTitle}>Coming Soon</Text>
-            <View style={styles.comingSoonGrid}>
-              <View style={styles.comingSoonCard}>
-                <MaterialCommunityIcons
-                  name="bar-chart"
-                  size={32}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.comingSoonText}>4-20 mA Scaler</Text>
-              </View>
-              <View style={styles.comingSoonCard}>
-                <MaterialCommunityIcons
-                  name="flash"
-                  size={32}
-                  color={colors.textSecondary}
-                />
-                <Text style={styles.comingSoonText}>3PH-Motor Current</Text>
-              </View>
-            </View>
+          <View style={styles.toolsGrid}>
+            <ToolComponent
+              iconName="calculator"
+              titleLine1="Packer | VentoCheck"
+              titleLine2="Calibrator"
+              screenName="PackerScreen"
+            />
           </View>
         </View>
       </ScrollView>
@@ -217,7 +206,8 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   toolsContainer: {
-    paddingHorizontal: 16,
+    flex: 1,
+    paddingHorizontal: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -228,9 +218,10 @@ const styles = StyleSheet.create({
   },
   toolsGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    // flexWrap: "wrap",
+    justifyContent: "center",
     marginBottom: 24,
+    flexWrap:"nowrap"
   },
   comingSoonSection: {
     marginTop: 20,

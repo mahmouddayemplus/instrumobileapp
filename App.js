@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
+import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -291,6 +291,24 @@ function RootStack() {
               component={SpareDetailScreen}
               options={({ navigation }) => ({
                 title: " SpareDetailScreen",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="PackerScreen"
+              component={PackerScreen}
+              options={({ navigation }) => ({
+                title: "Packer  Calibrator",
 
                 headerRight: () => (
                   <MaterialCommunityIcons
