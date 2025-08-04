@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
-// test sony laptop
+//git remote set-url origin git@github.com:mahmouddayemplus/instrumobileapp.git
+
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';
