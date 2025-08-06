@@ -29,14 +29,14 @@ const SpareDetailScreen = ({ route }) => {
   const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
 
   useLayoutEffect(() => {
-    navigation.setOptions({ 
+    navigation.setOptions({
       title: item.code,
       headerStyle: {
         backgroundColor: colors.primary,
       },
-      headerTintColor: '#fff',
+      headerTintColor: "#fff",
       headerTitleStyle: {
-        fontWeight: '600',
+        fontWeight: "600",
       },
     });
   }, [navigation, item]);
@@ -46,7 +46,7 @@ const SpareDetailScreen = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
@@ -59,10 +59,10 @@ const SpareDetailScreen = ({ route }) => {
             style={styles.image}
             resizeMode="contain"
           />
-          
+
           {/* Gradient overlay for better icon visibility */}
           <View style={styles.imageOverlay} />
-          
+
           {/* Action Icons */}
           <View style={styles.actionIcons}>
             <TouchableOpacity
@@ -90,7 +90,11 @@ const SpareDetailScreen = ({ route }) => {
           {/* Title Card */}
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
+              <Ionicons
+                name="information-circle-outline"
+                size={20}
+                color={colors.primary}
+              />
               <Text style={styles.cardTitle}>Product Information</Text>
             </View>
             <Text style={styles.productTitle}>{item.title}</Text>
@@ -99,13 +103,22 @@ const SpareDetailScreen = ({ route }) => {
           {/* SAP Code Card */}
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Ionicons name="barcode-outline" size={20} color={colors.primary} />
+              <Ionicons
+                name="barcode-outline"
+                size={20}
+                color={colors.primary}
+              />
               <Text style={styles.cardTitle}>SAP Code</Text>
             </View>
             <View style={styles.codeContainer}>
-              <Text style={styles.codeText}>{item.code}</Text>
+              <Text style={styles.codeText}>{item.code} | {item.new_code} </Text>
+          
               <TouchableOpacity style={styles.copyButton}>
-                <Ionicons name="copy-outline" size={16} color={colors.primary} />
+                <Ionicons
+                  name="copy-outline"
+                  size={16}
+                  color={colors.primary}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -116,38 +129,38 @@ const SpareDetailScreen = ({ route }) => {
               <Ionicons name="list-outline" size={20} color={colors.primary} />
               <Text style={styles.cardTitle}>Additional Details</Text>
             </View>
-            
+
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Category</Text>
-              <Text style={styles.detailValue}>Spare Parts</Text>
+              <Text style={styles.detailValue}>{item.category}</Text>
             </View>
-            
-            <View style={styles.detailRow}>
+
+            {/* <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Availability</Text>
               <View style={styles.availabilityContainer}>
                 <View style={styles.availabilityDot} />
                 <Text style={styles.availabilityText}>In Stock</Text>
               </View>
-            </View>
-            
-            <View style={styles.detailRow}>
+            </View> */}
+
+            {/* <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Last Updated</Text>
               <Text style={styles.detailValue}>Today</Text>
-            </View>
+            </View> */}
           </View>
 
           {/* Action Buttons */}
-          <View style={styles.actionButtons}>
+          {/* <View style={styles.actionButtons}>
             <TouchableOpacity style={styles.primaryButton}>
               <Ionicons name="call-outline" size={20} color="#fff" />
               <Text style={styles.primaryButtonText}>Contact Supplier</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.secondaryButton}>
+            </TouchableOpacity> */}
+
+          {/* <TouchableOpacity style={styles.secondaryButton}>
               <Ionicons name="document-text-outline" size={20} color={colors.primary} />
               <Text style={styles.secondaryButtonText}>View Specifications</Text>
-            </TouchableOpacity>
-          </View>
+            </TouchableOpacity> */}
+          {/* </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -167,31 +180,31 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   imageContainer: {
-    position: 'relative',
-    width: '100%',
+    position: "relative",
+    width: "100%",
     height: 300,
     backgroundColor: colors.card,
-    overflow: 'visible',
+    overflow: "visible",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     backgroundColor: colors.background,
   },
   imageOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     height: 80,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: "rgba(0,0,0,0.1)",
     zIndex: 1,
   },
   actionIcons: {
-    position: 'absolute',
+    position: "absolute",
     top: 20,
     right: 20,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     zIndex: 10,
   },
@@ -200,9 +213,9 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -221,50 +234,50 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
     gap: 8,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   productTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.text,
     lineHeight: 28,
   },
   codeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: colors.background,
     padding: 12,
     borderRadius: 8,
   },
   codeText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   copyButton: {
     padding: 8,
   },
   detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -272,16 +285,17 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 14,
     color: colors.textSecondary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: "600",
+    textTransform: "uppercase", // 👈 this makes text uppercase
   },
   availabilityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   availabilityDot: {
@@ -293,7 +307,7 @@ const styles = StyleSheet.create({
   availabilityText: {
     fontSize: 14,
     color: colors.success,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   actionButtons: {
     gap: 12,
@@ -303,9 +317,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
@@ -314,17 +328,17 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   primaryButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   secondaryButton: {
     backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     borderWidth: 1,
     borderColor: colors.border,
@@ -332,6 +346,6 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: colors.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

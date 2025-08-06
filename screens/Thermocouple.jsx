@@ -65,7 +65,7 @@ const Thermocouple = () => {
     if (isNaN(temp) || temp === "Invalid") return "#F44336";
     const temperature = parseFloat(temp);
     if (temperature < 0) return "#2196F3"; // Blue for cold
-    if (temperature > 500) return "#FF5722"; // Orange for hot
+    if (temperature > 5000) return "#FF5722"; // Orange for hot
     return "#4CAF50"; // Green for normal
   };
 

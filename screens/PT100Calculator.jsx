@@ -42,7 +42,7 @@ const PT100Calculator = () => {
     if (isNaN(temp) || temp === "Invalid") return "#F44336";
     const temperature = parseFloat(temp);
     if (temperature < 0) return "#2196F3"; // Blue for cold
-    if (temperature > 50) return "#FF5722"; // Orange for hot
+    if (temperature > 500) return "#FF5722"; // Orange for hot
     return "#4CAF50"; // Green for normal
   };
 
@@ -99,10 +99,10 @@ const PT100Calculator = () => {
                   {result === "Invalid" 
                     ? "❌ Invalid resistance value entered"
                     : parseFloat(result) < 0 
-                    ? "❄️ Temperature is below freezing point"
-                    : parseFloat(result) > 50 
-                    ? "🔥 Temperature is above normal range"
-                    : "✅ Temperature is within normal range"
+                    // ? "❄️ Temperature is below freezing point"
+                    // : parseFloat(result) > 50 
+                    // ? "🔥 Temperature is §above normal range"
+                    // : "✅ Temperature is within normal range"
                   }
                 </Text>
               </View>

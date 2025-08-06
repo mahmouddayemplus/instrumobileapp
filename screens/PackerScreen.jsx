@@ -35,15 +35,9 @@ const PackerScreen = () => {
 
   const calculateFactor = () => {
     const weight = 50000;
-    console.log("====================================");
-    console.log("xxxxxxxxxxxxxxxxx");
-    console.log("====================================");
 
     const total = parseFloat(totalizer);
     const factor = parseFloat(oldCorrectionFactor);
-    console.log("====================================");
-    console.log(total);
-    console.log("====================================");
 
     if (!isNaN(error) && !isNaN(weight) && !isNaN(total) && factor !== 0) {
       const newFactor = (weight / total) * factor;
@@ -79,7 +73,7 @@ const PackerScreen = () => {
           {/* Header Section */}
 
           {/* Test Weight Card */}
-          <View style={styles.card}>
+          <View style={styles.card_top}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Test Weight</Text>
               <View style={styles.weightDisplay}>
@@ -90,8 +84,22 @@ const PackerScreen = () => {
           </View>
 
           {/* Input Card */}
+
           <View style={styles.card}>
-            <Text style={styles.inputLabel}>Packer Weight</Text>
+            {error !== null && (
+              <View style={styles.error}>
+                <Text
+                  style={[styles.errorValue, { color: getErrorColor(error) }]}
+                >
+                  Error 
+                </Text>
+                <Text
+                  style={[styles.errorValue, { color: getErrorColor(error) }]}
+                >
+                  {error}%
+                </Text>
+              </View>
+            )}
             <TextInput
               style={styles.input}
               keyboardType="decimal-pad"
@@ -190,16 +198,23 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardHeader: {
-    alignItems: "center",
+    // alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "baseline",
+    flex: 1,
+    gap: 10,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     color: "#666",
     marginBottom: 16,
   },
   weightDisplay: {
     alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
   },
   weightValue: {
     fontSize: 24,
@@ -296,6 +311,7 @@ const styles = StyleSheet.create({
   errorValue: {
     fontSize: 36,
     fontWeight: "700",
+    marginLeft:20
   },
   errorInfo: {
     backgroundColor: "#F8F9FA",
@@ -308,5 +324,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     lineHeight: 20,
+  },
+  card_top: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  error: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "baseline",
   },
 });

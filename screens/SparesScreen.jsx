@@ -154,7 +154,7 @@ const SparesScreen = () => {
 
         <View style={styles.contentContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.code}>{item.code}</Text>
+            <Text style={styles.code}>{item.code} | {item.new_code}</Text>
             <Text style={styles.title} numberOfLines={2}>
               {item.title}
             </Text>
