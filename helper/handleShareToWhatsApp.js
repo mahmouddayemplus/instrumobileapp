@@ -6,7 +6,7 @@
     const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
 
     Linking.openURL(url)
-      .then(() => console.log("WhatsApp opened"))
+      .then(() => { })
       .catch(() => {
         alert("WhatsApp not installed on your device");
       });

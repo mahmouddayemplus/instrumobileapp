@@ -20,6 +20,8 @@ import { FlashList } from "@shopify/flash-list";
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
+  const [dataError, setDataError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.items);
   const user = useSelector((state) => state.auth.user);
@@ -32,36 +34,72 @@ const SparesScreen = () => {
 
   useEffect(() => {
     const fetchSpares = async () => {
-      let cached = await loadSpares("cached_spares");
+      try {
+        let cached = await loadSpares("cached_spares");
 
-      if (!cached) {
-        console.log("No Spares cached data found, fetching from Firestore...");
-        await updateSpares();
-        cached = await loadSpares("cached_spares");
-      }
+        if (!cached || cached.length === 0) {
+          console.log("No cached spares found, attempting to fetch from Firestore...");
+          try {
+            await updateSpares();
+            cached = await loadSpares("cached_spares");
+          } catch (error) {
+            console.error("Error fetching from Firestore:", error);
+            setDataError(true);
+            setErrorMessage("Spares database is not available. Please contact your administrator.");
+            return;
+          }
+        }
 
-      if (cached) {
-        setSpares(cached);
-        setFilteredSpares(cached);
-      } else {
-        console.log("Failed to fetch or load cached spares.");
+        if (cached && cached.length > 0) {
+          console.log("Spares data loaded successfully:", cached.length, "items");
+          setSpares(cached);
+          setFilteredSpares(cached);
+        } else {
+          console.log("No spares data available after fetch attempt");
+          setDataError(true);
+          setErrorMessage("No spare parts data available. Please try again later.");
+        }
+      } catch (error) {
+        console.error("Error in fetchSpares:", error);
+        setDataError(true);
+        setErrorMessage("Failed to load spare parts. Please check your connection and try again.");
       }
     };
 
     fetchSpares();
   }, []);
 
+  // Detect when spares is set to empty array and trigger error state
+  useEffect(() => {
+    if (spares && spares.length === 0 && !dataError) {
+      console.log("Detected empty spares array, setting error state");
+      setDataError(true);
+      setErrorMessage("No spare parts data available. Please try again later.");
+    }
+  }, [spares, dataError]);
+
   const handlePress = async () => {
     setLoading(true);
-    await updateSpares();
-    const cached = await loadSpares("cached_spares");
-    setLoading(false);
+    setDataError(false);
+    setErrorMessage("");
+    
+    try {
+      await updateSpares();
+      const cached = await loadSpares("cached_spares");
+      setLoading(false);
 
-    if (cached) {
-      setSpares(cached);
-      setFilteredSpares(cached);
-    } else {
-      console.log("No cached data found after update");
+      if (cached && cached.length > 0) {
+        setSpares(cached);
+        setFilteredSpares(cached);
+      } else {
+        setDataError(true);
+        setErrorMessage("No spare parts data available. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error refreshing spares:", error);
+      setLoading(false);
+      setDataError(true);
+      setErrorMessage("Failed to refresh spare parts. Please check your connection and try again.");
     }
   };
 
@@ -91,7 +129,40 @@ const SparesScreen = () => {
     });
   }, [navigation, spares, loading]);
 
+  // Show error state when data is not available
+  if (dataError) {
+    console.log("Rendering error state with message:", errorMessage);
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+        <View style={styles.errorContainer}>
+          <View style={styles.errorIconContainer}>
+            <Ionicons name="alert-circle-outline" size={80} color="#FF6B35" />
+          </View>
+          <Text style={styles.errorTitle}>No Data Available</Text>
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={handlePress}
+            disabled={loading}
+          >
+            <Ionicons name="refresh" size={20} color="#fff" />
+            <Text style={styles.retryButtonText}>
+              {loading ? 'Retrying...' : 'Try Again'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show loading state only if not in error state and still loading
   if (!spares || spares.length === 0) {
+    console.log("Rendering loading state. dataError:", dataError, "spares:", spares);
+    // Don't show loading if we have an error
+    if (dataError) {
+      return null; // This should not happen due to the order, but just in case
+    }
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
@@ -212,7 +283,7 @@ const SparesScreen = () => {
     const message = `Check out this spare part:\n\nCode: ${item.code}\nTitle: ${item.title}\n`;
     const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
     Linking.openURL(url)
-      .then(() => console.log("WhatsApp opened"))
+      .then(() => { })
       .catch(() => {
         alert("WhatsApp not installed on your device");
       });
@@ -495,5 +566,45 @@ const styles = StyleSheet.create({
   favoriteActive: {
     backgroundColor: colors.error,
     borderColor: colors.error,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  errorIconContainer: {
+    backgroundColor: "#FFE0D1",
+    borderRadius: 50,
+    padding: 15,
+    marginBottom: 20,
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.text,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  retryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    gap: 8,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

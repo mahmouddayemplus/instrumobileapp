@@ -23,11 +23,9 @@ export const writeAllTasksToFirestore = async (data) => {
       }
 
       await setDoc(doc(firestore, "allTasks", sectionId), task);
-      console.log(`Document with sectionId ${sectionId} written successfully.`);
-    }
+     }
 
-    console.log("All task documents written.");
-  } catch (error) {
+   } catch (error) {
     console.error("Error writing documents to Firestore:", error);
   }
 };

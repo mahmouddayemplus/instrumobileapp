@@ -157,16 +157,14 @@ function RootStack() {
       setIsTryingLogin(false);
     };
     const loadFavorites = async () => {
-      console.log('====================================');
-      console.log('calling load favorites');
-      console.log('====================================');
+ 
       const json = await AsyncStorage.getItem('favorite_spares')
       if (json) {
         const favorites = JSON.parse(json);
         dispatch(setFavorites(favorites));
-        console.log('Loaded favorites:', favorites);
+ 
       }
-      console.log('====================================');
+ 
     }
 
     loadFavorites();

@@ -88,16 +88,15 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
       let cached = await loadData("cached_tasks");
 
       if (!cached) {
-        console.log("No cached data found, fetching from Firestore...");
-        await updateDetailedTasks();
+         await updateDetailedTasks();
         cached = await loadData("cached_tasks");
       }
 
       if (cached) {
         setTasks(cached);
-        console.log("Tasks loaded:", cached);
+        // console.log("Tasks loaded:", cached);
       } else {
-        console.log("Failed to fetch or load cached tasks.");
+        // console.log("Failed to fetch or load cached tasks.");
       }
       setLoading(false);
     };
@@ -153,9 +152,9 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
 
     if (cached) {
       setTasks(cached);
-      console.log("Updated tasks loaded:", cached);
+      // console.log("Updated tasks loaded:", cached);
     } else {
-      console.log("No cached data found after update");
+      // console.log("No cached data found after update");
     }
     setRefreshing(false);
   };

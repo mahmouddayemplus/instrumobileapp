@@ -9,8 +9,7 @@ import { colors } from "../constants/color";
 import Icon from "react-native-vector-icons/Feather"; // or MaterialIcons, Ionicons...
 
 const AreaTasksListComponent = ({ data }) => {
-   // console.log("SectionTasksList dataxxxxxxxxxxxxxxxxxxxx:", data[0]);
-  // const [tasks, setTasks] = useState(item.tasks);
+ 
   const handleComplete = () => {};
   const renderTagItem = ({ item }) => (
     <View style={styles.tagContainer}>

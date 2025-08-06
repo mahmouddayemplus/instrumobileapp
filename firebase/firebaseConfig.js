@@ -80,7 +80,7 @@ export async function signin({ email, password }) {
       message: user,
     };
   } catch (error) {
-    console.log('Signin Error:', error.message);
+    // console.log('Signin Error:', error.message);
 
     return {
       status: 'error',
@@ -122,8 +122,7 @@ export const updateDetailedTasks = async () => {
     // Save to cache
     await storeData('cached_tasks', tasks);
 
-    console.log("Tasks fetched and cached successfully");
-  } catch (error) {
+   } catch (error) {
     console.error("Error fetching tasks:", error);
   }
 };
@@ -178,8 +177,7 @@ export const updateSpares = async () => {
     // Save to cache
     await storeData('cached_spares', spares);
 
-    console.log("spares fetched and cached successfully");
-  } catch (error) {
+   } catch (error) {
     console.error("Error fetching spares:", error);
   }
 };

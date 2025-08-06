@@ -20,8 +20,7 @@ export const initDb = async ( update =false) => {
         "order" INTEGER
       );
     `);
-        console.log('✅ Table created successfully');
-    } catch (error) {
+     } catch (error) {
         console.error('❌ Error initializing DB:', error);
     }
 };
@@ -37,8 +36,7 @@ export const saveTasksToSQLite = async (id, section, order) => {
             `INSERT OR REPLACE INTO tasks (id, section, "order") VALUES (?, ?, ?);`,
             [id, section, order]
         );
-        console.log('✅ Task inserted');
-    } catch (error) {
+     } catch (error) {
         console.error('❌ Insert error:', error);
     }
 };
