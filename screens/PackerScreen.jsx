@@ -19,11 +19,45 @@ const PackerScreen = () => {
   const [oldCorrectionFactor, setOldCorrectionFactor] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [inputError, setInputError] = useState(false);
   const { height } = Dimensions.get("window");
 
+  const handleTotalizerChange = (text) => {
+    // Remove any non-numeric characters and commas
+    const numericText = text.replace(/[^0-9]/g, '');
+    
+    // Limit to 5 digits
+    if (numericText.length <= 5) {
+      // Format with comma after first 2 digits
+      let formattedText = numericText;
+      if (numericText.length >= 3) {
+        formattedText = numericText.slice(0, 2) + ',' + numericText.slice(2);
+      }
+      
+      setTotalizer(formattedText);
+      setInputError(false);
+    }
+  };
+
+  const validateInput = () => {
+    // Remove comma for validation
+    const numericValue = totalizer.replace(/,/g, '');
+    if (numericValue.length !== 5) {
+      setInputError(true);
+      return false;
+    }
+    setInputError(false);
+    return true;
+  };
+
   const calculateError = () => {
+    if (!validateInput()) {
+      return;
+    }
+
     const weight = 50000;
-    const total = parseFloat(totalizer);
+    // Remove comma before parsing
+    const total = parseFloat(totalizer.replace(/,/g, ''));
 
     if (!isNaN(weight) && !isNaN(total) && total !== 0) {
       const error = (weight / total - 1) * 100;
@@ -84,72 +118,65 @@ const PackerScreen = () => {
           </View>
 
           {/* Input Card */}
-
           <View style={styles.card}>
             {error !== null && (
-              <View style={styles.error}>
-                <Text
-                  style={[styles.errorValue, { color: getErrorColor(error) }]}
-                >
-                  Error 
-                </Text>
-                <Text
-                  style={[styles.errorValue, { color: getErrorColor(error) }]}
-                >
-                  {error}%
+              <View style={styles.errorSection}>
+                <View style={styles.errorHeader}>
+                  <Text style={styles.errorTitle}>Calculated Error</Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: getErrorColor(error) },
+                    ]}
+                  >
+                    <Text style={styles.statusText}>{getErrorStatus(error)}</Text>
+                  </View>
+                </View>
+                <View style={styles.errorDisplay}>
+                  <Text
+                    style={[styles.errorValue, { color: getErrorColor(error) }]}
+                  >
+                    {error}%
+                  </Text>
+                </View>
+                <View style={styles.errorInfo}>
+                  <Text style={styles.errorInfoText}>
+                    {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5
+                      ? "✅ Weight is within acceptable range"
+                      : (parseFloat(error) > 0.5 && parseFloat(error) <= 2.5) ||
+                        (parseFloat(error) < -0.5 && parseFloat(error) >= -2.5)
+                      ? "⚠️ Weight deviation detected - consider calibration"
+                      : "❌ Significant weight error - immediate calibration required"}
+                  </Text>
+                </View>
+              </View>
+            )}
+            
+            <TextInput
+              style={[
+                styles.input,
+                inputError && styles.inputErrorBorder
+              ]}
+              keyboardType="numeric"
+              value={totalizer}
+              onChangeText={handleTotalizerChange}
+              placeholder="XX,XXX"
+              placeholderTextColor="#999"
+              maxLength={6}
+            />
+
+            {inputError && (
+              <View style={styles.inputError}>
+                <Text style={styles.inputErrorText}>
+                  Please enter exactly 5 digits.
                 </Text>
               </View>
             )}
-            <TextInput
-              style={styles.input}
-              keyboardType="decimal-pad"
-              value={totalizer}
-              onChangeText={setTotalizer}
-              placeholder="Enter packer weight..."
-              placeholderTextColor="#999"
-            />
 
             <TouchableOpacity style={styles.button} onPress={calculateError}>
               <Text style={styles.buttonText}>Calculate Error</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Result Card */}
-          {error !== null && (
-            <View style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>Error Analysis</Text>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: getErrorColor(error) },
-                  ]}
-                >
-                  <Text style={styles.statusText}>{getErrorStatus(error)}</Text>
-                </View>
-              </View>
-
-              <View style={styles.errorDisplay}>
-                <Text style={styles.errorLabel}>Error Percentage:</Text>
-                <Text
-                  style={[styles.errorValue, { color: getErrorColor(error) }]}
-                >
-                  {error}%
-                </Text>
-              </View>
-
-              <View style={styles.errorInfo}>
-                <Text style={styles.errorInfoText}>
-                  {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5
-                    ? "✅ Weight is within acceptable range"
-                    : (parseFloat(error) > 0.5 && parseFloat(error) <= 2.5) ||
-                      (parseFloat(error) < -0.5 && parseFloat(error) >= -2.5)
-                    ? "⚠️ Weight deviation detected - consider calibration"
-                    : "❌ Significant weight error - immediate calibration required"}
-                </Text>
-              </View>
-            </View>
-          )}
         </ScrollView>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -345,5 +372,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "baseline",
+  },
+  errorSection: {
+    marginBottom: 20,
+  },
+  errorHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  inputError: {
+    marginTop: 10,
+    alignItems: "center",
+  },
+  inputErrorText: {
+    color: "#F44336",
+    fontSize: 14,
+  },
+  inputErrorBorder: {
+    borderColor: "#F44336",
+    borderWidth: 2,
   },
 });
