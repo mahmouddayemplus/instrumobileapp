@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,11 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableWithoutFeedback,
-  Keyboard,
-} from 'react-native';
+  Keyboard,StatusBar
+} from "react-native";
 import { colors } from "../constants/color";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
 const units = {
   Pa: 1,
@@ -32,21 +34,49 @@ const units = {
 const unitList = Object.keys(units);
 
 const PressureConverter = () => {
-  const [inputValue, setInputValue] = useState('');
-  const [inputUnit, setInputUnit] = useState('Pa');
-  const [outputUnit, setOutputUnit] = useState('bar');
-  const [convertedValue, setConvertedValue] = useState('');
+  const navigation = useNavigation();
+  const [inputValue, setInputValue] = useState("");
+  const [inputUnit, setInputUnit] = useState("Pa");
+  const [outputUnit, setOutputUnit] = useState("bar");
+  const [convertedValue, setConvertedValue] = useState("");
 
   const [modalVisible, setModalVisible] = useState(false);
   const [isSelectingInputUnit, setIsSelectingInputUnit] = useState(true);
 
   const convertPressure = (value, fromUnit, toUnit) => {
-    if (!value || isNaN(value)) return '';
+    if (!value || isNaN(value)) return "";
     const valueInPa = parseFloat(value) * units[fromUnit];
     const converted = valueInPa / units[toUnit];
     return converted.toFixed(4);
   };
-
+  ///
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Pressure units ",
+      headerStyle: {
+        backgroundColor: colors.primary || "#34C759",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: "600",
+      },
+      headerLeft: () => (
+        <View style={styles.headerLeft}>
+          <TouchableOpacity
+            style={styles.headerIconContainer}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerIconContainer}>
+            <Ionicons name="speedometer" size={24} color="#fff" />
+          </View>
+        </View>
+      ),
+    });
+  }, [navigation]);
+  ///
   const handleConversion = (value, from = inputUnit, to = outputUnit) => {
     setConvertedValue(convertPressure(value, from, to));
   };
@@ -69,18 +99,18 @@ const PressureConverter = () => {
 
   const getUnitDescription = (unit) => {
     const descriptions = {
-      Pa: 'Pascal',
-      kPa: 'Kilopascal',
-      MPa: 'Megapascal',
-      bar: 'Bar',
-      mbar: 'Millibar',
-      atm: 'Atmosphere',
-      mmHg: 'Millimeter of Mercury',
-      inHg: 'Inch of Mercury',
-      mmH2O: 'Millimeter of Water',
-      inchH2O: 'Inch of Water',
-      torr: 'Torr',
-      psi: 'Pound per Square Inch',
+      Pa: "Pascal",
+      kPa: "Kilopascal",
+      MPa: "Megapascal",
+      bar: "Bar",
+      mbar: "Millibar",
+      atm: "Atmosphere",
+      mmHg: "Millimeter of Mercury",
+      inHg: "Inch of Mercury",
+      mmH2O: "Millimeter of Water",
+      inchH2O: "Inch of Water",
+      torr: "Torr",
+      psi: "Pound per Square Inch",
     };
     return descriptions[unit] || unit;
   };
@@ -88,7 +118,15 @@ const PressureConverter = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
+
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Input Card */}
           <View style={styles.inputCard}>
             <Text style={styles.inputLabel}>Pressure Value</Text>
@@ -117,7 +155,9 @@ const PressureConverter = () => {
               >
                 <Text style={styles.unitButtonLabel}>From</Text>
                 <Text style={styles.unitButtonValue}>{inputUnit}</Text>
-                <Text style={styles.unitButtonDesc}>{getUnitDescription(inputUnit)}</Text>
+                <Text style={styles.unitButtonDesc}>
+                  {getUnitDescription(inputUnit)}
+                </Text>
               </TouchableOpacity>
 
               <View style={styles.arrowContainer}>
@@ -130,7 +170,9 @@ const PressureConverter = () => {
               >
                 <Text style={styles.unitButtonLabel}>To</Text>
                 <Text style={styles.unitButtonValue}>{outputUnit}</Text>
-                <Text style={styles.unitButtonDesc}>{getUnitDescription(outputUnit)}</Text>
+                <Text style={styles.unitButtonDesc}>
+                  {getUnitDescription(outputUnit)}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -144,7 +186,7 @@ const PressureConverter = () => {
                   <Text style={styles.resultBadgeText}>Result</Text>
                 </View>
               </View>
-              
+
               <View style={styles.resultDisplay}>
                 <Text style={styles.resultLabel}>Pressure Value:</Text>
                 <Text style={styles.resultValue}>
@@ -162,7 +204,9 @@ const PressureConverter = () => {
 
           {/* Common Conversions Card */}
           <View style={styles.conversionsCard}>
-            <Text style={styles.conversionsTitle}>Common Pressure Conversions</Text>
+            <Text style={styles.conversionsTitle}>
+              Common Pressure Conversions
+            </Text>
             <View style={styles.conversionsGrid}>
               <View style={styles.conversionItem}>
                 <Text style={styles.conversionLabel}>1 atm</Text>
@@ -187,8 +231,9 @@ const PressureConverter = () => {
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>Pressure Units</Text>
             <Text style={styles.infoText}>
-              Pressure is the force applied perpendicular to the surface of an object per unit area. 
-              Different industries use various pressure units based on their specific requirements.
+              Pressure is the force applied perpendicular to the surface of an
+              object per unit area. Different industries use various pressure
+              units based on their specific requirements.
             </Text>
             <View style={styles.specsContainer}>
               <View style={styles.specItem}>
@@ -214,7 +259,7 @@ const PressureConverter = () => {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
-                  Select {isSelectingInputUnit ? 'Input' : 'Output'} Unit
+                  Select {isSelectingInputUnit ? "Input" : "Output"} Unit
                 </Text>
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -232,7 +277,9 @@ const PressureConverter = () => {
                     onPress={() => handleUnitSelect(item)}
                   >
                     <Text style={styles.modalItemUnit}>{item}</Text>
-                    <Text style={styles.modalItemDesc}>{getUnitDescription(item)}</Text>
+                    <Text style={styles.modalItemDesc}>
+                      {getUnitDescription(item)}
+                    </Text>
                   </TouchableOpacity>
                 )}
                 showsVerticalScrollIndicator={false}
@@ -280,11 +327,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#E1E5E9",
     borderRadius: 12,
-    backgroundColor: '#FAFBFC',
+    backgroundColor: "#FAFBFC",
     paddingHorizontal: 16,
     paddingVertical: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
@@ -292,7 +339,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 24,
     color: "#333",
-    textAlign: 'center',
+    textAlign: "center",
     fontWeight: "600",
   },
   unitCard: {
@@ -316,18 +363,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   unitSelectorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   unitButton: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#E1E5E9',
+    borderColor: "#E1E5E9",
   },
   unitButtonLabel: {
     fontSize: 12,
@@ -343,7 +390,7 @@ const styles = StyleSheet.create({
   unitButtonDesc: {
     fontSize: 10,
     color: "#666",
-    textAlign: 'center',
+    textAlign: "center",
   },
   arrowContainer: {
     paddingHorizontal: 16,
@@ -368,9 +415,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   resultHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   resultTitle: {
@@ -390,7 +437,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   resultDisplay: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   resultLabel: {
@@ -434,19 +481,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   conversionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   conversionItem: {
-    width: '48%',
+    width: "48%",
     backgroundColor: "#F8F9FA",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 8,
   },
   conversionLabel: {
@@ -487,12 +534,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   specsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   specItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   specLabel: {
     fontSize: 12,
@@ -506,15 +553,15 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 24,
-    maxHeight: '70%',
+    maxHeight: "70%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -525,9 +572,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   modalTitle: {
@@ -539,9 +586,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F8F9FA',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F8F9FA",
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeButtonText: {
     fontSize: 16,
@@ -552,10 +599,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderBottomColor: "#F0F0F0",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   modalItemUnit: {
     fontSize: 18,
@@ -566,6 +613,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     flex: 1,
-    textAlign: 'right',
+    textAlign: "right",
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 15,
+  },
+  headerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
   },
 });

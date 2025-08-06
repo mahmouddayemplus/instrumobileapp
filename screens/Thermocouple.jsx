@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,7 +8,11 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ScrollView,
+  StatusBar,
+  TouchableOpacity,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { colors } from "../constants/color";
 
 function millivoltToTemperature_K(mv) {
@@ -47,8 +51,36 @@ function millivoltToTemperature_K(mv) {
 }
 
 const Thermocouple = () => {
+  const navigation = useNavigation();
   const [input, setInput] = useState("0");
   const [result, setResult] = useState(null);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Type K Thermocouple",
+      headerStyle: {
+        backgroundColor: colors.primary || '#34C759',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: "600",
+      },
+      headerLeft: () => (
+        <View style={styles.headerLeft}>
+          <TouchableOpacity 
+            style={styles.headerIconContainer}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerIconContainer}>
+            <Ionicons name="pulse" size={24} color="#fff" />
+          </View>
+        </View>
+      ),
+    });
+  }, [navigation]);
 
   const handleInputChange = (text) => {
     setInput(text);
@@ -80,15 +112,20 @@ const Thermocouple = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
+        
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Input Card */}
           <View style={styles.inputCard}>
-            <Text style={styles.inputLabel}>Millivolt Value</Text>
+            <View style={styles.inputHeader}>
+              <Ionicons name="create" size={20} color={colors.primary || '#34C759'} />
+              <Text style={styles.inputLabel}>Input Millivolt Value</Text>
+            </View>
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
                 keyboardType="decimal-pad"
-                placeholder="Enter millivolt..."
+                placeholder="0.000"
                 placeholderTextColor="#999"
                 value={input}
                 onChangeText={handleInputChange}
@@ -101,28 +138,34 @@ const Thermocouple = () => {
           {result !== null && (
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>Temperature</Text>
+                <View style={styles.resultTitleContainer}>
+                  <Ionicons name="thermometer-outline" size={20} color={colors.primary || '#34C759'} />
+                  <Text style={styles.resultTitle}>Temperature Result</Text>
+                </View>
                 <View style={[styles.statusBadge, { backgroundColor: getTemperatureColor(result) }]}>
                   <Text style={styles.statusText}>{getTemperatureStatus(result)}</Text>
                 </View>
               </View>
               
               <View style={styles.temperatureDisplay}>
-                <Text style={styles.temperatureLabel}>Calculated Temperature:</Text>
-                <Text style={[styles.temperatureValue, { color: getTemperatureColor(result) }]}>
-                  {result} °C
-                </Text>
+                <Text style={styles.temperatureLabel}>Calculated Temperature</Text>
+                <View style={styles.temperatureValueContainer}>
+                  <Text style={[styles.temperatureValue, { color: getTemperatureColor(result) }]}>
+                    {result}
+                  </Text>
+                  <Text style={styles.temperatureUnit}>°C</Text>
+                </View>
               </View>
 
-              <View style={styles.temperatureInfo}>
+              <View style={[styles.temperatureInfo, { borderLeftColor: getTemperatureColor(result) }]}>
                 <Text style={styles.temperatureInfoText}>
                   {result === "Invalid" 
-                    ? "❌ Millivolt value is outside supported range"
+                    ? "❌ Millivolt value is outside supported range (-5.891 to 54.886 mV)"
                     : parseFloat(result) < 0 
-                    ? "❄️ Temperature is below freezing point"
+                    ? "❄️ Temperature is below freezing point - check for cold conditions"
                     : parseFloat(result) > 500 
-                    ? "🔥 Temperature is in high range"
-                    : "✅ Temperature is within normal range"
+                    ? "🔥 Temperature is in high range - ensure proper insulation"
+                    : "✅ Temperature is within normal operating range"
                   }
                 </Text>
               </View>
@@ -131,14 +174,23 @@ const Thermocouple = () => {
 
           {/* Range Info Card */}
           <View style={styles.rangeCard}>
-            <Text style={styles.rangeTitle}>Type K Thermocouple Range</Text>
+            <View style={styles.rangeHeader}>
+              <Ionicons name="analytics" size={20} color={colors.primary || '#34C759'} />
+              <Text style={styles.rangeTitle}>Operating Range</Text>
+            </View>
             <View style={styles.rangeGrid}>
               <View style={styles.rangeItem}>
+                <View style={styles.rangeIconContainer}>
+                  <Ionicons name="snow" size={24} color="#2196F3" />
+                </View>
                 <Text style={styles.rangeLabel}>Minimum</Text>
-                <Text style={styles.rangeValue}>-6.458 mV</Text>
+                <Text style={styles.rangeValue}>-5.891 mV</Text>
                 <Text style={styles.rangeTemp}>-270°C</Text>
               </View>
               <View style={styles.rangeItem}>
+                <View style={styles.rangeIconContainer}>
+                  <Ionicons name="flame" size={24} color="#FF5722" />
+                </View>
                 <Text style={styles.rangeLabel}>Maximum</Text>
                 <Text style={styles.rangeValue}>54.886 mV</Text>
                 <Text style={styles.rangeTemp}>1372°C</Text>
@@ -148,21 +200,36 @@ const Thermocouple = () => {
 
           {/* Reference Values Card */}
           <View style={styles.referenceCard}>
-            <Text style={styles.referenceTitle}>Common Reference Values</Text>
+            <View style={styles.referenceHeader}>
+              <Ionicons name="list" size={20} color={colors.primary || '#34C759'} />
+              <Text style={styles.referenceTitle}>Reference Values</Text>
+            </View>
             <View style={styles.referenceGrid}>
               <View style={styles.referenceItem}>
+                <View style={styles.refIconContainer}>
+                  <Ionicons name="water" size={16} color="#2196F3" />
+                </View>
                 <Text style={styles.refTemp}>0°C</Text>
                 <Text style={styles.refMv}>0.000 mV</Text>
               </View>
               <View style={styles.referenceItem}>
+                <View style={styles.refIconContainer}>
+                  <Ionicons name="thermometer" size={16} color="#4CAF50" />
+                </View>
                 <Text style={styles.refTemp}>100°C</Text>
                 <Text style={styles.refMv}>4.096 mV</Text>
               </View>
               <View style={styles.referenceItem}>
+                <View style={styles.refIconContainer}>
+                  <Ionicons name="sunny" size={16} color="#FF9800" />
+                </View>
                 <Text style={styles.refTemp}>200°C</Text>
                 <Text style={styles.refMv}>8.138 mV</Text>
               </View>
               <View style={styles.referenceItem}>
+                <View style={styles.refIconContainer}>
+                  <Ionicons name="flame" size={16} color="#FF5722" />
+                </View>
                 <Text style={styles.refTemp}>500°C</Text>
                 <Text style={styles.refMv}>20.644 mV</Text>
               </View>
@@ -201,6 +268,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background || "#F8F9FA",
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 15,
+  },
+  headerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
   scroll: {
     padding: 20,
     paddingBottom: 40,
@@ -219,11 +300,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  inputHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   inputLabel: {
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 16,
+    marginLeft: 8,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -273,10 +359,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  resultTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   resultTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#333",
+    marginLeft: 8,
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -295,18 +386,27 @@ const styles = StyleSheet.create({
   temperatureLabel: {
     fontSize: 16,
     color: "#666",
-    marginBottom: 8,
+    marginBottom: 12,
+  },
+  temperatureValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
   },
   temperatureValue: {
     fontSize: 48,
     fontWeight: "700",
+  },
+  temperatureUnit: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#666",
+    marginLeft: 8,
   },
   temperatureInfo: {
     backgroundColor: "#F8F9FA",
     padding: 16,
     borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#E1E5E9",
   },
   temperatureInfoText: {
     fontSize: 14,
@@ -327,12 +427,17 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  rangeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    justifyContent: 'center',
+  },
   rangeTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 16,
-    textAlign: 'center',
+    marginLeft: 8,
   },
   rangeGrid: {
     flexDirection: 'row',
@@ -345,6 +450,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginHorizontal: 4,
+  },
+  rangeIconContainer: {
+    marginBottom: 8,
   },
   rangeLabel: {
     fontSize: 12,
@@ -376,12 +484,17 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  referenceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    justifyContent: 'center',
+  },
   referenceTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 16,
-    textAlign: 'center',
+    marginLeft: 8,
   },
   referenceGrid: {
     flexDirection: 'row',
@@ -395,6 +508,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 8,
+  },
+  refIconContainer: {
+    marginBottom: 6,
   },
   refTemp: {
     fontSize: 16,

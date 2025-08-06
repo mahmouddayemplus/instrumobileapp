@@ -38,8 +38,7 @@ const SparesScreen = () => {
         let cached = await loadSpares("cached_spares");
 
         if (!cached || cached.length === 0) {
-          console.log("No cached spares found, attempting to fetch from Firestore...");
-          try {
+           try {
             await updateSpares();
             cached = await loadSpares("cached_spares");
           } catch (error) {
@@ -51,12 +50,10 @@ const SparesScreen = () => {
         }
 
         if (cached && cached.length > 0) {
-          console.log("Spares data loaded successfully:", cached.length, "items");
-          setSpares(cached);
+           setSpares(cached);
           setFilteredSpares(cached);
         } else {
-          console.log("No spares data available after fetch attempt");
-          setDataError(true);
+           setDataError(true);
           setErrorMessage("No spare parts data available. Please try again later.");
         }
       } catch (error) {
@@ -72,8 +69,7 @@ const SparesScreen = () => {
   // Detect when spares is set to empty array and trigger error state
   useEffect(() => {
     if (spares && spares.length === 0 && !dataError) {
-      console.log("Detected empty spares array, setting error state");
-      setDataError(true);
+       setDataError(true);
       setErrorMessage("No spare parts data available. Please try again later.");
     }
   }, [spares, dataError]);
@@ -131,8 +127,7 @@ const SparesScreen = () => {
 
   // Show error state when data is not available
   if (dataError) {
-    console.log("Rendering error state with message:", errorMessage);
-    return (
+     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
         <View style={styles.errorContainer}>
@@ -158,8 +153,7 @@ const SparesScreen = () => {
 
   // Show loading state only if not in error state and still loading
   if (!spares || spares.length === 0) {
-    console.log("Rendering loading state. dataError:", dataError, "spares:", spares);
-    // Don't show loading if we have an error
+     // Don't show loading if we have an error
     if (dataError) {
       return null; // This should not happen due to the order, but just in case
     }

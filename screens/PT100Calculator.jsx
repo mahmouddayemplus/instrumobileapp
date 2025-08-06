@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useLayoutEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,9 +7,12 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
-  ScrollView,
+  ScrollView,TouchableOpacity,StatusBar
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
 import { colors } from "../constants/color";
+import { useNavigation } from "@react-navigation/native";
 
 function resistanceToTemperature_PT100(R) {
   const R0 = 100;
@@ -26,6 +29,35 @@ function resistanceToTemperature_PT100(R) {
 const PT100Calculator = () => {
   const [input, setInput] = useState("100");
   const [result, setResult] = useState(null);
+  const navigation = useNavigation();
+  ////
+    useLayoutEffect(() => {
+      navigation.setOptions({
+        title: "PT100",
+        headerStyle: {
+          backgroundColor: colors.primary || '#34C759',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "600",
+        },
+        headerLeft: () => (
+          <View style={styles.headerLeft}>
+            <TouchableOpacity 
+              style={styles.headerIconContainer}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <View style={styles.headerIconContainer}>
+              <Ionicons name="thermometer" size={24} color="#fff" />
+            </View>
+          </View>
+        ),
+      });
+    }, [navigation]);
+    ///
 
   const handleInputChange = (text) => {
     setInput(text);
@@ -57,6 +89,8 @@ const PT100Calculator = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
+                <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
+        
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Header Section */}
  
@@ -400,5 +434,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "500",
+  },
+   headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 15,
+  },
+  headerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
 });

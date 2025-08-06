@@ -6,12 +6,15 @@ import {
   SafeAreaView,
   TextInput,
   Keyboard,
-  ScrollView,
+  ScrollView,StatusBar,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
 import { colors } from "../constants/color";
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { Dimensions } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const PackerScreen = () => {
   const [actualWeight, setActualWeight] = useState("");
@@ -21,19 +24,49 @@ const PackerScreen = () => {
   const [error, setError] = useState(null);
   const [inputError, setInputError] = useState(false);
   const { height } = Dimensions.get("window");
+  const navigation = useNavigation();
+  ///
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Packer|VentoCheck",
+      headerStyle: {
+        backgroundColor: colors.primary || "#34C759",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: "600",
+      },
+      headerLeft: () => (
+        <View style={styles.headerLeft}>
+          <TouchableOpacity
+            style={styles.headerIconContainer}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerIconContainer}>
+            <Ionicons name="calculator" size={24} color="#fff" />
+          </View>
+        </View>
+      ),
+    });
+  }, [navigation]);
+
+  ///
 
   const handleTotalizerChange = (text) => {
     // Remove any non-numeric characters and commas
-    const numericText = text.replace(/[^0-9]/g, '');
-    
+    const numericText = text.replace(/[^0-9]/g, "");
+
     // Limit to 5 digits
     if (numericText.length <= 5) {
       // Format with comma after first 2 digits
       let formattedText = numericText;
       if (numericText.length >= 3) {
-        formattedText = numericText.slice(0, 2) + ',' + numericText.slice(2);
+        formattedText = numericText.slice(0, 2) + "," + numericText.slice(2);
       }
-      
+
       setTotalizer(formattedText);
       setInputError(false);
     }
@@ -41,7 +74,7 @@ const PackerScreen = () => {
 
   const validateInput = () => {
     // Remove comma for validation
-    const numericValue = totalizer.replace(/,/g, '');
+    const numericValue = totalizer.replace(/,/g, "");
     if (numericValue.length !== 5) {
       setInputError(true);
       return false;
@@ -57,7 +90,7 @@ const PackerScreen = () => {
 
     const weight = 50000;
     // Remove comma before parsing
-    const total = parseFloat(totalizer.replace(/,/g, ''));
+    const total = parseFloat(totalizer.replace(/,/g, ""));
 
     if (!isNaN(weight) && !isNaN(total) && total !== 0) {
       const error = (weight / total - 1) * 100;
@@ -98,6 +131,8 @@ const PackerScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
+                        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
+        
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
@@ -129,7 +164,9 @@ const PackerScreen = () => {
                       { backgroundColor: getErrorColor(error) },
                     ]}
                   >
-                    <Text style={styles.statusText}>{getErrorStatus(error)}</Text>
+                    <Text style={styles.statusText}>
+                      {getErrorStatus(error)}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.errorDisplay}>
@@ -151,12 +188,9 @@ const PackerScreen = () => {
                 </View>
               </View>
             )}
-            
+
             <TextInput
-              style={[
-                styles.input,
-                inputError && styles.inputErrorBorder
-              ]}
+              style={[styles.input, inputError && styles.inputErrorBorder]}
               keyboardType="numeric"
               value={totalizer}
               onChangeText={handleTotalizerChange}
@@ -338,7 +372,7 @@ const styles = StyleSheet.create({
   errorValue: {
     fontSize: 36,
     fontWeight: "700",
-    marginLeft:20
+    marginLeft: 20,
   },
   errorInfo: {
     backgroundColor: "#F8F9FA",
@@ -398,5 +432,19 @@ const styles = StyleSheet.create({
   inputErrorBorder: {
     borderColor: "#F44336",
     borderWidth: 2,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 15,
+  },
+  headerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
   },
 });

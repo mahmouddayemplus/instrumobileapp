@@ -14,6 +14,6 @@ export const colors = {
   error: '#FF3B30',           // Red – validation, danger
   success: '#30D158',         // Another variation for green success
   warning: '#FFD60A',         // Yellow – alerts
-
+ 
   overlay: 'rgba(0,0,0,0.2)', // For modals or loading overlays
 };

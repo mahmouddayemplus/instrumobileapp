@@ -18,8 +18,7 @@ const TaskDetailScreen = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSafetyWarning, setShowSafetyWarning] = useState(false);
   const { task } = route.params;
-  console.log("task",' task');
-  const taskId = task.id; // Assuming task has an id field
+   const taskId = task.id; // Assuming task has an id field
 
   // Helper function to get the actual task count
   const getTaskCount = () => {
@@ -87,8 +86,7 @@ const TaskDetailScreen = () => {
 
       const taskById = tasks.filter((t) => t.sectionId === taskId);
 
-      console.log("Task found:", taskById);
-
+ 
       if (taskById.length !== 0) {
         setAreaTasks(taskById);
       }

@@ -55,7 +55,7 @@ const SpareDetailScreen = ({ route }) => {
           <Image
             source={{ uri: imageUrl }}
             defaultSource={defaultImage}
-            onError={() => console.log("Failed to load image")}
+            onError={() => {}}
             style={styles.image}
             resizeMode="contain"
           />
