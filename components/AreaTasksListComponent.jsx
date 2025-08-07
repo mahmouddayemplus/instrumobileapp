@@ -20,7 +20,7 @@ const AreaTasksListComponent = ({ data }) => {
 
       <FlatList
         data={item.tasks}
-        keyExtractor={(task) => task.id}
+        keyExtractor={(task) => task.description}
         renderItem={({ item: task }) => (
           <View style={styles.taskItem}>
             <Text style={styles.taskText}>• {task.description}</Text>

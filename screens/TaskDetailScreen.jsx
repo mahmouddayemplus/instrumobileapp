@@ -1,15 +1,23 @@
-import { StyleSheet, Text, View, Button, SafeAreaView, ActivityIndicator, StatusBar, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  SafeAreaView,
+  ActivityIndicator,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig"; // Combined imports
-import AreaTasksListComponent from '../components/AreaTasksListComponent'
+import AreaTasksListComponent from "../components/AreaTasksListComponent";
 import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons, etc.
 import { writeAllTasksToFirestore } from "../firebase/fireStoreBulkWrite";
-import { demoData } from '../firebase/demoData'
+import { demoData } from "../firebase/demoData";
 import { colors } from "../constants/color";
 
 const TaskDetailScreen = () => {
- 
   const route = useRoute();
   const navigation = useNavigation();
   const [tasks, setTasks] = useState(null);
@@ -18,12 +26,16 @@ const TaskDetailScreen = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSafetyWarning, setShowSafetyWarning] = useState(false);
   const { task } = route.params;
-   const taskId = task.id; // Assuming task has an id field
+  const taskId = task.id; // Assuming task has an id field
 
   // Helper function to get the actual task count
   const getTaskCount = () => {
     if (areaTasks && areaTasks[0] && areaTasks[0].tags) {
-      return areaTasks[0].tags.length;
+      const numberOfTask = areaTasks[0].tags.reduce(
+        (total, tag) => total + (tag.tasks?.length || 0),
+        0 // ← Initial value
+      );
+      return numberOfTask;
     }
     return 0;
   };
@@ -35,14 +47,14 @@ const TaskDetailScreen = () => {
         let cached = await loadData("cached_tasks");
 
         if (!cached) {
-           await updateDetailedTasks(); // Fetch from Firestore and store in AsyncStorage
+          await updateDetailedTasks(); // Fetch from Firestore and store in AsyncStorage
           cached = await loadData("cached_tasks"); // Load again after update
         }
 
         if (cached) {
           setTasks(cached);
-         } else {
-         }
+        } else {
+        }
       } catch (error) {
         console.error("Error fetching tasks:", error);
       } finally {
@@ -86,7 +98,6 @@ const TaskDetailScreen = () => {
 
       const taskById = tasks.filter((t) => t.sectionId === taskId);
 
- 
       if (taskById.length !== 0) {
         setAreaTasks(taskById);
       }
@@ -104,13 +115,21 @@ const TaskDetailScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
         <View style={styles.loadingContent}>
           <View style={styles.loadingIconContainer}>
-            <ActivityIndicator size="large" color={colors.primary || '#34C759'} />
+            <ActivityIndicator
+              size="large"
+              color={colors.primary || "#34C759"}
+            />
           </View>
           <Text style={styles.loadingText}>Loading tasks...</Text>
-          <Text style={styles.loadingSubtext}>Please wait while we fetch your data</Text>
+          <Text style={styles.loadingSubtext}>
+            Please wait while we fetch your data
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -119,7 +138,10 @@ const TaskDetailScreen = () => {
   if (!areaTasks || areaTasks.length === 0) {
     return (
       <SafeAreaView style={styles.emptyContainer}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
         <View style={styles.emptyContent}>
           <View style={styles.emptyIconContainer}>
             <Ionicons name="document-outline" size={80} color="#ccc" />
@@ -128,14 +150,14 @@ const TaskDetailScreen = () => {
           <Text style={styles.emptySubtext}>
             There are no tasks available for this area at the moment.
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
             onPress={handlePress}
             disabled={isRefreshing}
           >
             <Ionicons name="refresh" size={20} color="#fff" />
             <Text style={styles.retryButtonText}>
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              {isRefreshing ? "Refreshing..." : "Refresh"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -145,34 +167,37 @@ const TaskDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
-      
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.primary || "#34C759"}
+      />
+
       {/* Custom Header Section */}
       <View style={styles.headerSection}>
         <View style={styles.headerContent}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          
+
           <View style={styles.headerTextContainer}>
             <Text style={styles.areaTitle}>{task.area}</Text>
             <Text style={styles.taskCount}>
-              {getTaskCount()} task{(getTaskCount() !== 1) ? 's' : ''} available
+              {getTaskCount()} task{getTaskCount() !== 1 ? "s" : ""} available
             </Text>
           </View>
-          
-          <TouchableOpacity 
-            onPress={handlePress} 
+
+          <TouchableOpacity
+            onPress={handlePress}
             style={styles.refreshButton}
             disabled={isRefreshing}
           >
-            <Ionicons 
-              name="refresh" 
-              size={24} 
-              color="#fff" 
+            <Ionicons
+              name="refresh"
+              size={24}
+              color="#fff"
               style={isRefreshing ? styles.rotating : null}
             />
           </TouchableOpacity>
@@ -180,7 +205,7 @@ const TaskDetailScreen = () => {
       </View>
 
       {/* Collapsible Safety Warning */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.safetyToggle}
         onPress={() => setShowSafetyWarning(!showSafetyWarning)}
         activeOpacity={0.7}
@@ -188,10 +213,10 @@ const TaskDetailScreen = () => {
         <View style={styles.safetyToggleContent}>
           <Ionicons name="warning" size={16} color="#FF6B35" />
           <Text style={styles.safetyToggleText}>Safety Guidelines</Text>
-          <Ionicons 
-            name={showSafetyWarning ? "chevron-up" : "chevron-down"} 
-            size={16} 
-            color="#666" 
+          <Ionicons
+            name={showSafetyWarning ? "chevron-up" : "chevron-down"}
+            size={16}
+            color="#666"
           />
         </View>
       </TouchableOpacity>
@@ -199,11 +224,14 @@ const TaskDetailScreen = () => {
       {showSafetyWarning && (
         <View style={styles.safetySection}>
           <Text style={styles.safetyText}>
-            Ensure to apply electrical isolation (LOTO) and release all stored energy before starting the work.
+            Ensure to apply electrical isolation (LOTOTO) and release all stored
+            energy before starting the work.
           </Text>
           <View style={styles.stopContainer}>
             <Text style={styles.stopTitle}>STOP</Text>
-            <Text style={styles.stopSubtitle}>Stop, Think, Observe, Proceed</Text>
+            <Text style={styles.stopSubtitle}>
+              Stop, Think, Observe, Proceed
+            </Text>
           </View>
         </View>
       )}
@@ -212,14 +240,18 @@ const TaskDetailScreen = () => {
       <View style={styles.tasksSection}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleContainer}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.primary || '#34C759'} />
+            <Ionicons
+              name="checkmark-circle"
+              size={20}
+              color={colors.primary || "#34C759"}
+            />
             <Text style={styles.sectionTitle}>Available Tasks</Text>
           </View>
           <View style={styles.sectionBadge}>
             <Text style={styles.sectionBadgeText}>{getTaskCount()}</Text>
           </View>
         </View>
-        
+
         <AreaTasksListComponent data={areaTasks} />
       </View>
 
@@ -249,29 +281,29 @@ const styles = StyleSheet.create({
   },
   loadingContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   loadingIconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(52, 199, 89, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(52, 199, 89, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 24,
   },
   loadingText: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
     marginBottom: 8,
   },
   loadingSubtext: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     lineHeight: 24,
   },
   emptyContainer: {
@@ -280,88 +312,88 @@ const styles = StyleSheet.create({
   },
   emptyContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   emptyIconContainer: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 32,
   },
   emptyTitle: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptySubtext: {
     fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     lineHeight: 26,
     marginBottom: 40,
   },
   retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary || '#34C759',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.primary || "#34C759",
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 30,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
   },
   retryButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 12,
   },
   headerSection: {
-    backgroundColor: colors.primary || '#34C759',
+    backgroundColor: colors.primary || "#34C759",
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingTop: 20,
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTextContainer: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   areaTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#fff',
+    fontWeight: "700",
+    color: "#fff",
     marginBottom: 2,
   },
   taskCount: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: "500",
   },
   safetyToggle: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 20,
     marginTop: 12,
     marginBottom: 8,
@@ -369,57 +401,57 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
   },
   safetyToggleContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   safetyToggleText: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginLeft: 8,
   },
   safetySection: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 20,
     marginBottom: 12,
     borderRadius: 12,
     padding: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
   },
   safetyText: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
     lineHeight: 20,
     marginBottom: 12,
   },
   stopContainer: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: "#FF6B35",
     borderRadius: 8,
     padding: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   stopTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#fff',
+    fontWeight: "800",
+    color: "#fff",
     marginBottom: 2,
   },
   stopSubtitle: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
     opacity: 0.9,
   },
   tasksSection: {
@@ -427,67 +459,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
   sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
     marginLeft: 8,
   },
   sectionBadge: {
-    backgroundColor: colors.primary || '#34C759',
+    backgroundColor: colors.primary || "#34C759",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     minWidth: 32,
-    alignItems: 'center',
+    alignItems: "center",
   },
   sectionBadgeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   refreshOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   refreshStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 25,
   },
   refreshStatusText: {
     fontSize: 16,
-    color: '#fff',
+    color: "#fff",
     marginLeft: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   refreshButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   rotating: {
-    transform: [{ rotate: '360deg' }],
+    transform: [{ rotate: "360deg" }],
   },
 });

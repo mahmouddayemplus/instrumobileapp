@@ -60,15 +60,16 @@ const AnimatedTaskCard = ({ item, onPress }) => {
         ]}
       >
         <View style={styles.iconContainer}>
-          <Ionicons 
-            name="construct" 
-            size={28} 
-            color={colors.primary} 
-          />
+          <Ionicons name="construct" size={28} color={colors.primary} />
         </View>
         <Text style={styles.cardTitle}>{item.area}</Text>
         <Text style={styles.cardSubtitle}>
-          {item.tasks ? `${item.tasks.length} tasks` : 'No tasks'}
+          {item.tags
+            ? `${item.tags.reduce(
+                (total, tag) => total + (tag.tasks?.length || 0),
+                0
+              )} tasks`
+            : "No tasks"}
         </Text>
       </Animated.View>
     </TouchableOpacity>
@@ -88,7 +89,7 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
       let cached = await loadData("cached_tasks");
 
       if (!cached) {
-         await updateDetailedTasks();
+        await updateDetailedTasks();
         cached = await loadData("cached_tasks");
       }
 
@@ -106,7 +107,7 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Preventive Maintenance",
+      title: "Plant Maintenance",
       headerTitleStyle: {
         fontSize: 20,
         fontWeight: "bold",
@@ -120,25 +121,17 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
       headerRight: () => (
         <View style={styles.headerRight}>
           <View style={styles.userInfo}>
-            <Ionicons
-              name="person-circle"
-              size={20}
-              color={colors.primary}
-            />
+            <Ionicons name="person-circle" size={20} color={colors.primary} />
             <Text style={styles.welcomeText}>
               {user?.displayName || "User"}
             </Text>
           </View>
-          <TouchableOpacity 
-            onPress={handlePress} 
+          <TouchableOpacity
+            onPress={handlePress}
             style={styles.refreshButton}
             disabled={refreshing}
           >
-            <Ionicons 
-              name="refresh" 
-              size={24} 
-              color={colors.primary} 
-            />
+            <Ionicons name="refresh" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
       ),
@@ -170,16 +163,10 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
     <View style={styles.headerSection}>
       <View style={styles.headerGradient}>
         <View style={styles.headerContent}>
-          <Ionicons
-            name="shield-checkmark"
-            size={40}
-            color={colors.card}
-          />
+          <Ionicons name="shield-checkmark" size={40} color={colors.card} />
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerTitle}>Maintenance Tasks</Text>
-            <Text style={styles.headerSubtitle}>
-              Preventive maintenance by area
-            </Text>
+ 
           </View>
         </View>
       </View>
