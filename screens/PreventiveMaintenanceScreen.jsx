@@ -109,7 +109,7 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
     navigation.setOptions({
       title: "Plant Maintenance",
       headerTitleStyle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "bold",
         color: colors.primary,
       },

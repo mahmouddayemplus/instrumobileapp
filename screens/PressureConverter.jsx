@@ -134,7 +134,7 @@ const PressureConverter = () => {
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
-                placeholder="Enter pressure value..."
+                placeholder="pressure value..."
                 placeholderTextColor="#999"
                 value={inputValue}
                 onChangeText={(text) => {

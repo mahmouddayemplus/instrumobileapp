@@ -38,28 +38,34 @@ const SparesScreen = () => {
         let cached = await loadSpares("cached_spares");
 
         if (!cached || cached.length === 0) {
-           try {
+          try {
             await updateSpares();
             cached = await loadSpares("cached_spares");
           } catch (error) {
             console.error("Error fetching from Firestore:", error);
             setDataError(true);
-            setErrorMessage("Spares database is not available. Please contact your administrator.");
+            setErrorMessage(
+              "Spares database is not available. Please contact your administrator."
+            );
             return;
           }
         }
 
         if (cached && cached.length > 0) {
-           setSpares(cached);
+          setSpares(cached);
           setFilteredSpares(cached);
         } else {
-           setDataError(true);
-          setErrorMessage("No spare parts data available. Please try again later.");
+          setDataError(true);
+          setErrorMessage(
+            "No spare parts data available. Please try again later."
+          );
         }
       } catch (error) {
         console.error("Error in fetchSpares:", error);
         setDataError(true);
-        setErrorMessage("Failed to load spare parts. Please check your connection and try again.");
+        setErrorMessage(
+          "Failed to load spare parts. Please check your connection and try again."
+        );
       }
     };
 
@@ -69,7 +75,7 @@ const SparesScreen = () => {
   // Detect when spares is set to empty array and trigger error state
   useEffect(() => {
     if (spares && spares.length === 0 && !dataError) {
-       setDataError(true);
+      setDataError(true);
       setErrorMessage("No spare parts data available. Please try again later.");
     }
   }, [spares, dataError]);
@@ -78,7 +84,7 @@ const SparesScreen = () => {
     setLoading(true);
     setDataError(false);
     setErrorMessage("");
-    
+
     try {
       await updateSpares();
       const cached = await loadSpares("cached_spares");
@@ -89,13 +95,17 @@ const SparesScreen = () => {
         setFilteredSpares(cached);
       } else {
         setDataError(true);
-        setErrorMessage("No spare parts data available. Please try again later.");
+        setErrorMessage(
+          "No spare parts data available. Please try again later."
+        );
       }
     } catch (error) {
       console.error("Error refreshing spares:", error);
       setLoading(false);
       setDataError(true);
-      setErrorMessage("Failed to refresh spare parts. Please check your connection and try again.");
+      setErrorMessage(
+        "Failed to refresh spare parts. Please check your connection and try again."
+      );
     }
   };
 
@@ -105,7 +115,7 @@ const SparesScreen = () => {
       headerStyle: {
         backgroundColor: colors.primary,
       },
-      headerTintColor: '#fff',
+      headerTintColor: "#fff",
       headerTitleStyle: {
         fontSize: 18,
         fontWeight: "600",
@@ -127,7 +137,7 @@ const SparesScreen = () => {
 
   // Show error state when data is not available
   if (dataError) {
-     return (
+    return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
         <View style={styles.errorContainer}>
@@ -136,14 +146,14 @@ const SparesScreen = () => {
           </View>
           <Text style={styles.errorTitle}>No Data Available</Text>
           <Text style={styles.errorMessage}>{errorMessage}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
             onPress={handlePress}
             disabled={loading}
           >
             <Ionicons name="refresh" size={20} color="#fff" />
             <Text style={styles.retryButtonText}>
-              {loading ? 'Retrying...' : 'Try Again'}
+              {loading ? "Retrying..." : "Try Again"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -153,7 +163,7 @@ const SparesScreen = () => {
 
   // Show loading state only if not in error state and still loading
   if (!spares || spares.length === 0) {
-     // Don't show loading if we have an error
+    // Don't show loading if we have an error
     if (dataError) {
       return null; // This should not happen due to the order, but just in case
     }
@@ -219,37 +229,41 @@ const SparesScreen = () => {
 
         <View style={styles.contentContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.code}>{item.code} | {item.new_code}</Text>
-            <Text style={styles.title} numberOfLines={2}>
+            <Text style={styles.code}>
+              {item.code} | {item.new_code}
+            </Text>
+            <Text style={styles.title} numberOfLines={3}>
               {item.title}
             </Text>
             <View style={styles.categoryContainer}>
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>
-                  {item.category?.toUpperCase() || 'GENERAL'}
+                  {item.category?.toUpperCase() || "GENERAL"}
                 </Text>
               </View>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  onPress={() => handleShareToWhatsApp(item)}
+                  style={styles.actionButton}
+                >
+                  <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => dispatch(toggleFavorite(item.code))}
+                  style={[
+                    styles.actionButton,
+                    isFavorite && styles.favoriteActive,
+                  ]}
+                >
+                  <Ionicons
+                    name={isFavorite ? "pin" : "pin-outline"}
+                    size={20}
+                    color={isFavorite ? "#fff" : colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              onPress={() => handleShareToWhatsApp(item)}
-              style={styles.actionButton}
-            >
-              <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => dispatch(toggleFavorite(item.code))}
-              style={[styles.actionButton, isFavorite && styles.favoriteActive]}
-            >
-              <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={20}
-                color={isFavorite ? "#fff" : colors.textSecondary}
-              />
-            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
@@ -277,7 +291,7 @@ const SparesScreen = () => {
     const message = `Check out this spare part:\n\nCode: ${item.code}\nTitle: ${item.title}\n`;
     const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
     Linking.openURL(url)
-      .then(() => { })
+      .then(() => {})
       .catch(() => {
         alert("WhatsApp not installed on your device");
       });
@@ -294,11 +308,16 @@ const SparesScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-      
+
       {/* Search Section */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+          <Ionicons
+            name="search"
+            size={20}
+            color={colors.textSecondary}
+            style={styles.searchIcon}
+          />
           <TextInput
             placeholder="Search by title or SAP code"
             value={searchQuery}
@@ -307,23 +326,31 @@ const SparesScreen = () => {
             placeholderTextColor={colors.textSecondary}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => handleSearch("")} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+            <TouchableOpacity
+              onPress={() => handleSearch("")}
+              style={styles.clearButton}
+            >
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={colors.textSecondary}
+              />
             </TouchableOpacity>
           )}
         </View>
-        
+
         {searchQuery && (
           <Text style={styles.resultCount}>
-            Found {filteredSpares.length} item{filteredSpares.length !== 1 ? "s" : ""}
+            Found {filteredSpares.length} item
+            {filteredSpares.length !== 1 ? "s" : ""}
           </Text>
         )}
       </View>
 
       {/* Category Filters */}
       <View style={styles.categorySection}>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoryScroll}
         >
@@ -332,19 +359,27 @@ const SparesScreen = () => {
               key={category.key}
               style={[
                 styles.categoryButton,
-                selectedCategory === category.key && styles.categoryButtonActive
+                selectedCategory === category.key &&
+                  styles.categoryButtonActive,
               ]}
               onPress={() => handleCategoryChange(category.key)}
             >
-              <Ionicons 
-                name={category.icon} 
-                size={16} 
-                color={selectedCategory === category.key ? "#fff" : colors.textSecondary} 
+              <Ionicons
+                name={category.icon}
+                size={16}
+                color={
+                  selectedCategory === category.key
+                    ? "#fff"
+                    : colors.textSecondary
+                }
               />
-              <Text style={[
-                styles.categoryButtonText,
-                selectedCategory === category.key && styles.categoryButtonTextActive
-              ]}>
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  selectedCategory === category.key &&
+                    styles.categoryButtonTextActive,
+                ]}
+              >
                 {category.label}
               </Text>
             </TouchableOpacity>
@@ -482,7 +517,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: 16,
     marginBottom: 12,
-    padding: 16,
+    padding: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -493,14 +528,14 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   itemImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 12,
   },
   imageLoader: {
@@ -516,7 +551,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   code: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     color: colors.text,
     marginBottom: 4,
@@ -525,11 +560,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   categoryContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "baseline",
+    justifyContent:"space-between"
   },
   categoryBadge: {
     backgroundColor: colors.primaryLight,
@@ -538,28 +574,27 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   categoryText: {
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: "600",
     color: colors.primaryDark,
   },
   actionButtons: {
     flexDirection: "row",
     gap: 8,
-    marginTop: 8,
+    marginTop: 4,
   },
   actionButton: {
-    width: 36,
-    height: 36,
+    width: 20,
+    height: 20,
     borderRadius: 18,
     backgroundColor: colors.background,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
+ 
   },
   favoriteActive: {
-    backgroundColor: colors.error,
-    borderColor: colors.error,
+    backgroundColor: colors.primary,
+    borderColor: colors.primaryDark,
   },
   errorContainer: {
     flex: 1,
