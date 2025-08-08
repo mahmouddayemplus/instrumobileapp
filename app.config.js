@@ -3,9 +3,9 @@ import 'dotenv/config'; // Load .env automatically
 
 export default{
   "expo": {
-    "name": "instruapp",
+    "name": "instrupro",
     
-    "slug": "instruapp",
+    "slug": "instrupro",
     "version": "1.0.0",
      "extra": {
       "firebaseApiKey": process.env.FIREBASE_API_KEY,

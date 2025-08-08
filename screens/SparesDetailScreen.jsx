@@ -2,6 +2,8 @@ import React, { useLayoutEffect, useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { handleShareToWhatsApp } from "../helper/handleShareToWhatsApp";
 import { Linking } from "react-native";
+import * as Clipboard from 'expo-clipboard';
+
 import {
   View,
   Text,
@@ -42,6 +44,13 @@ const SpareDetailScreen = ({ route }) => {
   }, [navigation, item]);
 
   const isFavorite = favorites.includes(item.code);
+  const handleCopy = async () => {
+    const textToCopy = `Old Code ${item.code } , New Code ${item.new_code}`
+    console.log('====================================');
+    console.log(textToCopy);
+    console.log('====================================');
+    await Clipboard.setStringAsync(textToCopy);
+   };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -113,7 +122,7 @@ const SpareDetailScreen = ({ route }) => {
             <View style={styles.codeContainer}>
               <Text style={styles.codeText}>{item.code} | {item.new_code} </Text>
           
-              <TouchableOpacity style={styles.copyButton}>
+              <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
                 <Ionicons
                   name="copy-outline"
                   size={16}
