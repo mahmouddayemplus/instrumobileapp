@@ -57,7 +57,7 @@ function HomeTabs() {
             <MaterialCommunityIcons
               name="logout"
               size={24}
-              color="#2e7d32"
+              color="#2e7d32" 
               onPress={() => {
                 Alert.alert(
                   "Confirm Logout",
