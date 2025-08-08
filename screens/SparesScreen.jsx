@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView } from "react-native";
-import React, { useState, useEffect, useLayoutEffect, memo } from "react";
+import React, { useState, useEffect, useLayoutEffect  } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Linking } from "react-native";
 import { toggleFavorite } from "../store/favoritesSlice";
@@ -7,8 +7,7 @@ import { toggleFavorite } from "../store/favoritesSlice";
 import {
   loadSpares,
   updateSpares,
-  storeFavorites,
-  loadFavorites,
+ 
 } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -191,84 +190,86 @@ const SparesScreen = () => {
     setFilteredSpares(filtered);
   };
 
-  const RenderItem = memo(({ item }) => {
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const [imageError, setImageError] = useState(false);
-    const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
-    const isFavorite = favorites.includes(item.code);
+ const RenderItem = ({ item }) => {
+  const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.items);
+  const isFavorite = favorites.includes(item.code);
+  const navigation = useNavigation();
+  const defaultImage = require("../assets/no-image.webp");
 
-    return (
-      <TouchableOpacity
-        style={styles.item}
-        onPress={() =>
-          navigation.navigate("SpareDetailScreen", {
-            item,
-          })
-        }
-      >
-        <View style={styles.imageContainer}>
-          {!imageLoaded && !imageError && (
-            <ActivityIndicator
-              size="small"
-              color={colors.primary}
-              style={styles.imageLoader}
-            />
-          )}
-          <Image
-            source={imageError ? defaultImage : imageUrl}
-            style={styles.itemImage}
-            contentFit="contain"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {
-              setImageError(true);
-              setImageLoaded(true);
-            }}
-            transition={300}
-          />
-        </View>
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
 
-        <View style={styles.contentContainer}>
-          <View style={styles.textContainer}>
-            <Text style={styles.code}>
-              {item.code} | {item.new_code}
-            </Text>
-            <Text style={styles.title} numberOfLines={3}>
-              {item.title}
-            </Text>
-            <View style={styles.categoryContainer}>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>
-                  {item.category?.toUpperCase() || "GENERAL"}
-                </Text>
-              </View>
-              <View style={styles.actionButtons}>
-                <TouchableOpacity
-                  onPress={() => handleShareToWhatsApp(item)}
-                  style={styles.actionButton}
-                >
-                  <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-                </TouchableOpacity>
+  const handleFavoriteButton = () => {
+    dispatch(toggleFavorite(item.code));
+  };
 
-                <TouchableOpacity
-                  onPress={() => dispatch(toggleFavorite(item.code))}
-                  style={[
-                    styles.actionButton,
-                    isFavorite && styles.favoriteActive,
-                  ]}
-                >
-                  <Ionicons
-                    name={isFavorite ? "pin" : "pin-outline"}
-                    size={20}
-                    color={isFavorite ? "#fff" : colors.textSecondary}
-                  />
-                </TouchableOpacity>
-              </View>
+  return (
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => navigation.navigate("SpareDetailScreen", { item })}
+    >
+      <View style={styles.imageContainer}>
+        {!imageLoaded && !imageError && (
+          <ActivityIndicator size="small" color={colors.primary} style={styles.imageLoader} />
+        )}
+        <Image
+          source={imageError ? defaultImage : imageUrl}
+          style={styles.itemImage}
+          contentFit="contain"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => {
+            setImageError(true);
+            setImageLoaded(true);
+          }}
+          transition={300}
+        />
+      </View>
+
+      <View style={styles.contentContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.code}>
+            {item.code} | {item.new_code}
+          </Text>
+          <Text style={styles.title} numberOfLines={3}>
+            {item.title}
+          </Text>
+          <View style={styles.categoryContainer}>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>
+                {item.category?.toUpperCase() || "GENERAL"}
+              </Text>
+            </View>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                onPress={() => handleShareToWhatsApp(item)}
+                style={styles.actionButton}
+              >
+                <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleFavoriteButton}
+                style={[
+                  styles.actionButton,
+                  isFavorite && styles.favoriteActive,
+                ]}
+              >
+                <Ionicons
+                  name={isFavorite ? "pin" : "pin-outline"}
+                  size={20}
+                  color={isFavorite ? "#fff" : colors.textSecondary}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      </TouchableOpacity>
-    );
-  });
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);

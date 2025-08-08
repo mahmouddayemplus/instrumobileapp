@@ -70,7 +70,7 @@ const SpareDetailScreen = ({ route }) => {
               style={[styles.iconButton, isFavorite && styles.favoriteActive]}
             >
               <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
+                name={isFavorite ? "pin" : "pin-outline"}
                 size={24}
                 color={isFavorite ? "#fff" : colors.text}
               />
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     zIndex: 11,
   },
   favoriteActive: {
-    backgroundColor: colors.error,
+    backgroundColor: colors.primary,
   },
   content: {
     padding: 20,
