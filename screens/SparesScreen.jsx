@@ -117,7 +117,7 @@ const SparesScreen = () => {
       },
       headerRight: () => (
         <View style={styles.headerRight}>
-          <Ionicons name="person-circle" size={20} color={"#fff"}/>
+          <Ionicons name="person-circle" size={20} color={"#fff"} />
 
           <Text style={styles.userName}>{user.displayName}</Text>
           <TouchableOpacity onPress={handlePress} style={styles.refreshButton}>
@@ -136,7 +136,11 @@ const SparesScreen = () => {
   if (dataError) {
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
+
         <View style={styles.errorContainer}>
           <View style={styles.errorIconContainer}>
             <Ionicons name="alert-circle-outline" size={80} color="#FF6B35" />
@@ -309,7 +313,10 @@ const SparesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.primary || "#34C759"}
+      />
 
       {/* Search Section */}
       <View style={styles.searchSection}>
