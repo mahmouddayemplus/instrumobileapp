@@ -13,6 +13,10 @@ export default {
     android: {
       package: "com.mahmoud.instrupro", // ✅ required
       versionCode: 1,
+      adaptiveIcon: {
+        foregroundImage: "./assets/adaptive-icon.png",
+        backgroundColor: "#ffffff",
+      },
       edgeToEdgeEnabled: true,
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
