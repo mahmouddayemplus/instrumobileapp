@@ -7,9 +7,6 @@ import { colors } from "../constants/color"; // adjust path
  
 const HeaderConfigurator = ({title,iconName}) => {
   const navigation = useNavigation();
-  console.log('====================================');
-  console.log(title);
-  console.log('====================================');
 
   useLayoutEffect(() => {
     navigation.setOptions({

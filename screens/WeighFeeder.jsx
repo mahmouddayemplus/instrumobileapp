@@ -102,147 +102,175 @@ const WeighFeeder = () => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-      <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={colors.primary || "#34C759"}
-        />
+        <SafeAreaView style={styles.container}>
+          <StatusBar
+            barStyle="light-content"
+            backgroundColor={colors.primary || "#34C759"}
+          />
 
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-          alwaysBounceVertical={false}
-        >
-          {/* Header Section */}
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+            alwaysBounceVertical={false}
+          >
+            {/* Header Section */}
 
-          {/* Error Calculation Card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Error Calculation</Text>
+            {/* Error Calculation Card */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Error Calculation</Text>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Actual Weight (kg)</Text>
-              <TextInput
-                style={styles.input}
-                keyboardType="decimal-pad"
-                value={actualWeight}
-                onChangeText={setActualWeight}
-                placeholder="Enter actual weight..."
-                placeholderTextColor="#999"
-              />
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Actual Weight (kg)</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  value={actualWeight}
+                  onChangeText={setActualWeight}
+                  placeholder="Enter actual weight..."
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Weigh Feeder Totalizer</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  value={totalizer}
+                  onChangeText={setTotalizer}
+                  placeholder="Enter totalizer value..."
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <TouchableOpacity style={styles.button} onPress={calculateError}>
+                <Text style={styles.buttonText}>Calculate Error</Text>
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Weigh Feeder Totalizer</Text>
-              <TextInput
-                style={styles.input}
-                keyboardType="decimal-pad"
-                value={totalizer}
-                onChangeText={setTotalizer}
-                placeholder="Enter totalizer value..."
-                placeholderTextColor="#999"
-              />
-            </View>
+            {/* Error Result Card */}
+            {error !== null && (
+              <View style={styles.resultCard}>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultTitle}>Error Analysis</Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: getErrorColor(error) },
+                    ]}
+                  >
+                    <Text style={styles.statusText}>
+                      {getErrorStatus(error)}
+                    </Text>
+                  </View>
+                </View>
 
-            <TouchableOpacity style={styles.button} onPress={calculateError}>
-              <Text style={styles.buttonText}>Calculate Error</Text>
-            </TouchableOpacity>
-          </View>
+                <View style={styles.errorDisplay}>
+                  <Text style={styles.errorLabel}>Error Percentage:</Text>
+                  <Text
+                    style={[styles.errorValue, { color: getErrorColor(error) }]}
+                  >
+                    {error}%
+                  </Text>
+                </View>
 
-          {/* Error Result Card */}
-          {error !== null && (
-            <View style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>Error Analysis</Text>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: getErrorColor(error) },
-                  ]}
-                >
-                  <Text style={styles.statusText}>{getErrorStatus(error)}</Text>
+                <View style={styles.errorInfo}>
+                  <Text style={styles.errorInfoText}>
+                    {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5
+                      ? "✅ Weigh feeder is within acceptable range"
+                      : (parseFloat(error) > 0.5 && parseFloat(error) <= 2.5) ||
+                        (parseFloat(error) < -0.5 && parseFloat(error) >= -2.5)
+                      ? "⚠️ Weight deviation detected - consider apply correction factor"
+                      : "❌ Significant weight error  "}
+                  </Text>
                 </View>
               </View>
+            )}
 
-              <View style={styles.errorDisplay}>
-                <Text style={styles.errorLabel}>Error Percentage:</Text>
-                <Text
-                  style={[styles.errorValue, { color: getErrorColor(error) }]}
-                >
-                  {error}%
-                </Text>
-              </View>
-
-              <View style={styles.errorInfo}>
-                <Text style={styles.errorInfoText}>
-                  {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5
-                    ? "✅ Weigh feeder is within acceptable range"
-                    : (parseFloat(error) > 0.5 && parseFloat(error) <= 2.5) ||
-                      (parseFloat(error) < -0.5 && parseFloat(error) >= -2.5)
-                    ? "⚠️ Weight deviation detected - consider calibration"
-                    : "❌ Significant weight error - immediate calibration required"}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {/* Correction Factor Card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Correction Factor Calculation</Text>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>
-                Current Correction Factor (D02)
+            {/* Correction Factor Card */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                Correction Factor Calculation
               </Text>
-              <TextInput
-                style={styles.input}
-                keyboardType="decimal-pad"
-                value={oldCorrectionFactor}
-                onChangeText={setOldCorrectionFactor}
-                placeholder="Enter current factor..."
-                placeholderTextColor="#999"
-              />
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>
+                  Current Correction Factor (D02)
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  value={oldCorrectionFactor}
+                  onChangeText={setOldCorrectionFactor}
+                  onFocus={() => setShowModal(true)} // 👈 trigger modal
+                  placeholder="Enter current factor..."
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <TouchableOpacity style={styles.button} onPress={calculateFactor}>
+                <Text style={styles.buttonText}>Calculate New Factor</Text>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={calculateFactor}>
-              <Text style={styles.buttonText}>Calculate New Factor</Text>
-            </TouchableOpacity>
-          </View>
+            {/* Factor Result Card */}
+            {result !== null && result !== "Invalid input" && (
+              <View style={styles.resultCard}>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultTitle}>New Correction Factor</Text>
+                  <View style={styles.factorBadge}>
+                    <Text style={styles.factorBadgeText}>D02</Text>
+                  </View>
+                </View>
 
-          {/* Factor Result Card */}
-          {result !== null && result !== "Invalid input" && (
-            <View style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>New Correction Factor</Text>
-                <View style={styles.factorBadge}>
-                  <Text style={styles.factorBadgeText}>D02</Text>
+                <View style={styles.factorDisplay}>
+                  <Text style={styles.factorLabel}>Updated Factor:</Text>
+                  <Text style={styles.factorValue}>{result}</Text>
+                </View>
+
+                <View style={styles.factorInfo}>
+                  <Text style={styles.factorInfoText}>
+                    💡 Apply this new correction factor to improve weigh feeder
+                    accuracy
+                  </Text>
                 </View>
               </View>
+            )}
 
-              <View style={styles.factorDisplay}>
-                <Text style={styles.factorLabel}>Updated Factor:</Text>
-                <Text style={styles.factorValue}>{result}</Text>
-              </View>
-
-              <View style={styles.factorInfo}>
-                <Text style={styles.factorInfoText}>
-                  💡 Apply this new correction factor to improve weigh feeder
-                  accuracy
+            {/* Invalid Input Message */}
+            {result === "Invalid input" && (
+              <View style={styles.errorMessageCard}>
+                <Text style={styles.errorMessageText}>
+                  ⚠️ Please enter valid numeric values for all fields
                 </Text>
               </View>
+            )}
+          </ScrollView>
+        </SafeAreaView>
+        <Modal visible={showModal} animationType="slide" transparent={true}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.inputLabel}>Current Correction Factor</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  value={oldCorrectionFactor}
+                  onChangeText={setOldCorrectionFactor}
+                  autoFocus
+                />
+                <TouchableOpacity
+                  style={[styles.button, { marginTop: 20 }]}
+                  onPress={() => setShowModal(false)}
+                >
+                  <Text style={styles.buttonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          )}
-
-          {/* Invalid Input Message */}
-          {result === "Invalid input" && (
-            <View style={styles.errorMessageCard}>
-              <Text style={styles.errorMessageText}>
-                ⚠️ Please enter valid numeric values for all fields
-              </Text>
-            </View>
-          )}
-        </ScrollView>
-      </SafeAreaView>
+          </TouchableWithoutFeedback>
+        </Modal>
+ 
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
@@ -290,7 +318,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#333",
     marginBottom: 20,
@@ -354,7 +382,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   resultTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#333",
   },
@@ -456,5 +484,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "85%",
+    padding: 24,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
   },
 });

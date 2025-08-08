@@ -1,14 +1,10 @@
 import { StyleSheet, Text, View, ScrollView } from "react-native";
-import React, { useState, useEffect, useLayoutEffect  } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Linking } from "react-native";
 import { toggleFavorite } from "../store/favoritesSlice";
 
-import {
-  loadSpares,
-  updateSpares,
- 
-} from "../firebase/firebaseConfig";
+import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, StatusBar, SafeAreaView } from "react-native";
@@ -121,6 +117,8 @@ const SparesScreen = () => {
       },
       headerRight: () => (
         <View style={styles.headerRight}>
+          <Ionicons name="person-circle" size={20} color={"#fff"}/>
+
           <Text style={styles.userName}>{user.displayName}</Text>
           <TouchableOpacity onPress={handlePress} style={styles.refreshButton}>
             {loading ? (
@@ -190,86 +188,89 @@ const SparesScreen = () => {
     setFilteredSpares(filtered);
   };
 
- const RenderItem = ({ item }) => {
-  const dispatch = useDispatch();
-  const favorites = useSelector((state) => state.favorites.items);
-  const isFavorite = favorites.includes(item.code);
-  const navigation = useNavigation();
-  const defaultImage = require("../assets/no-image.webp");
+  const RenderItem = ({ item }) => {
+    const dispatch = useDispatch();
+    const favorites = useSelector((state) => state.favorites.items);
+    const isFavorite = favorites.includes(item.code);
+    const navigation = useNavigation();
+    const defaultImage = require("../assets/no-image.webp");
 
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
 
-  const handleFavoriteButton = () => {
-    dispatch(toggleFavorite(item.code));
-  };
+    const handleFavoriteButton = () => {
+      dispatch(toggleFavorite(item.code));
+    };
 
-  return (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => navigation.navigate("SpareDetailScreen", { item })}
-    >
-      <View style={styles.imageContainer}>
-        {!imageLoaded && !imageError && (
-          <ActivityIndicator size="small" color={colors.primary} style={styles.imageLoader} />
-        )}
-        <Image
-          source={imageError ? defaultImage : imageUrl}
-          style={styles.itemImage}
-          contentFit="contain"
-          onLoad={() => setImageLoaded(true)}
-          onError={() => {
-            setImageError(true);
-            setImageLoaded(true);
-          }}
-          transition={300}
-        />
-      </View>
+    return (
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => navigation.navigate("SpareDetailScreen", { item })}
+      >
+        <View style={styles.imageContainer}>
+          {!imageLoaded && !imageError && (
+            <ActivityIndicator
+              size="small"
+              color={colors.primary}
+              style={styles.imageLoader}
+            />
+          )}
+          <Image
+            source={imageError ? defaultImage : imageUrl}
+            style={styles.itemImage}
+            contentFit="contain"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+            transition={300}
+          />
+        </View>
 
-      <View style={styles.contentContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.code}>
-            {item.code} | {item.new_code}
-          </Text>
-          <Text style={styles.title} numberOfLines={3}>
-            {item.title}
-          </Text>
-          <View style={styles.categoryContainer}>
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>
-                {item.category?.toUpperCase() || "GENERAL"}
-              </Text>
-            </View>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                onPress={() => handleShareToWhatsApp(item)}
-                style={styles.actionButton}
-              >
-                <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-              </TouchableOpacity>
+        <View style={styles.contentContainer}>
+          <View style={styles.textContainer}>
+            <Text style={styles.code}>
+              {item.code} | {item.new_code}
+            </Text>
+            <Text style={styles.title} numberOfLines={3}>
+              {item.title}
+            </Text>
+            <View style={styles.categoryContainer}>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>
+                  {item.category?.toUpperCase() || "GENERAL"}
+                </Text>
+              </View>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  onPress={() => handleShareToWhatsApp(item)}
+                  style={styles.actionButton}
+                >
+                  <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleFavoriteButton}
-                style={[
-                  styles.actionButton,
-                  isFavorite && styles.favoriteActive,
-                ]}
-              >
-                <Ionicons
-                  name={isFavorite ? "pin" : "pin-outline"}
-                  size={20}
-                  color={isFavorite ? "#fff" : colors.textSecondary}
-                />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleFavoriteButton}
+                  style={[
+                    styles.actionButton,
+                    isFavorite && styles.favoriteActive,
+                  ]}
+                >
+                  <Ionicons
+                    name={isFavorite ? "pin" : "pin-outline"}
+                    size={20}
+                    color={isFavorite ? "#fff" : colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
+      </TouchableOpacity>
+    );
+  };
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -552,7 +553,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   code: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
     color: colors.text,
     marginBottom: 4,
@@ -566,7 +567,7 @@ const styles = StyleSheet.create({
   categoryContainer: {
     flexDirection: "row",
     alignItems: "baseline",
-    justifyContent:"space-between"
+    justifyContent: "space-between",
   },
   categoryBadge: {
     backgroundColor: colors.primaryLight,
@@ -591,7 +592,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     justifyContent: "center",
     alignItems: "center",
- 
   },
   favoriteActive: {
     backgroundColor: colors.primary,

@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   unitButtonValue: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#333",
+    color: colors.primary,
     marginBottom: 4,
   },
   unitButtonDesc: {

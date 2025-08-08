@@ -107,13 +107,13 @@ const ToolsScreen = ({ navigation }) => {
             <ToolComponent
               iconName="thermometer"
               titleLine1="PT100"
-              titleLine2="Calculator"
+              titleLine2=""
               screenName="PT100Calculator"
             />
             <ToolComponent
               iconName="pulse"
               titleLine1="Thermocouple-k Type"
-              titleLine2="Calculator"
+              titleLine2=""
               screenName="Thermocouple"
             />
           </View>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   headerGradient: {
     marginHorizontal: 16,
     borderRadius: 16,
-    padding: 20,
+    padding: 10,
     backgroundColor: colors.primary,
   },
   headerContent: {
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 10,
     color: colors.card,
     opacity: 0.9,
   },

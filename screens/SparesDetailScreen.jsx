@@ -46,9 +46,7 @@ const SpareDetailScreen = ({ route }) => {
   const isFavorite = favorites.includes(item.code);
   const handleCopy = async () => {
     const textToCopy = `Old Code ${item.code } , New Code ${item.new_code}`
-    console.log('====================================');
-    console.log(textToCopy);
-    console.log('====================================');
+ 
     await Clipboard.setStringAsync(textToCopy);
    };
 
