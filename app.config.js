@@ -31,6 +31,12 @@ export default {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
+      dark: {
+        image: "./assets/splash-icon.png",
+        resizeMode: "contain",
+        backgroundColor: "#ffffff",
+      },
+      tabletImage: "./assets/splash-icon.png",
     },
 
     extra: {

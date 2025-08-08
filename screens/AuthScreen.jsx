@@ -3,6 +3,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { login } from "../store/authSlice";
 import { storeUser } from "../helper/authStorage";
+import { colors } from "../constants/color";
+
 import {
   KeyboardAvoidingView,
   Platform,
@@ -261,7 +263,7 @@ export default function AuthScreen() {
   );
 }
 
-const GREEN = "#2e8b57";
+const GREEN = colors.primaryDark;
 
 const styles = StyleSheet.create({
   container: {
@@ -275,11 +277,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: "center",
     fontWeight: "bold",
-    color: GREEN,
+    color: colors.primaryDark,
   },
   input: {
     borderWidth: 1,
-    borderColor: GREEN,
+    borderColor: colors.primaryDark,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -294,7 +296,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   button: {
-    backgroundColor: GREEN,
+    backgroundColor: colors.primaryDark,
     padding: 14,
     borderRadius: 8,
     alignItems: "center",
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
   },
   switchText: {
     marginTop: 16,
-    color: GREEN,
+    color: colors.primaryDark,
     textAlign: "center",
     fontWeight: "600",
   },
@@ -320,7 +322,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 36,
-    color: "#444",
+    color: colors.primaryDark,
     textAlign: "center",
     marginBottom: 12,
     fontWeight: "500",
@@ -328,7 +330,7 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    color: "#2e8b57",
+    color: colors.primaryDark,
     fontWeight: "bold",
     elevation: 2,
     // textShadowColor: "#000",
@@ -348,12 +350,12 @@ const styles = StyleSheet.create({
   },
   developerText: {
     fontSize: 14,
-    color: "#666",
+    color: colors.primaryDark,
     marginBottom: 2,
   },
   developerName: {
     fontSize: 16,
-    color: GREEN,
+    color: colors.primaryDark,
     fontWeight: "600",
     textAlign: "center",
   },

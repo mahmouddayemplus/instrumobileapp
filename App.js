@@ -8,8 +8,10 @@ import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
 //# Clear cache and rebuild
 // eas build --platform android --clear-cache
 // eas build --platform ios --clear-cache
-// npx expo run:android --clear
-// npx expo run:ios --clear
+//npx expo start --clear
+//npx expo run:android 
+ 
+// npx expo run:ios  
 
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PackerScreen from './screens/PackerScreen'
