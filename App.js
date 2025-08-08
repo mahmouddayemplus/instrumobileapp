@@ -1,18 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
-//git remote set-url origin git@github.com:mahmouddayemplus/instrumobileapp.git
-//eas secret:push
-//eas build -p android --clear-cache
-//eas secret:list --profile preview
-//eas build -p android --profile preview
-//# Clear cache and rebuild
-// eas build --platform android --clear-cache
-// eas build --platform ios --clear-cache
-//npx expo start --clear
-//npx expo run:android 
- 
-// npx expo run:ios  
-
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';

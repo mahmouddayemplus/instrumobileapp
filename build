@@ -1,0 +1,11 @@
+//git remote set-url origin git@github.com:mahmouddayemplus/instrumobileapp.git
+//eas secret:push
+//eas build -p android --clear-cache
+//eas secret:list --profile preview
+//eas build -p android --profile preview
+//# Clear cache and rebuild
+// eas build --platform android --clear-cache
+// eas build --platform ios --clear-cache
+//npx expo start --clear
+//npx expo run:android 
+// npx expo run:ios 
