@@ -18,15 +18,12 @@ export default {
         backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
-      adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
-        backgroundColor: "#ffffff",
-      },
     },
 
     ios: {
       buildNumber: "1.0.0",
       supportsTablet: true,
+      icon: "./assets/icon.png",
     },
 
     splash: {

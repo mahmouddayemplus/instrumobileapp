@@ -2,6 +2,10 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
 //git remote set-url origin git@github.com:mahmouddayemplus/instrumobileapp.git
 //eas secret:push
+//eas build -p android --clear-cache
+//eas secret:list --profile preview
+//eas build -p android --profile preview
+
 
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PackerScreen from './screens/PackerScreen'

@@ -140,11 +140,17 @@ export default function AuthScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={styles.welcomeText}>
-            <Text style={styles.brand}>Instrumentation Toolbox</Text>
+            <Text style={styles.brand}>instruPro Toolbox</Text>
           </Text>
           <Text style={styles.title}>
             {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}
           </Text>
+          
+          {/* Developer Attribution */}
+          <View style={styles.developerContainer}>
+            <Text style={styles.developerText}>Developed by</Text>
+            <Text style={styles.developerName}>Mahmoud Abdeldayem</Text>
+          </View>
 
           <TextInput
             style={[styles.input, errors.email && styles.inputError]}
@@ -334,5 +340,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff", // Optional: match your app theme
+  },
+  developerContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+    paddingVertical: 8,
+  },
+  developerText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 2,
+  },
+  developerName: {
+    fontSize: 16,
+    color: GREEN,
+    fontWeight: "600",
+    textAlign: "center",
   },
 });
