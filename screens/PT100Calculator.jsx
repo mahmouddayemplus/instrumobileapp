@@ -102,7 +102,7 @@ const PT100Calculator = () => {
               <TextInput
                 style={styles.input}
                 keyboardType="decimal-pad"
-                placeholder="Enter resistance..."
+                placeholder="resistance..."
                 placeholderTextColor="#999"
                 value={input}
                 onChangeText={handleInputChange}
@@ -116,9 +116,7 @@ const PT100Calculator = () => {
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
                 <Text style={styles.resultTitle}>Temperature</Text>
-                <View style={[styles.statusBadge, { backgroundColor: getTemperatureColor(result) }]}>
-                  <Text style={styles.statusText}>{getTemperatureStatus(result)}</Text>
-                </View>
+  
               </View>
               
               <View style={styles.temperatureDisplay}>

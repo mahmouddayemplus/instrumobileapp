@@ -10,6 +10,7 @@ import {
   StatusBar,
 } from "react-native";
 import { colors } from "../constants/color";
+import { KeyboardAvoidingView, Platform, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import React, { useState, useLayoutEffect } from "react";
@@ -23,6 +24,7 @@ const WeighFeeder = () => {
   const [oldCorrectionFactor, setOldCorrectionFactor] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const calculateError = () => {
     const weight = parseFloat(actualWeight);
@@ -96,6 +98,10 @@ const WeighFeeder = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <SafeAreaView style={styles.container}>
         <StatusBar
           barStyle="light-content"
@@ -237,6 +243,7 @@ const WeighFeeder = () => {
           )}
         </ScrollView>
       </SafeAreaView>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 };

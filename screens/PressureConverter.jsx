@@ -10,7 +10,8 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableWithoutFeedback,
-  Keyboard,StatusBar
+  Keyboard,
+  StatusBar,
 } from "react-native";
 import { colors } from "../constants/color";
 import { useNavigation } from "@react-navigation/native";
@@ -154,7 +155,10 @@ const PressureConverter = () => {
                 onPress={() => openUnitModal(true)}
               >
                 <Text style={styles.unitButtonLabel}>From</Text>
-                <Text style={styles.unitButtonValue}>{inputUnit}</Text>
+                <View style={styles.box}>
+                  <Text style={styles.unitButtonValue}> {inputValue} </Text>
+                  <Text style={styles.unitButtonValue}>{inputUnit}</Text>
+                </View>
                 <Text style={styles.unitButtonDesc}>
                   {getUnitDescription(inputUnit)}
                 </Text>
@@ -169,7 +173,10 @@ const PressureConverter = () => {
                 onPress={() => openUnitModal(false)}
               >
                 <Text style={styles.unitButtonLabel}>To</Text>
-                <Text style={styles.unitButtonValue}>{outputUnit}</Text>
+                <View style={styles.box}>
+                  <Text style={styles.unitButtonValue}>{convertedValue}</Text>
+                  <Text style={styles.unitButtonValue}>{outputUnit}</Text>
+                </View>
                 <Text style={styles.unitButtonDesc}>
                   {getUnitDescription(outputUnit)}
                 </Text>
@@ -629,4 +636,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 8,
   },
+  box:{
+    flexDirection:'column',
+    justifyContent:"center",
+    alignItems:"center",
+   }
 });

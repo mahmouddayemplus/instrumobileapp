@@ -142,9 +142,7 @@ const Thermocouple = () => {
                   <Ionicons name="thermometer-outline" size={20} color={colors.primary || '#34C759'} />
                   <Text style={styles.resultTitle}>Temperature Result</Text>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: getTemperatureColor(result) }]}>
-                  <Text style={styles.statusText}>{getTemperatureStatus(result)}</Text>
-                </View>
+  
               </View>
               
               <View style={styles.temperatureDisplay}>
@@ -162,10 +160,7 @@ const Thermocouple = () => {
                   {result === "Invalid" 
                     ? "❌ Millivolt value is outside supported range (-5.891 to 54.886 mV)"
                     : parseFloat(result) < 0 
-                    ? "❄️ Temperature is below freezing point - check for cold conditions"
-                    : parseFloat(result) > 500 
-                    ? "🔥 Temperature is in high range - ensure proper insulation"
-                    : "✅ Temperature is within normal operating range"
+                
                   }
                 </Text>
               </View>
