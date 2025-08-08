@@ -5,7 +5,11 @@ import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
 //eas build -p android --clear-cache
 //eas secret:list --profile preview
 //eas build -p android --profile preview
-
+//# Clear cache and rebuild
+// eas build --platform android --clear-cache
+// eas build --platform ios --clear-cache
+// npx expo run:android --clear
+// npx expo run:ios --clear
 
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import PackerScreen from './screens/PackerScreen'

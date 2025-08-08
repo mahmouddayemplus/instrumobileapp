@@ -25,6 +25,7 @@ export default {
       supportsTablet: true,
       icon: "./assets/icon.png",
     },
+    
 
     splash: {
       image: "./assets/splash-icon.png",
