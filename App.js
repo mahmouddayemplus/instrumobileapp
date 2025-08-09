@@ -1,6 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView, Alert } from 'react-native';
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,7 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PreventiveMaintenanceScreen from './screens/PreventiveMaintenanceScreen'
 import { Provider } from 'react-redux';
-import store from './store/store';  // adjust path as needed
+import store from './store/store';
 import { useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
@@ -118,7 +116,7 @@ function HomeTabs() {
         options={{
 
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialIcons
+            <MaterialCommunityIcons
               name="inventory"
               size={focused ? size + 4 : size}
               color={focused ? '#43ad49ff' : color} // Green when focused

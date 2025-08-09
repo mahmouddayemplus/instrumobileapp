@@ -73,9 +73,8 @@ const TaskDetailScreen = () => {
 
       if (cached) {
         setTasks(cached);
-        // console.log("Updated tasks loaded successfully");
       } else {
-        // console.log("No cached data found after update");
+        // No cached data found after update
       }
     } catch (error) {
       console.error("Error updating tasks:", error);
@@ -92,10 +91,6 @@ const TaskDetailScreen = () => {
 
   useEffect(() => {
     if (tasks && taskId) {
-      // console.log("=========  Filtering Tasks  ================");
-      // console.log("All Tasks:", tasks);
-      // console.log("taskId:", taskId);
-
       const taskById = tasks.filter((t) => t.sectionId === taskId);
 
       if (taskById.length !== 0) {

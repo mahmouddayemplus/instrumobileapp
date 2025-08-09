@@ -3,10 +3,6 @@ import * as SQLite from 'expo-sqlite';
 let db;
 
 export const initDb = async ( update =false) => {
-    // console.log('========= xxxxxxxxxx initDb xxxxxxxx===============');
-    // console.log(update);
-    // console.log('====================================');
-
     try {
         db = await SQLite.openDatabaseAsync('pmTasks.db');
         if (update) {
@@ -27,10 +23,6 @@ export const initDb = async ( update =false) => {
 
 
 export const saveTasksToSQLite = async (id, section, order) => {
-    // console.log('========= saveTasksToSQLite ===============');
-    // console.log(id, section, order);
-    // console.log('====================================');
-
     try {
         await db.runAsync(
             `INSERT OR REPLACE INTO tasks (id, section, "order") VALUES (?, ?, ?);`,

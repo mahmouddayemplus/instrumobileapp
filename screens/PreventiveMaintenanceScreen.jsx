@@ -95,9 +95,8 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
 
       if (cached) {
         setTasks(cached);
-        // console.log("Tasks loaded:", cached);
       } else {
-        // console.log("Failed to fetch or load cached tasks.");
+        // Failed to fetch or load cached tasks
       }
       setLoading(false);
     };
@@ -145,9 +144,8 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
 
     if (cached) {
       setTasks(cached);
-      // console.log("Updated tasks loaded:", cached);
     } else {
-      // console.log("No cached data found after update");
+      // No cached data found after update
     }
     setRefreshing(false);
   };

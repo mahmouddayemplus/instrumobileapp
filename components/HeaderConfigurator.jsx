@@ -10,7 +10,7 @@ const HeaderConfigurator = ({title,iconName}) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: {title},
+      title: title,
       headerStyle: {
         backgroundColor: colors.primary || "#34C759",
       },
