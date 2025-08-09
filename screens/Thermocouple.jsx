@@ -1,4 +1,6 @@
 import React, { useState, useLayoutEffect } from "react";
+import Slider from "@react-native-community/slider"; // make sure installed
+
 import {
   StyleSheet,
   Text,
@@ -59,16 +61,16 @@ const Thermocouple = () => {
     navigation.setOptions({
       title: "Type K Thermocouple",
       headerStyle: {
-        backgroundColor: colors.primary || '#34C759',
+        backgroundColor: colors.primary || "#34C759",
       },
-      headerTintColor: '#fff',
+      headerTintColor: "#fff",
       headerTitleStyle: {
         fontSize: 18,
         fontWeight: "600",
       },
       headerLeft: () => (
         <View style={styles.headerLeft}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.headerIconContainer}
             onPress={() => navigation.goBack()}
           >
@@ -108,17 +110,34 @@ const Thermocouple = () => {
     if (temperature > 500) return "Hot";
     return "Normal";
   };
+  const handleSliderChange = (value) => {
+     
+    const textValue = value.toFixed(3);
+    setInput(textValue);
+    const T = millivoltToTemperature_K(value);
+    setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
-        
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
+
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Input Card */}
           <View style={styles.inputCard}>
             <View style={styles.inputHeader}>
-              <Ionicons name="create" size={20} color={colors.primary || '#34C759'} />
+              <Ionicons
+                name="create"
+                size={20}
+                color={colors.primary || "#34C759"}
+              />
               <Text style={styles.inputLabel}>Input Millivolt Value</Text>
             </View>
             <View style={styles.inputWrapper}>
@@ -132,6 +151,21 @@ const Thermocouple = () => {
               />
               <Text style={styles.mvUnit}>mV</Text>
             </View>
+            <Slider
+              style={{ marginTop: 16 }}
+              minimumValue={-5.891}
+              maximumValue={54.886}
+              step={0.001}
+              value={parseFloat(input) || 0}
+              onSlidingComplete={(value) => {
+                const textValue = value.toFixed(3);
+                setInput(textValue);
+                const T = millivoltToTemperature_K(value);
+                setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+              }}
+              minimumTrackTintColor={colors.primary || "#34C759"}
+              maximumTrackTintColor="#ccc"
+            />
           </View>
 
           {/* Result Card */}
@@ -139,29 +173,42 @@ const Thermocouple = () => {
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
                 <View style={styles.resultTitleContainer}>
-                  <Ionicons name="thermometer-outline" size={20} color={colors.primary || '#34C759'} />
+                  <Ionicons
+                    name="thermometer-outline"
+                    size={20}
+                    color={colors.primary || "#34C759"}
+                  />
                   <Text style={styles.resultTitle}>Temperature Result</Text>
                 </View>
-  
               </View>
-              
+
               <View style={styles.temperatureDisplay}>
-                <Text style={styles.temperatureLabel}>Calculated Temperature</Text>
+                <Text style={styles.temperatureLabel}>
+                  Calculated Temperature
+                </Text>
                 <View style={styles.temperatureValueContainer}>
-                  <Text style={[styles.temperatureValue, { color: getTemperatureColor(result) }]}>
+                  <Text
+                    style={[
+                      styles.temperatureValue,
+                      { color: getTemperatureColor(result) },
+                    ]}
+                  >
                     {result}
                   </Text>
                   <Text style={styles.temperatureUnit}>°C</Text>
                 </View>
               </View>
 
-              <View style={[styles.temperatureInfo, { borderLeftColor: getTemperatureColor(result) }]}>
+              <View
+                style={[
+                  styles.temperatureInfo,
+                  { borderLeftColor: getTemperatureColor(result) },
+                ]}
+              >
                 <Text style={styles.temperatureInfoText}>
-                  {result === "Invalid" 
+                  {result === "Invalid"
                     ? "❌ Millivolt value is outside supported range (-5.891 to 54.886 mV)"
-                    : parseFloat(result) < 0 
-                
-                  }
+                    : parseFloat(result) < 0}
                 </Text>
               </View>
             </View>
@@ -170,7 +217,11 @@ const Thermocouple = () => {
           {/* Range Info Card */}
           <View style={styles.rangeCard}>
             <View style={styles.rangeHeader}>
-              <Ionicons name="analytics" size={20} color={colors.primary || '#34C759'} />
+              <Ionicons
+                name="analytics"
+                size={20}
+                color={colors.primary || "#34C759"}
+              />
               <Text style={styles.rangeTitle}>Operating Range</Text>
             </View>
             <View style={styles.rangeGrid}>
@@ -196,7 +247,11 @@ const Thermocouple = () => {
           {/* Reference Values Card */}
           <View style={styles.referenceCard}>
             <View style={styles.referenceHeader}>
-              <Ionicons name="list" size={20} color={colors.primary || '#34C759'} />
+              <Ionicons
+                name="list"
+                size={20}
+                color={colors.primary || "#34C759"}
+              />
               <Text style={styles.referenceTitle}>Reference Values</Text>
             </View>
             <View style={styles.referenceGrid}>
@@ -235,9 +290,9 @@ const Thermocouple = () => {
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>Type K Thermocouple</Text>
             <Text style={styles.infoText}>
-              Type K thermocouples use Chromel (Ni-Cr) and Alumel (Ni-Al) alloys. 
-              They provide accurate temperature measurements from -270°C to 1372°C 
-              using NIST ITS-90 standard equations.
+              Type K thermocouples use Chromel (Ni-Cr) and Alumel (Ni-Al)
+              alloys. They provide accurate temperature measurements from -270°C
+              to 1372°C using NIST ITS-90 standard equations.
             </Text>
             <View style={styles.specsContainer}>
               <View style={styles.specItem}>
@@ -264,17 +319,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background || "#F8F9FA",
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginLeft: 15,
   },
   headerIconContainer: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 8,
   },
   scroll: {
@@ -296,8 +351,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   inputHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
   },
   inputLabel: {
@@ -307,16 +362,16 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 2,
     borderColor: "#E1E5E9",
     borderRadius: 12,
-    backgroundColor: '#FAFBFC',
+    backgroundColor: "#FAFBFC",
     paddingHorizontal: 16,
     paddingVertical: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
@@ -325,12 +380,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 24,
     color: "#333",
-    textAlign: 'center',
+    textAlign: "center",
     fontWeight: "600",
   },
   mvUnit: {
     fontSize: 24,
-    color: '#666',
+    color: "#666",
     marginLeft: 8,
     fontWeight: "500",
   },
@@ -349,14 +404,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   resultHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   resultTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   resultTitle: {
     fontSize: 20,
@@ -375,7 +430,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   temperatureDisplay: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   temperatureLabel: {
@@ -384,8 +439,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   temperatureValueContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
   },
   temperatureValue: {
     fontSize: 48,
@@ -423,10 +478,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   rangeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   rangeTitle: {
     fontSize: 18,
@@ -435,12 +490,12 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   rangeGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   rangeItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: "#F8F9FA",
     padding: 16,
     borderRadius: 12,
@@ -480,10 +535,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   referenceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   referenceTitle: {
     fontSize: 18,
@@ -492,16 +547,16 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   referenceGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   referenceItem: {
-    width: '48%',
+    width: "48%",
     backgroundColor: "#F8F9FA",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 8,
   },
   refIconContainer: {
@@ -545,12 +600,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   specsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   specItem: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   specLabel: {
     fontSize: 12,

@@ -1,4 +1,6 @@
-import React, { useState,useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect } from "react";
+import Slider from "@react-native-community/slider"; // make sure installed
+
 import {
   StyleSheet,
   Text,
@@ -7,7 +9,9 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
-  ScrollView,TouchableOpacity,StatusBar
+  ScrollView,
+  TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -30,34 +34,35 @@ const PT100Calculator = () => {
   const [input, setInput] = useState("100");
   const [result, setResult] = useState(null);
   const navigation = useNavigation();
-  ////
-    useLayoutEffect(() => {
-      navigation.setOptions({
-        title: "PT100",
-        headerStyle: {
-          backgroundColor: colors.primary || '#34C759',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-        },
-        headerLeft: () => (
-          <View style={styles.headerLeft}>
-            <TouchableOpacity 
-              style={styles.headerIconContainer}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <View style={styles.headerIconContainer}>
-              <Ionicons name="thermometer" size={24} color="#fff" />
-            </View>
+  const SCALE_STEPS = 6; // number of intervals (ticks = SCALE_STEPS + 1)
+  const MAX_OHM = 300;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "PT100",
+      headerStyle: {
+        backgroundColor: colors.primary || "#34C759",
+      },
+      headerTintColor: "#fff",
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: "600",
+      },
+      headerLeft: () => (
+        <View style={styles.headerLeft}>
+          <TouchableOpacity
+            style={styles.headerIconContainer}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerIconContainer}>
+            <Ionicons name="thermometer" size={24} color="#fff" />
           </View>
-        ),
-      });
-    }, [navigation]);
-    ///
+        </View>
+      ),
+    });
+  }, [navigation]);
 
   const handleInputChange = (text) => {
     setInput(text);
@@ -74,7 +79,7 @@ const PT100Calculator = () => {
     if (isNaN(temp) || temp === "Invalid") return "#F44336";
     const temperature = parseFloat(temp);
     if (temperature < 0) return "#2196F3"; // Blue for cold
-    if (temperature > 500) return "#FF5722"; // Orange for hot
+    if (temperature > 5000) return "#FF5722"; // Orange for hot
     return "#4CAF50"; // Green for normal
   };
 
@@ -89,12 +94,15 @@ const PT100Calculator = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
-                <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
-        
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-          {/* Header Section */}
- 
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
 
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Input Card */}
           <View style={styles.inputCard}>
             <Text style={styles.inputLabel}>Resistance Value</Text>
@@ -109,6 +117,35 @@ const PT100Calculator = () => {
               />
               <Text style={styles.ohmUnit}>Ω</Text>
             </View>
+
+            <Slider
+              style={{ marginTop: 16 }}
+              minimumValue={0}
+              maximumValue={MAX_OHM}
+              step={0.001}
+              value={parseFloat(input) || 0}
+              onSlidingComplete={(value) => {
+                const textValue = value.toFixed(3);
+                setInput(textValue);
+                const T = resistanceToTemperature_PT100(value);
+                setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+              }}
+              minimumTrackTintColor={colors.primary || "#34C759"}
+              maximumTrackTintColor="#ccc"
+            />
+
+            {/* Static ruler below the slider */}
+            <View style={styles.rulerContainer}>
+              {Array.from({ length: SCALE_STEPS + 1 }, (_, i) => {
+                const val = (MAX_OHM / SCALE_STEPS) * i;
+                return (
+                  <View key={i} style={styles.tickContainer}>
+                    <View style={styles.tick} />
+                    <Text style={styles.tickLabel}>{Math.round(val)}</Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
 
           {/* Result Card */}
@@ -116,26 +153,31 @@ const PT100Calculator = () => {
             <View style={styles.resultCard}>
               <View style={styles.resultHeader}>
                 <Text style={styles.resultTitle}>Temperature</Text>
-  
               </View>
-              
+
               <View style={styles.temperatureDisplay}>
-                <Text style={styles.temperatureLabel}>Calculated Temperature:</Text>
-                <Text style={[styles.temperatureValue, { color: getTemperatureColor(result) }]}>
+                <Text style={styles.temperatureLabel}>
+                  Calculated Temperature:
+                </Text>
+                <Text
+                  style={[
+                    styles.temperatureValue,
+                    { color: getTemperatureColor(result) },
+                  ]}
+                >
                   {result} °C
                 </Text>
               </View>
 
               <View style={styles.temperatureInfo}>
                 <Text style={styles.temperatureInfoText}>
-                  {result === "Invalid" 
+                  {result === "Invalid"
                     ? "❌ Invalid resistance value entered"
-                    : parseFloat(result) < 0 
-                    // ? "❄️ Temperature is below freezing point"
-                    // : parseFloat(result) > 50 
-                    // ? "🔥 Temperature is §above normal range"
-                    // : "✅ Temperature is within normal range"
-                  }
+                    : parseFloat(result) < 0
+                    ? "❄️ Temperature is below freezing point"
+                    : parseFloat(result) > 50
+                    ? "🔥 Temperature is above normal range"
+                    : "✅ Temperature is within normal range"}
                 </Text>
               </View>
             </View>
@@ -168,8 +210,9 @@ const PT100Calculator = () => {
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>PT100 Sensor</Text>
             <Text style={styles.infoText}>
-              PT100 is a platinum resistance temperature sensor with 100Ω resistance at 0°C. 
-              It provides accurate temperature measurements across a wide range.
+              PT100 is a platinum resistance temperature sensor with 100Ω
+              resistance at 0°C. It provides accurate temperature measurements
+              across a wide range.
             </Text>
             <View style={styles.specsContainer}>
               <View style={styles.specItem}>
@@ -199,86 +242,19 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
-  headerSection: {
-    marginBottom: 24,
-    alignItems: 'center',
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 15,
   },
   headerIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.primary || "#34C759",
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: colors.primary || "#34C759",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  headerIcon: {
-    fontSize: 40,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: colors.primaryDark || "#1A1A1A",
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  infoCard: {
-    backgroundColor: "#fff",
-    padding: 24,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  infoTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  specsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  specItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  specLabel: {
-    fontSize: 12,
-    color: "#999",
-    marginBottom: 4,
-  },
-  specValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
   },
   inputCard: {
     backgroundColor: "#fff",
@@ -301,16 +277,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 2,
     borderColor: "#E1E5E9",
     borderRadius: 12,
-    backgroundColor: '#FAFBFC',
+    backgroundColor: "#FAFBFC",
     paddingHorizontal: 16,
     paddingVertical: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
@@ -319,14 +295,35 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 24,
     color: "#333",
-    textAlign: 'center',
+    textAlign: "center",
     fontWeight: "600",
   },
   ohmUnit: {
     fontSize: 24,
-    color: '#666',
+    color: "#666",
     marginLeft: 8,
     fontWeight: "500",
+  },
+  rulerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 0,
+    marginRight:1,
+    marginTop: 12,
+  },
+  tickContainer: {
+    alignItems: "center",
+    width: 40,
+  },
+  tick: {
+    width: 2,
+    height: 12,
+    backgroundColor: "#666",
+    marginBottom: 4,
+  },
+  tickLabel: {
+    fontSize: 12,
+    color: "#333",
   },
   resultCard: {
     backgroundColor: "#fff",
@@ -343,9 +340,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   resultHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   resultTitle: {
@@ -353,18 +350,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#333",
   },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
   temperatureDisplay: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   temperatureLabel: {
@@ -407,19 +394,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   referenceGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   referenceItem: {
-    width: '48%',
+    width: "48%",
     backgroundColor: "#F8F9FA",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 8,
   },
   refTemp: {
@@ -433,18 +420,5 @@ const styles = StyleSheet.create({
     color: "#666",
     fontWeight: "500",
   },
-   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 15,
-  },
-  headerIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
 });
+

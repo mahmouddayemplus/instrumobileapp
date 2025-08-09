@@ -117,7 +117,7 @@ function HomeTabs() {
 
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
-              name="inventory"
+              name="warehouse"
               size={focused ? size + 4 : size}
               color={focused ? '#43ad49ff' : color} // Green when focused
             />
