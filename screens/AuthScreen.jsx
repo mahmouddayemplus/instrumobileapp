@@ -68,6 +68,7 @@ export default function AuthScreen() {
     if (isSignup && !isExistingUser) {
       const result = await signup({ email, password, displayName, companyId });
       setLoading(false);
+ 
 
       if (result.status === "ok") {
         const dispatchPayload = {

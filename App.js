@@ -15,7 +15,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { logout, saveUser } from './store/authSlice';
 import { setFavorites } from './store/favoritesSlice';
-
 import { getUser, removeUser } from "./helper/authStorage";
 import { useState, useEffect } from 'react';
 import { setAuthenticated } from './store/authSlice'

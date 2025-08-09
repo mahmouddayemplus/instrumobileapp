@@ -2,9 +2,11 @@
 //eas secret:push
 //eas build -p android --clear-cache
 //eas secret:list --profile preview
-//eas build -p android --profile preview
+//eas build -p android --profile preview //use it to generate apk file
 //# Clear cache and rebuild
-// eas build --platform android --clear-cache
+// eas build --platform android --clear-cache //use it to generate aab file
+# eas build --platform android --profile preview
+
 // eas build --platform ios --clear-cache
 //npx expo start --clear
 //npx expo run:android 
