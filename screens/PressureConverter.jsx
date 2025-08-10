@@ -117,7 +117,6 @@ const PressureConverter = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <StatusBar
           barStyle="light-content"
@@ -128,6 +127,8 @@ const PressureConverter = () => {
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
         >
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
           {/* Input Card */}
           <View style={styles.inputCard}>
             <Text style={styles.inputLabel}>Pressure Value</Text>
@@ -145,7 +146,7 @@ const PressureConverter = () => {
               />
             </View>
           </View>
-
+</TouchableWithoutFeedback>
           {/* Unit Selection Card */}
           <View style={styles.unitCard}>
             <Text style={styles.unitCardTitle}>Unit Selection</Text>
@@ -295,8 +296,7 @@ const PressureConverter = () => {
           </View>
         </Modal>
       </SafeAreaView>
-    </TouchableWithoutFeedback>
-  );
+   );
 };
 
 export default PressureConverter;

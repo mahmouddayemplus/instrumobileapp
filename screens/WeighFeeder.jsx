@@ -97,7 +97,6 @@ const WeighFeeder = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -117,6 +116,8 @@ const WeighFeeder = () => {
             {/* Header Section */}
 
             {/* Error Calculation Card */}
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Error Calculation</Text>
 
@@ -148,7 +149,7 @@ const WeighFeeder = () => {
                 <Text style={styles.buttonText}>Calculate Error</Text>
               </TouchableOpacity>
             </View>
-
+</TouchableWithoutFeedback>
             {/* Error Result Card */}
             {error !== null && (
               <View style={styles.resultCard}>
@@ -272,8 +273,7 @@ const WeighFeeder = () => {
         </Modal>
  
       </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
-  );
+   );
 };
 
 export default WeighFeeder;

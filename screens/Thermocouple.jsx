@@ -398,7 +398,7 @@ const Thermocouple = () => {
             </View>
             <View style={styles.specItem}>
               <Text style={styles.specLabel}>Accuracy</Text>
-              <Text style={styles.specValue}>±1.1°C to ±2.2°C</Text>
+              <Text style={styles.specValue}>±2.2°C</Text>
             </View>
           </View>
         </View>
