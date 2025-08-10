@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect } from "react";
 import Slider from "@react-native-community/slider"; // make sure installed
 
 import {
@@ -12,6 +12,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Switch,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -30,12 +31,26 @@ function resistanceToTemperature_PT100(R) {
   return T;
 }
 
+function temperatureToResistance_PT100(T) {
+  // Inverse (simple polynomial): R = R0 * (1 + A*T + B*T^2)
+  const R0 = 100;
+  const A = 3.9083e-3;
+  const B = -5.775e-7;
+  return R0 * (1 + A * T + B * T * T);
+}
+
 const PT100Calculator = () => {
-  const [input, setInput] = useState("100");
-  const [result, setResult] = useState(null);
+  const [input, setInput] = useState("100"); // editable field (either Ω or °C depending on mode)
+  const [result, setResult] = useState(null); // computed other value
+  const [isReverse, setIsReverse] = useState(false); // false = Ω -> °C, true = °C -> Ω
+  const [debouncedInput, setDebouncedInput] = useState("100");
+
   const navigation = useNavigation();
-  const SCALE_STEPS = 6; // number of intervals (ticks = SCALE_STEPS + 1)
+   
+  const SCALE_STEPS = 6; // number of ticks
   const MAX_OHM = 300;
+  const TEMP_MIN = -200;
+  const TEMP_MAX = 500;
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -64,32 +79,93 @@ const PT100Calculator = () => {
     });
   }, [navigation]);
 
+  // helper: clamp
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+  // update result whenever input changes (mode-aware)
   const handleInputChange = (text) => {
     setInput(text);
     const value = parseFloat(text);
     if (!isNaN(value)) {
-      const T = resistanceToTemperature_PT100(value);
-      setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+      if (!isReverse) {
+        // Ω -> °C
+        const T = resistanceToTemperature_PT100(value);
+        setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+      } else {
+        // °C -> Ω
+        const R = temperatureToResistance_PT100(value);
+        setResult(isNaN(R) ? "Invalid" : R.toFixed(3));
+      }
     } else {
       setResult(null);
     }
   };
 
-  const getTemperatureColor = (temp) => {
-    if (isNaN(temp) || temp === "Invalid") return "#F44336";
-    const temperature = parseFloat(temp);
-    if (temperature < 0) return "#2196F3"; // Blue for cold
-    if (temperature > 5000) return "#FF5722"; // Orange for hot
-    return "#4CAF50"; // Green for normal
+  // slider change handler (live)
+  const onSliderChange = (value) => {
+    if (!isReverse) {
+      // slider is resistance
+      const txt = value.toFixed(3);
+      setInput(txt);
+      const T = resistanceToTemperature_PT100(value);
+      setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+    } else {
+      // slider is temperature
+      const txt = value.toFixed(2);
+      setInput(txt);
+      const R = temperatureToResistance_PT100(value);
+      setResult(isNaN(R) ? "Invalid" : R.toFixed(3));
+    }
   };
 
-  const getTemperatureStatus = (temp) => {
-    if (isNaN(temp) || temp === "Invalid") return "Invalid Input";
-    const temperature = parseFloat(temp);
-    if (temperature < 0) return "Cold";
-    if (temperature > 50) return "Hot";
-    return "Normal";
+  // toggle mode and try to preserve meaning by swapping values where possible
+  const toggleReverse = () => {
+    const currentValue = parseFloat(input);
+
+    if (!isNaN(currentValue)) {
+      if (!isReverse) {
+        // Switching from Ω → °C to °C → Ω
+        const newTemp = resistanceToTemperature_PT100(currentValue);
+        if (!isNaN(newTemp)) {
+          const newR = temperatureToResistance_PT100(newTemp);
+          setIsReverse(true);
+          setInput(newTemp.toFixed(2));
+          setResult(newR.toFixed(3));
+          return;
+        }
+      } else {
+        // Switching from °C → Ω to Ω → °C
+        const newR = temperatureToResistance_PT100(currentValue);
+        const newT = resistanceToTemperature_PT100(newR);
+        if (!isNaN(newT)) {
+          setIsReverse(false);
+          setInput(newR.toFixed(3));
+          setResult(newT.toFixed(2));
+          return;
+        }
+      }
+    }
+
+    // Fallback if conversion fails or invalid input
+    setIsReverse(!isReverse);
+    setInput("");
+    setResult(null);
   };
+
+  // compute slider min/max/step depending on mode
+  const sliderMin = isReverse ? TEMP_MIN : 0;
+  const sliderMax = isReverse ? TEMP_MAX : MAX_OHM;
+  const sliderStep = isReverse ? 0.1 : 0.001;
+
+  // initialize result from initial input
+  useEffect(() => {
+    handleInputChange(input);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const inputLabel = isReverse ? "Temperature" : "Resistance Value";
+  const unitLabel = isReverse ? "°C" : "Ω";
+  const resultTitle = isReverse ? "Resistance" : "Temperature";
 
   return (
     <SafeAreaView style={styles.container}>
@@ -100,52 +176,67 @@ const PT100Calculator = () => {
 
       <ScrollView
         contentContainerStyle={styles.scroll}
-        // showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={true}
         scrollEventThrottle={16}
       >
+        {/* mode switch row */}
+        <View style={styles.switchRow}>
+          <Text style={styles.switchText}>
+            {isReverse ? "°C → Ω" : "Ω → °C"}
+          </Text>
+          <Switch
+            value={isReverse}
+            onValueChange={toggleReverse}
+            trackColor={{ true: colors.primary || "#34C759", false: "#ccc" }}
+            thumbColor={isReverse ? "#fff" : "#fff"}
+          />
+        </View>
+
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           {/* Input Card */}
           <View style={styles.inputCard}>
-            <Text style={styles.inputLabel}>Resistance Value</Text>
+            <Text style={styles.inputLabel}>{inputLabel}</Text>
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
                 keyboardType="decimal-pad"
-                placeholder="resistance..."
+                placeholder={isReverse ? "temperature..." : "resistance..."}
                 placeholderTextColor="#999"
                 value={input}
                 onChangeText={handleInputChange}
               />
-              <Text style={styles.ohmUnit}>Ω</Text>
+              <Text style={styles.ohmUnit}>{unitLabel}</Text>
             </View>
+
             <View pointerEvents="box-none">
               <Slider
                 style={{ marginTop: 16 }}
-                minimumValue={0}
-                maximumValue={MAX_OHM}
-                step={0.001}
-                value={parseFloat(input) || 0}
-                onSlidingComplete={(value) => {
-                  const textValue = value.toFixed(3);
-                  setInput(textValue);
-                  const T = resistanceToTemperature_PT100(value);
-                  setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
-                }}
+                minimumValue={sliderMin}
+                maximumValue={sliderMax}
+                step={sliderStep}
+                value={clamp(
+                  parseFloat(input) || sliderMin,
+                  sliderMin,
+                  sliderMax
+                )}
+                onValueChange={onSliderChange}
                 minimumTrackTintColor={colors.primary || "#34C759"}
                 maximumTrackTintColor="#ccc"
               />
             </View>
 
-            {/* Static ruler below the slider */}
+            {/* Ruler below slider - updates labels according to mode */}
             <View style={styles.rulerContainer}>
               {Array.from({ length: SCALE_STEPS + 1 }, (_, i) => {
-                const val = (MAX_OHM / SCALE_STEPS) * i;
+                const val =
+                  sliderMin + ((sliderMax - sliderMin) / SCALE_STEPS) * i;
+                // formatting
+                const label = isReverse ? val.toFixed(0) : Math.round(val);
                 return (
                   <View key={i} style={styles.tickContainer}>
                     <View style={styles.tick} />
-                    <Text style={styles.tickLabel}>{Math.round(val)}</Text>
+                    <Text style={styles.tickLabel}>{label}</Text>
                   </View>
                 );
               })}
@@ -157,32 +248,36 @@ const PT100Calculator = () => {
         {result !== null && (
           <View style={styles.resultCard}>
             <View style={styles.resultHeader}>
-              <Text style={styles.resultTitle}>Temperature</Text>
+              <Text style={styles.resultTitle}>{resultTitle}</Text>
             </View>
 
             <View style={styles.temperatureDisplay}>
               <Text style={styles.temperatureLabel}>
-                Calculated Temperature:
+                {isReverse
+                  ? "Calculated Resistance:"
+                  : "Calculated Temperature:"}
               </Text>
               <Text
                 style={[
                   styles.temperatureValue,
-                  { color: getTemperatureColor(result) },
+                  { color: !isReverse ? getTemperatureColor(result) : "#333" },
                 ]}
               >
-                {result} °C
+                {result} {isReverse ? "Ω" : "°C"}
               </Text>
             </View>
 
             <View style={styles.temperatureInfo}>
               <Text style={styles.temperatureInfoText}>
-                {result === "Invalid"
-                  ? "❌ Invalid resistance value entered"
-                  : parseFloat(result) < 0
-                  ? "❄️ Temperature is below freezing point"
-                  : parseFloat(result) > 50
-                  ? "🔥 Temperature is above normal range"
-                  : "✅ Temperature is within normal range"}
+                {!isReverse
+                  ? result === "Invalid"
+                    ? "❌ Invalid resistance value entered"
+                    : parseFloat(result) < 0
+                    ? "❄️ Temperature is below freezing point"
+                    : parseFloat(result) > 50
+                    ? "🔥 Temperature is above normal range"
+                    : "✅ Temperature is within normal range"
+                  : "🔎 Result is the computed resistance for the entered temperature."}
               </Text>
             </View>
           </View>
@@ -235,6 +330,23 @@ const PT100Calculator = () => {
   );
 };
 
+// keep your original getTemperatureColor / getTemperatureStatus functions here
+const getTemperatureColor = (temp) => {
+  if (isNaN(Number(temp)) || temp === "Invalid") return "#F44336";
+  const temperature = parseFloat(temp);
+  if (temperature < 0) return "#2196F3";
+  if (temperature > 5000) return "#FF5722";
+  return "#4CAF50";
+};
+
+const getTemperatureStatus = (temp) => {
+  if (isNaN(Number(temp)) || temp === "Invalid") return "Invalid Input";
+  const temperature = parseFloat(temp);
+  if (temperature < 0) return "Cold";
+  if (temperature > 50) return "Hot";
+  return "Normal";
+};
+
 export default PT100Calculator;
 
 const styles = StyleSheet.create({
@@ -245,6 +357,19 @@ const styles = StyleSheet.create({
   scroll: {
     padding: 20,
     paddingBottom: 40,
+  },
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginBottom: 8,
+    paddingRight: 4,
+  },
+  switchText: {
+    marginRight: 12,
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "600",
   },
   headerLeft: {
     flexDirection: "row",
