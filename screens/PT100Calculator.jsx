@@ -92,24 +92,20 @@ const PT100Calculator = () => {
   };
 
   return (
-    <TouchableWithoutFeedback
-      onPress={Keyboard.dismiss}
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
-    >
-      <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={colors.primary || "#34C759"}
-        />
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.primary || "#34C759"}
+      />
 
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          nestedScrollEnabled={true}
-          scrollEventThrottle={16}
-        >
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        // showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
+        scrollEventThrottle={16}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           {/* Input Card */}
           <View style={styles.inputCard}>
             <Text style={styles.inputLabel}>Resistance Value</Text>
@@ -155,87 +151,87 @@ const PT100Calculator = () => {
               })}
             </View>
           </View>
+        </TouchableWithoutFeedback>
 
-          {/* Result Card */}
-          {result !== null && (
-            <View style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <Text style={styles.resultTitle}>Temperature</Text>
-              </View>
-
-              <View style={styles.temperatureDisplay}>
-                <Text style={styles.temperatureLabel}>
-                  Calculated Temperature:
-                </Text>
-                <Text
-                  style={[
-                    styles.temperatureValue,
-                    { color: getTemperatureColor(result) },
-                  ]}
-                >
-                  {result} °C
-                </Text>
-              </View>
-
-              <View style={styles.temperatureInfo}>
-                <Text style={styles.temperatureInfoText}>
-                  {result === "Invalid"
-                    ? "❌ Invalid resistance value entered"
-                    : parseFloat(result) < 0
-                    ? "❄️ Temperature is below freezing point"
-                    : parseFloat(result) > 50
-                    ? "🔥 Temperature is above normal range"
-                    : "✅ Temperature is within normal range"}
-                </Text>
-              </View>
+        {/* Result Card */}
+        {result !== null && (
+          <View style={styles.resultCard}>
+            <View style={styles.resultHeader}>
+              <Text style={styles.resultTitle}>Temperature</Text>
             </View>
-          )}
 
-          {/* Reference Values Card */}
-          <View style={styles.referenceCard}>
-            <Text style={styles.referenceTitle}>Common Reference Values</Text>
-            <View style={styles.referenceGrid}>
-              <View style={styles.referenceItem}>
-                <Text style={styles.refTemp}>0°C</Text>
-                <Text style={styles.refResistance}>100.00 Ω</Text>
-              </View>
-              <View style={styles.referenceItem}>
-                <Text style={styles.refTemp}>25°C</Text>
-                <Text style={styles.refResistance}>109.73 Ω</Text>
-              </View>
-              <View style={styles.referenceItem}>
-                <Text style={styles.refTemp}>50°C</Text>
-                <Text style={styles.refResistance}>119.40 Ω</Text>
-              </View>
-              <View style={styles.referenceItem}>
-                <Text style={styles.refTemp}>100°C</Text>
-                <Text style={styles.refResistance}>138.51 Ω</Text>
-              </View>
+            <View style={styles.temperatureDisplay}>
+              <Text style={styles.temperatureLabel}>
+                Calculated Temperature:
+              </Text>
+              <Text
+                style={[
+                  styles.temperatureValue,
+                  { color: getTemperatureColor(result) },
+                ]}
+              >
+                {result} °C
+              </Text>
+            </View>
+
+            <View style={styles.temperatureInfo}>
+              <Text style={styles.temperatureInfoText}>
+                {result === "Invalid"
+                  ? "❌ Invalid resistance value entered"
+                  : parseFloat(result) < 0
+                  ? "❄️ Temperature is below freezing point"
+                  : parseFloat(result) > 50
+                  ? "🔥 Temperature is above normal range"
+                  : "✅ Temperature is within normal range"}
+              </Text>
             </View>
           </View>
+        )}
 
-          {/* PT100 Info Card */}
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>PT100 Sensor</Text>
-            <Text style={styles.infoText}>
-              PT100 is a platinum resistance temperature sensor with 100Ω
-              resistance at 0°C. It provides accurate temperature measurements
-              across a wide range.
-            </Text>
-            <View style={styles.specsContainer}>
-              <View style={styles.specItem}>
-                <Text style={styles.specLabel}>Base Resistance</Text>
-                <Text style={styles.specValue}>100 Ω at 0°C</Text>
-              </View>
-              <View style={styles.specItem}>
-                <Text style={styles.specLabel}>Temperature Coefficient</Text>
-                <Text style={styles.specValue}>0.385 Ω/°C</Text>
-              </View>
+        {/* Reference Values Card */}
+        <View style={styles.referenceCard}>
+          <Text style={styles.referenceTitle}>Common Reference Values</Text>
+          <View style={styles.referenceGrid}>
+            <View style={styles.referenceItem}>
+              <Text style={styles.refTemp}>0°C</Text>
+              <Text style={styles.refResistance}>100.00 Ω</Text>
+            </View>
+            <View style={styles.referenceItem}>
+              <Text style={styles.refTemp}>25°C</Text>
+              <Text style={styles.refResistance}>109.73 Ω</Text>
+            </View>
+            <View style={styles.referenceItem}>
+              <Text style={styles.refTemp}>50°C</Text>
+              <Text style={styles.refResistance}>119.40 Ω</Text>
+            </View>
+            <View style={styles.referenceItem}>
+              <Text style={styles.refTemp}>100°C</Text>
+              <Text style={styles.refResistance}>138.51 Ω</Text>
             </View>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        </View>
+
+        {/* PT100 Info Card */}
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>PT100 Sensor</Text>
+          <Text style={styles.infoText}>
+            PT100 is a platinum resistance temperature sensor with 100Ω
+            resistance at 0°C. It provides accurate temperature measurements
+            across a wide range.
+          </Text>
+          <View style={styles.specsContainer}>
+            <View style={styles.specItem}>
+              <Text style={styles.specLabel}>Base Resistance</Text>
+              <Text style={styles.specValue}>100 Ω at 0°C</Text>
+            </View>
+            <View style={styles.specItem}>
+              <Text style={styles.specLabel}>Temperature Coefficient</Text>
+              <Text style={styles.specValue}>0.385 Ω/°C</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
