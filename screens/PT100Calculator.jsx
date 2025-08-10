@@ -92,7 +92,11 @@ const PT100Calculator = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback
+      onPress={Keyboard.dismiss}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+    >
       <SafeAreaView style={styles.container}>
         <StatusBar
           barStyle="light-content"
@@ -102,6 +106,9 @@ const PT100Calculator = () => {
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
+          scrollEventThrottle={16}
         >
           {/* Input Card */}
           <View style={styles.inputCard}>
@@ -117,22 +124,23 @@ const PT100Calculator = () => {
               />
               <Text style={styles.ohmUnit}>Ω</Text>
             </View>
-
-            <Slider
-              style={{ marginTop: 16 }}
-              minimumValue={0}
-              maximumValue={MAX_OHM}
-              step={0.001}
-              value={parseFloat(input) || 0}
-              onSlidingComplete={(value) => {
-                const textValue = value.toFixed(3);
-                setInput(textValue);
-                const T = resistanceToTemperature_PT100(value);
-                setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
-              }}
-              minimumTrackTintColor={colors.primary || "#34C759"}
-              maximumTrackTintColor="#ccc"
-            />
+            <View pointerEvents="box-none">
+              <Slider
+                style={{ marginTop: 16 }}
+                minimumValue={0}
+                maximumValue={MAX_OHM}
+                step={0.001}
+                value={parseFloat(input) || 0}
+                onSlidingComplete={(value) => {
+                  const textValue = value.toFixed(3);
+                  setInput(textValue);
+                  const T = resistanceToTemperature_PT100(value);
+                  setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+                }}
+                minimumTrackTintColor={colors.primary || "#34C759"}
+                maximumTrackTintColor="#ccc"
+              />
+            </View>
 
             {/* Static ruler below the slider */}
             <View style={styles.rulerContainer}>
@@ -308,7 +316,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 0,
-    marginRight:1,
+    marginRight: 1,
     marginTop: 12,
   },
   tickContainer: {
@@ -421,4 +429,3 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 });
-
