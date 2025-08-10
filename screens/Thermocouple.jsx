@@ -6,6 +6,7 @@ import {
   Text,
   View,
   SafeAreaView,
+  Switch,
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
@@ -51,12 +52,54 @@ function millivoltToTemperature_K(mv) {
 
   return t; // Temperature in °C
 }
+function temperatureToMillivolt_K(temp) {
+  let coeffs;
+
+  if (temp >= -270 && temp < 0) {
+    // Range: -270°C to 0°C
+    coeffs = [
+      0.0, 3.9450128025e-2, 2.3622373598e-5, -3.2858906784e-7, -4.9904828777e-9,
+      -6.7509059173e-11, -5.7410327428e-13, -3.1088872894e-15,
+      -1.0451609365e-17, -1.9889266878e-20, -1.6322697486e-23,
+    ];
+  } else if (temp >= 0 && temp <= 1372) {
+    // Range: 0°C to 1372°C
+    coeffs = [
+      -1.7600413686e-2, 3.8921204975e-2, 1.8558770032e-5, -9.9457592874e-8,
+      3.1840945719e-10, -5.6072844889e-13, 5.6075059059e-16, -3.2020720003e-19,
+      9.7151147152e-23, -1.2104721275e-26,
+    ];
+  } else {
+    return NaN; // Out of range
+  }
+
+  let mv = 0;
+  for (let i = 0; i < coeffs.length; i++) {
+    mv += coeffs[i] * Math.pow(temp, i);
+  }
+
+  return mv; // in millivolts
+}
 
 const Thermocouple = () => {
   const navigation = useNavigation();
   const [input, setInput] = useState("0");
   const [result, setResult] = useState(null);
+  const [isReverse, setIsReverse] = useState(false); // false = Ω -> °C, true = °C -> Ω
+  const unitOutLabel = !isReverse ? "°C" : "mV";
+  const inputLabel = isReverse ? "Temperature" : "milliVolt";
+  const unitLabel = isReverse ? "°C" : "mV";
+  const resultTitle = isReverse ? "milliVolt" : "Temperature";
+  // const minMv = -5.891;
+  const minMv = 0;
+  const maxMv = 54.886;
+  const minTemp = 0;
+  // const minTemp = -270;
+  const maxTemp = 1372;
+  const SCALE_STEPS = 6;
 
+  const minimumValue = !isReverse ? minMv : minTemp;
+  const maximumValue = !isReverse ? maxMv : maxTemp;
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Type K Thermocouple",
@@ -88,8 +131,15 @@ const Thermocouple = () => {
     setInput(text);
     const value = parseFloat(text);
     if (!isNaN(value)) {
-      const T = millivoltToTemperature_K(value);
-      setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+      if (!isReverse) {
+        // Ω -> °C
+        const T = millivoltToTemperature_K(value);
+        setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+      } else {
+        // °C -> Ω
+        const mv = temperatureToMillivolt_K(value);
+        setResult(isNaN(mv) ? "I nvalid" : mv.toFixed(3));
+      }
     } else {
       setResult(null);
     }
@@ -110,26 +160,80 @@ const Thermocouple = () => {
     if (temperature > 500) return "Hot";
     return "Normal";
   };
-  const handleSliderChange = (value) => {
-     
-    const textValue = value.toFixed(3);
-    setInput(textValue);
-    const T = millivoltToTemperature_K(value);
-    setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+ 
+  const toggleReverse = () => {
+    const currentValue = parseFloat(input);
+
+    if (!isNaN(currentValue)) {
+      if (!isReverse) {
+        // Switching from mv → °C to °C → mv
+        const newTemp = Math.round(millivoltToTemperature_K(currentValue));
+        if (!isNaN(newTemp)) {
+          const newMv = temperatureToMillivolt_K(newTemp);
+          setIsReverse(true);
+          setInput(newTemp.toFixed(2));
+          setResult(newMv.toFixed(3));
+          return;
+        }
+      } else {
+        // Switching from °C → mv to mv → °C
+        const newMv = Math.round(temperatureToMillivolt_K(currentValue));
+        const newT = millivoltToTemperature_K(newMv);
+        if (!isNaN(newT)) {
+          setIsReverse(false);
+          setInput(newMv.toFixed(2));
+          setResult(newT.toFixed(2));
+          return;
+        }
+      }
+    }
+
+    // Fallback if conversion fails or invalid input
+    setIsReverse(!isReverse);
+    setInput("");
+    setResult(null);
+  };
+
+  const onSliderComplete = (value) => {
+    const txt = value.toFixed(3);
+    if (!isReverse) {
+      // slider is mv
+
+      setInput(txt);
+      const T = millivoltToTemperature_K(value);
+      setResult(isNaN(T) ? "Invalid" : T.toFixed(1));
+    } else {
+      // slider is temperature
+
+      setInput(txt);
+      const mv = temperatureToMillivolt_K(value);
+      setResult(isNaN(mv) ? "Invalid" : mv.toFixed(3));
+    }
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={colors.primary || "#34C759"}
-        />
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.primary || "#34C759"}
+      />
 
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-        >
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.switchRow}>
+          <Text style={styles.switchText}>
+            {isReverse ? "°C → mv" : "mv → °C"}
+          </Text>
+          <Switch
+            value={isReverse}
+            onValueChange={toggleReverse}
+            trackColor={{ true: colors.primary || "#34C759", false: "#ccc" }}
+            thumbColor={isReverse ? "#fff" : "#fff"}
+          />
+        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           {/* Input Card */}
           <View style={styles.inputCard}>
             <View style={styles.inputHeader}>
@@ -138,7 +242,7 @@ const Thermocouple = () => {
                 size={20}
                 color={colors.primary || "#34C759"}
               />
-              <Text style={styles.inputLabel}>Input Millivolt Value</Text>
+              <Text style={styles.inputLabel}>Input {inputLabel}</Text>
             </View>
             <View style={styles.inputWrapper}>
               <TextInput
@@ -149,165 +253,157 @@ const Thermocouple = () => {
                 value={input}
                 onChangeText={handleInputChange}
               />
-              <Text style={styles.mvUnit}>mV</Text>
+              <Text style={styles.mvUnit}>{unitLabel}</Text>
             </View>
             <Slider
               style={{ marginTop: 16 }}
-              minimumValue={-5.891}
-              maximumValue={54.886}
+              minimumValue={minimumValue}
+              maximumValue={maximumValue}
               step={0.001}
               value={parseFloat(input) || 0}
-              onSlidingComplete={(value) => {
-                const textValue = value.toFixed(3);
-                setInput(textValue);
-                const T = millivoltToTemperature_K(value);
-                setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
-              }}
+              onSlidingComplete={onSliderComplete}
               minimumTrackTintColor={colors.primary || "#34C759"}
               maximumTrackTintColor="#ccc"
             />
+            <View style={styles.rulerContainer}>
+              {Array.from({ length: SCALE_STEPS + 1 }, (_, i) => {
+                const val = (maximumValue / SCALE_STEPS) * i;
+                return (
+                  <View key={i} style={styles.tickContainer}>
+                    <View style={styles.tick} />
+                    <Text style={styles.tickLabel}>{Math.round(val)}</Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
-
-          {/* Result Card */}
-          {result !== null && (
-            <View style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <View style={styles.resultTitleContainer}>
-                  <Ionicons
-                    name="thermometer-outline"
-                    size={20}
-                    color={colors.primary || "#34C759"}
-                  />
-                  <Text style={styles.resultTitle}>Temperature Result</Text>
-                </View>
+        </TouchableWithoutFeedback>
+        {/* Result Card */}
+        {result !== null && (
+          <View style={styles.resultCard}>
+            <View style={styles.resultHeader}>
+              <View style={styles.resultTitleContainer}>
+                <Ionicons
+                  name="thermometer-outline"
+                  size={20}
+                  color={colors.primary || "#34C759"}
+                />
+                <Text style={styles.resultTitle}>{resultTitle} Result</Text>
               </View>
+            </View>
 
-              <View style={styles.temperatureDisplay}>
-                <Text style={styles.temperatureLabel}>
-                  Calculated Temperature
+            <View style={styles.temperatureDisplay}>
+              <Text style={styles.temperatureLabel}>
+                Calculated {resultTitle}
+              </Text>
+              <View style={styles.temperatureValueContainer}>
+                <Text
+                  style={[
+                    styles.temperatureValue,
+                    { color: getTemperatureColor(result) },
+                  ]}
+                >
+                  {result}
                 </Text>
-                <View style={styles.temperatureValueContainer}>
-                  <Text
-                    style={[
-                      styles.temperatureValue,
-                      { color: getTemperatureColor(result) },
-                    ]}
-                  >
-                    {result}
-                  </Text>
-                  <Text style={styles.temperatureUnit}>°C</Text>
-                </View>
-              </View>
-
-              <View
-                style={[
-                  styles.temperatureInfo,
-                  { borderLeftColor: getTemperatureColor(result) },
-                ]}
-              >
-                <Text style={styles.temperatureInfoText}>
-                  {result === "Invalid"
-                    ? "❌ Millivolt value is outside supported range (-5.891 to 54.886 mV)"
-                    : parseFloat(result) < 0}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {/* Range Info Card */}
-          <View style={styles.rangeCard}>
-            <View style={styles.rangeHeader}>
-              <Ionicons
-                name="analytics"
-                size={20}
-                color={colors.primary || "#34C759"}
-              />
-              <Text style={styles.rangeTitle}>Operating Range</Text>
-            </View>
-            <View style={styles.rangeGrid}>
-              <View style={styles.rangeItem}>
-                <View style={styles.rangeIconContainer}>
-                  <Ionicons name="snow" size={24} color="#2196F3" />
-                </View>
-                <Text style={styles.rangeLabel}>Minimum</Text>
-                <Text style={styles.rangeValue}>-5.891 mV</Text>
-                <Text style={styles.rangeTemp}>-270°C</Text>
-              </View>
-              <View style={styles.rangeItem}>
-                <View style={styles.rangeIconContainer}>
-                  <Ionicons name="flame" size={24} color="#FF5722" />
-                </View>
-                <Text style={styles.rangeLabel}>Maximum</Text>
-                <Text style={styles.rangeValue}>54.886 mV</Text>
-                <Text style={styles.rangeTemp}>1372°C</Text>
+                <Text style={styles.temperatureUnit}>{unitOutLabel}</Text>
               </View>
             </View>
           </View>
+        )}
 
-          {/* Reference Values Card */}
-          <View style={styles.referenceCard}>
-            <View style={styles.referenceHeader}>
-              <Ionicons
-                name="list"
-                size={20}
-                color={colors.primary || "#34C759"}
-              />
-              <Text style={styles.referenceTitle}>Reference Values</Text>
+        {/* Range Info Card */}
+        <View style={styles.rangeCard}>
+          <View style={styles.rangeHeader}>
+            <Ionicons
+              name="analytics"
+              size={20}
+              color={colors.primary || "#34C759"}
+            />
+            <Text style={styles.rangeTitle}>Operating Range</Text>
+          </View>
+          <View style={styles.rangeGrid}>
+            <View style={styles.rangeItem}>
+              <View style={styles.rangeIconContainer}>
+                <Ionicons name="snow" size={24} color="#2196F3" />
+              </View>
+              <Text style={styles.rangeLabel}>Minimum</Text>
+              <Text style={styles.rangeValue}>-5.891 mV</Text>
+              <Text style={styles.rangeTemp}>-270°C</Text>
             </View>
-            <View style={styles.referenceGrid}>
-              <View style={styles.referenceItem}>
-                <View style={styles.refIconContainer}>
-                  <Ionicons name="water" size={16} color="#2196F3" />
-                </View>
-                <Text style={styles.refTemp}>0°C</Text>
-                <Text style={styles.refMv}>0.000 mV</Text>
+            <View style={styles.rangeItem}>
+              <View style={styles.rangeIconContainer}>
+                <Ionicons name="flame" size={24} color="#FF5722" />
               </View>
-              <View style={styles.referenceItem}>
-                <View style={styles.refIconContainer}>
-                  <Ionicons name="thermometer" size={16} color="#4CAF50" />
-                </View>
-                <Text style={styles.refTemp}>100°C</Text>
-                <Text style={styles.refMv}>4.096 mV</Text>
-              </View>
-              <View style={styles.referenceItem}>
-                <View style={styles.refIconContainer}>
-                  <Ionicons name="sunny" size={16} color="#FF9800" />
-                </View>
-                <Text style={styles.refTemp}>200°C</Text>
-                <Text style={styles.refMv}>8.138 mV</Text>
-              </View>
-              <View style={styles.referenceItem}>
-                <View style={styles.refIconContainer}>
-                  <Ionicons name="flame" size={16} color="#FF5722" />
-                </View>
-                <Text style={styles.refTemp}>500°C</Text>
-                <Text style={styles.refMv}>20.644 mV</Text>
-              </View>
+              <Text style={styles.rangeLabel}>Maximum</Text>
+              <Text style={styles.rangeValue}>54.886 mV</Text>
+              <Text style={styles.rangeTemp}>1372°C</Text>
             </View>
           </View>
+        </View>
 
-          {/* Info Card */}
-          <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Type K Thermocouple</Text>
-            <Text style={styles.infoText}>
-              Type K thermocouples use Chromel (Ni-Cr) and Alumel (Ni-Al)
-              alloys. They provide accurate temperature measurements from -270°C
-              to 1372°C using NIST ITS-90 standard equations.
-            </Text>
-            <View style={styles.specsContainer}>
-              <View style={styles.specItem}>
-                <Text style={styles.specLabel}>Temperature Range</Text>
-                <Text style={styles.specValue}>-270°C to 1372°C</Text>
+        {/* Reference Values Card */}
+        <View style={styles.referenceCard}>
+          <View style={styles.referenceHeader}>
+            <Ionicons
+              name="list"
+              size={20}
+              color={colors.primary || "#34C759"}
+            />
+            <Text style={styles.referenceTitle}>Reference Values</Text>
+          </View>
+          <View style={styles.referenceGrid}>
+            <View style={styles.referenceItem}>
+              <View style={styles.refIconContainer}>
+                <Ionicons name="water" size={16} color="#2196F3" />
               </View>
-              <View style={styles.specItem}>
-                <Text style={styles.specLabel}>Accuracy</Text>
-                <Text style={styles.specValue}>±1.1°C to ±2.2°C</Text>
+              <Text style={styles.refTemp}>0°C</Text>
+              <Text style={styles.refMv}>0.000 mV</Text>
+            </View>
+            <View style={styles.referenceItem}>
+              <View style={styles.refIconContainer}>
+                <Ionicons name="thermometer" size={16} color="#4CAF50" />
               </View>
+              <Text style={styles.refTemp}>100°C</Text>
+              <Text style={styles.refMv}>4.096 mV</Text>
+            </View>
+            <View style={styles.referenceItem}>
+              <View style={styles.refIconContainer}>
+                <Ionicons name="sunny" size={16} color="#FF9800" />
+              </View>
+              <Text style={styles.refTemp}>200°C</Text>
+              <Text style={styles.refMv}>8.138 mV</Text>
+            </View>
+            <View style={styles.referenceItem}>
+              <View style={styles.refIconContainer}>
+                <Ionicons name="flame" size={16} color="#FF5722" />
+              </View>
+              <Text style={styles.refTemp}>500°C</Text>
+              <Text style={styles.refMv}>20.644 mV</Text>
             </View>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        </View>
+
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Type K Thermocouple</Text>
+          <Text style={styles.infoText}>
+            Type K thermocouples use Chromel (Ni-Cr) and Alumel (Ni-Al) alloys.
+            They provide accurate temperature measurements from -270°C to 1372°C
+            using NIST ITS-90 standard equations.
+          </Text>
+          <View style={styles.specsContainer}>
+            <View style={styles.specItem}>
+              <Text style={styles.specLabel}>Temperature Range</Text>
+              <Text style={styles.specValue}>-270°C to 1372°C</Text>
+            </View>
+            <View style={styles.specItem}>
+              <Text style={styles.specLabel}>Accuracy</Text>
+              <Text style={styles.specValue}>±1.1°C to ±2.2°C</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -615,6 +711,41 @@ const styles = StyleSheet.create({
   specValue: {
     fontSize: 14,
     fontWeight: "600",
+    color: "#333",
+  },
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginBottom: 8,
+    paddingRight: 4,
+  },
+  switchText: {
+    marginRight: 12,
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "600",
+  },
+  rulerContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 0,
+    marginRight: 1,
+    marginTop: 12,
+  },
+  tickContainer: {
+    alignItems: "center",
+    width: 27,
+  },
+  tick: {
+    width: 1,
+    height: 12,
+    backgroundColor: "#666",
+    marginBottom: 4,
+  },
+  tickLabel: {
+    fontSize: 8,
     color: "#333",
   },
 });

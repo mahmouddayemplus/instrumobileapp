@@ -135,7 +135,7 @@ const PT100Calculator = () => {
           const newR = temperatureToResistance_PT100(newTemp);
           setIsReverse(true);
           setInput(newTemp.toFixed(2));
-          setResult(newR.toFixed(3));
+          setResult(newR.toFixed(2));
           return;
         }
       } else {
@@ -144,7 +144,7 @@ const PT100Calculator = () => {
         const newT = resistanceToTemperature_PT100(newR);
         if (!isNaN(newT)) {
           setIsReverse(false);
-          setInput(newR.toFixed(3));
+          setInput(newR.toFixed(2));
           setResult(newT.toFixed(2));
           return;
         }
@@ -193,7 +193,7 @@ const PT100Calculator = () => {
               <TextInput
                 style={styles.input}
                 keyboardType="decimal-pad"
-                placeholder="resistance..."
+                placeholder={""}
                 placeholderTextColor="#999"
                 value={input}
                 onChangeText={handleInputChange}
