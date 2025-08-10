@@ -84,6 +84,9 @@ const PT100Calculator = () => {
 
   // update result whenever input changes (mode-aware)
   const handleInputChange = (text) => {
+    console.log('====================================');
+    console.log(isReverse);
+    console.log('====================================');
     setInput(text);
     const value = parseFloat(text);
     if (!isNaN(value)) {
@@ -103,19 +106,19 @@ const PT100Calculator = () => {
 
   // slider change handler (live)
   const onSliderChange = (value) => {
-    if (!isReverse) {
-      // slider is resistance
-      const txt = value.toFixed(3);
-      setInput(txt);
-      const T = resistanceToTemperature_PT100(value);
-      setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
-    } else {
-      // slider is temperature
-      const txt = value.toFixed(2);
-      setInput(txt);
-      const R = temperatureToResistance_PT100(value);
-      setResult(isNaN(R) ? "Invalid" : R.toFixed(3));
-    }
+    // if (!isReverse) {
+    //   // slider is resistance
+    //   const txt = value.toFixed(3);
+    //   setInput(txt);
+    //   const T = resistanceToTemperature_PT100(value);
+    //   setResult(isNaN(T) ? "Invalid" : T.toFixed(2));
+    // } else {
+    //   // slider is temperature
+    //   const txt = value.toFixed(2);
+    //   setInput(txt);
+    //   const R = temperatureToResistance_PT100(value);
+    //   setResult(isNaN(R) ? "Invalid" : R.toFixed(3));
+    // }
   };
 
   // toggle mode and try to preserve meaning by swapping values where possible
