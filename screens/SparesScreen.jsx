@@ -278,6 +278,9 @@ const SparesScreen = () => {
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
+    console.log('====================================');
+    console.log(category);
+    console.log('====================================');
     const filtered = spares.filter((item) => {
       const matchesSearch =
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -305,10 +308,11 @@ const SparesScreen = () => {
 
   const categories = [
     { key: "all", label: "All", icon: "grid-outline" },
-    { key: "general", label: "General", icon: "construct-outline" },
+    { key: "general", label: "Inst", icon: "construct-outline" },
     { key: "plc", label: "PLC", icon: "hardware-chip-outline" },
     { key: "packing", label: "Packing", icon: "cube-outline" },
     { key: "favorites", label: "Favorites", icon: "heart-outline" },
+    { key: "warehouse", label: "warehouse", icon: "grid-outline" },
   ];
 
   return (
@@ -325,7 +329,7 @@ const SparesScreen = () => {
             name="search"
             size={20}
             color={colors.textSecondary}
-            style={styles.searchIcon}
+            style={styles.searchIcon} 
           />
           <TextInput
             placeholder="Search by title or SAP code"

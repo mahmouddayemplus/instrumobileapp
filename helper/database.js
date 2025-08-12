@@ -4,16 +4,16 @@ let db;
 
 export const initDb = async ( update =false) => {
     try {
-        db = await SQLite.openDatabaseAsync('pmTasks.db');
+        db = await SQLite.openDatabaseAsync('qcc_hcc_all_warehouse.db');
         if (update) {
         await db.execAsync(`DROP TABLE IF EXISTS tasks;`);
         }
 
         await db.execAsync(`
       CREATE TABLE IF NOT EXISTS tasks (
-        id TEXT PRIMARY KEY NOT NULL,
-        section TEXT NOT NULL,
-        "order" INTEGER
+        new TEXT PRIMARY KEY NOT NULL,
+        old  TEXT NOT NULL,
+        description INTEGER
       );
     `);
      } catch (error) {
@@ -22,16 +22,16 @@ export const initDb = async ( update =false) => {
 };
 
 
-export const saveTasksToSQLite = async (id, section, order) => {
-    try {
-        await db.runAsync(
-            `INSERT OR REPLACE INTO tasks (id, section, "order") VALUES (?, ?, ?);`,
-            [id, section, order]
-        );
-     } catch (error) {
-        console.error('❌ Insert error:', error);
-    }
-};
+// export const saveTasksToSQLite = async (id, section, order) => {
+//     try {
+//         await db.runAsync(
+//             `INSERT OR REPLACE INTO tasks (id, section, "order") VALUES (?, ?, ?);`,
+//             [id, section, order]
+//         );
+//      } catch (error) {
+//         console.error('❌ Insert error:', error);
+//     }
+// };
 
 
 
