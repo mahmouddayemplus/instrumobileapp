@@ -12,7 +12,7 @@ import { FlatList, TextInput, ActivityIndicator } from "react-native";
 import { colors } from "../constants/color";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
-import { searchWarehouse, searchItems, getTasksFromSQLite, testDatabase, initializeDatabase, checkDatabaseFile, resetDatabase } from "../helper/database";
+import { getItems, searchItems } from "../helper/database";
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
   const [dataError, setDataError] = useState(false);
@@ -68,48 +68,7 @@ const SparesScreen = () => {
   }, []);
 
   // Test warehouse database on component load
-  useEffect(() => {
-    const testWarehouseDatabase = async () => {
-      try {
-        console.log("🧪 Testing warehouse database...");
-        
-        // Reset database state first
-        resetDatabase();
-        
-        // First check if database file exists
-        const fileExists = await checkDatabaseFile();
-        console.log("Database file exists:", fileExists);
-        
-        // Initialize database
-        const initResult = await initializeDatabase();
-        console.log("Database initialization result:", initResult);
-        
-        if (initResult.success) {
-          console.log("✅ Warehouse database is working!");
-          
-          // Test search functionality
-          try {
-            const searchResult = await searchWarehouse('sample', 5);
-            console.log("Sample search result:", searchResult);
-            
-            if (searchResult && searchResult.length > 0) {
-              console.log("✅ Search functionality is working!");
-            } else {
-              console.log("⚠️ Search returned no results (this might be normal)");
-            }
-          } catch (searchError) {
-            console.error("❌ Search test failed:", searchError);
-          }
-        } else {
-          console.log("❌ Warehouse database initialization failed:", initResult.error);
-        }
-      } catch (error) {
-        console.error("❌ Error testing warehouse database:", error);
-      }
-    };
-
-    testWarehouseDatabase();
-  }, []);
+   
 
   // Detect when spares is set to empty array and trigger error state
   useEffect(() => {
@@ -225,25 +184,29 @@ const SparesScreen = () => {
 
   const handleSearch = async (text) => {
     setSearchQuery(text);
-    
+
     if (selectedCategory === "warehouse") {
       // Search in warehouse database
       try {
-        const warehouseResults = await searchWarehouse(text, 100);
-        console.log("Warehouse search results:", warehouseResults);
-        
-        // Convert warehouse results to match spares format
-        const convertedResults = warehouseResults.map(item => ({
-          id: item.id,
-          code: item.new || item.old || '',
-          title: item.description || '',
-          category: 'warehouse',
-          new_code: item.new || '',
-          old_code: item.old || '',
-          description: item.description || ''
-        }));
-        
-        setFilteredSpares(convertedResults);
+        const warehouseResults = await searchItems('mcu');
+        console.log('====================================');
+        console.log(warehouseResults);
+        console.log('====================================');
+        // const warehouseResults = await searchWarehouse(text, 100);
+        // console.log("Warehouse search results:", warehouseResults);
+
+        // // Convert warehouse results to match spares format
+        // const convertedResults = warehouseResults.map(item => ({
+        //   id: item.id,
+        //   code: item.new || item.old || '',
+        //   title: item.description || '',
+        //   category: '',
+        //   new_code: item.new || '',
+        //   old_code: item.old || '',
+        //   description: item.description || ''
+        // }));
+
+        // setFilteredSpares(convertedResults);
       } catch (error) {
         console.error("Warehouse search error:", error);
         setFilteredSpares([]);
@@ -265,28 +228,28 @@ const SparesScreen = () => {
   const handleCategoryChange = async (category) => {
     setSelectedCategory(category);
     console.log("Category changed to:", category);
-    
+
     if (category === "warehouse") {
       // Load warehouse data
       try {
-        const warehouseResults = await searchWarehouse(searchQuery, 100);
-        console.log("Initial warehouse results:", warehouseResults);
-        
-        // Convert warehouse results to match spares format
-        const convertedResults = warehouseResults.map(item => ({
-          id: item.id,
-          code: item.new || item.old || '',
-          title: item.description || '',
-          category: 'warehouse',
-          new_code: item.new || '',
-          old_code: item.old || '',
-          description: item.description || ''
-        }));
-        
-        setFilteredSpares(convertedResults);
+        // const warehouseResults = await searchWarehouse(searchQuery, 100);
+        // console.log("Initial warehouse results:", warehouseResults);
+
+        // // Convert warehouse results to match spares format
+        // const convertedResults = warehouseResults.map((item) => ({
+        //   id: item.id,
+        //   code: item.new || item.old || "",
+        //   title: item.description || "",
+        //   category: "warehouse",
+        //   new_code: item.new || "",
+        //   old_code: item.old || "",
+        //   description: item.description || "",
+        // }));
+
+        // setFilteredSpares(convertedResults);
       } catch (error) {
         console.error("Warehouse category error:", error);
-        setFilteredSpares([]);
+        // setFilteredSpares([]);
       }
     } else {
       // Handle other categories

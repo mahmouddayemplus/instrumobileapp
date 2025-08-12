@@ -2,15 +2,14 @@ import * as FileSystem from 'expo-file-system';
 import * as Asset from 'expo-asset';
 import * as SQLite from 'expo-sqlite';
 
-const dbFileName = 'warehouse.db';
+const DB_NAME = 'warehouse.db';
 
-async function openDatabase() {
-  const dbFile = `${FileSystem.documentDirectory}${dbFileName}`;
-
-  // Check if DB file already copied
+// Step 1: Copy DB from assets to document directory
+async function copyDatabase() {
+  const dbFile = `${FileSystem.documentDirectory}${DB_NAME}`;
   const fileInfo = await FileSystem.getInfoAsync(dbFile);
+
   if (!fileInfo.exists) {
-    // Copy from assets to document directory
     const asset = Asset.Asset.fromModule(require('../assets/warehouse.db'));
     await asset.downloadAsync();
     await FileSystem.copyAsync({
@@ -19,100 +18,66 @@ async function openDatabase() {
     });
   }
 
-  // Open DB from copied location
-  const db = SQLite.openDatabaseAsync(dbFile);
-  return db;
+  return dbFile;
 }
-// export const initDb = async (update = false) => {
-//     try {
-//         db = await SQLite.openDatabaseAsync('qcc_hcc_all_warehouse.db');
 
+// Step 2: Open the DB asynchronously
+async function openDatabase(dbFile) {
+  return SQLite.openDatabaseAsync(dbFile);
+}
 
-//         await db.execAsync(`
-//       CREATE TABLE IF NOT EXISTS qcc_hcc_all_warehouse (
-//         new TEXT PRIMARY KEY NOT NULL,
-//         old  TEXT NOT NULL,
-//         description TEXT NOT NULL
-//       );
-//     `);
-//     } catch (error) {
-//         console.error('❌ Error initializing DB:', error);
-//     }
-// };
+// Step 3: Updated helper to run SQL with proper result handling
+async function executeSqlAsync(db, sql, params = []) {
+  try {
+    // For SELECT queries, we need to use getAllAsync
+    if (sql.trim().toUpperCase().startsWith('SELECT')) {
+      return await db.getAllAsync(sql, params);
+    }
+    // For other queries (INSERT, UPDATE, DELETE)
+    return await db.runAsync(sql, params);
+  } catch (error) {
+    console.error('SQL Error:', error);
+    throw error;
+  }
+}
 
-const db = await openDatabase();
-const rows = await db.getAllAsync(`SELECT * FROM "items" LIMIT 10;`);
+// Public function to get DB handle
+export async function getDatabase() {
+  const dbFile = await copyDatabase();
+  return await openDatabase(dbFile);
+}
 
+// Example: get rows from "items" table
+export async function getItems(limit = 10) {
+  try {
+    const db = await getDatabase();
+    // For SELECT queries, getAllAsync returns the rows directly
+    const rows = await db.getAllAsync('SELECT * FROM items LIMIT ?;', [limit]);
+    return rows || []; // Return empty array if undefined
+  } catch (error) {
+    console.error('❌ Fetch error:', error);
+    return [];
+  }
+}
 
-// console.log('==============ddddddd==================');
-// console.log(rows);
-// console.log('====================================');
+// Example: search items by term in multiple columns
+export async function searchItems(term, limit = 100) {
+  try {
+    const db = await getDatabase();
+    const likeTerm = `%${term.replace(/[%_]/g, '\\$&')}%`;
 
+    const sql = `
+      SELECT * FROM items
+      WHERE "new" LIKE ? ESCAPE '\\'
+        OR "old" LIKE ? ESCAPE '\\'
+        OR "description" LIKE ? ESCAPE '\\'
+      LIMIT ?;
+    `;
 
-
-
-
-// export const getTasksFromSQLite = async () => {
-//         const db = await SQLite.openDatabaseAsync('qcc_hcc_all_warehouse.db');
-
-//     try {
-//         const result = await db.getAllAsync(`SELECT * FROM items limit 10 ASC;`);
-//         return result; // array of rows
-//     } catch (error) {
-//         console.error('❌ Fetch error:', error);
-//         return [];
-//     }
-// };
-
-
-// function escapeLike(term) {
-//     return term.replace(/[%_]/g, '\\$&');
-// }
-// const DB_NAME = 'qcc_hcc_all_warehouse.db'; // or 'qcc_hcc_all_warehouse.db'
-// const TABLE = 'items';
-// export async function searchWarehouse(term, limit = 100) {
-//     console.log('====================================');
-//     console.log(term);
-//     console.log('====================================');
-//     const db = await SQLite.openDatabaseAsync(DB_NAME);
-//     const like = `%${escapeLike( term )}%`;
-
-//     const sql = `
-//     SELECT id, "new", "old", "description"
-//     FROM "${TABLE}"
-//     WHERE "new" LIKE ? ESCAPE '\\'
-//        OR "old" LIKE ? ESCAPE '\\'
-//        OR "description" LIKE ? ESCAPE '\\'
-//     ORDER BY id DESC
-//     LIMIT ${limit};
-//   `;
-
-//     const rows = await db.getAllAsync(sql, [like, like, like]);
-//     console.log('====================================');
-//     console.log(rows);
-//     console.log('====================================');
-//     return rows; // array of objects
-// }
-// export const searchItems = async (searchTerm) => {
-//     const DB_NAME = 'qcc_hcc_all_warehouse'; // or 'qcc_hcc_all_warehouse.db'
-//     const TABLE = 'items';
-//     const db = await SQLite.openDatabaseAsync(DB_NAME);
-
-//     try {
-//         const query = `
-//       SELECT * FROM items
-//       WHERE new LIKE ? OR old LIKE ? OR description LIKE ?
-//       ORDER BY new ASC;
-//     `;
-//         const param = `%${searchTerm}%`;
-
-//         const result = await db.getAllAsync(query, [param, param, param]);
-//         console.log('Search results:', result);
-//         return result;
-//     } catch (error) {
-//         console.error('❌ Search error:', error);
-//         return [];
-//     }
-// };
-
-
+    const rows = await db.getAllAsync(sql, [likeTerm, likeTerm, likeTerm, limit]);
+    return rows || [];
+  } catch (error) {
+    console.error('❌ Search error:', error);
+    return [];
+  }
+}
