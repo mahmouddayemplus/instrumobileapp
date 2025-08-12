@@ -62,6 +62,9 @@ export async function getItems(limit = 10) {
 
 // Example: search items by term in multiple columns
 export async function searchItems(term, limit = 100) {
+  console.log('==============term=============');
+  console.log(term);
+  console.log('====================================');
   try {
     const db = await getDatabase();
     const likeTerm = `%${term.replace(/[%_]/g, '\\$&')}%`;

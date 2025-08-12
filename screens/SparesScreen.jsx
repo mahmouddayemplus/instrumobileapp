@@ -188,7 +188,7 @@ const SparesScreen = () => {
     if (selectedCategory === "warehouse") {
       // Search in warehouse database
       try {
-        const warehouseResults = await searchItems('mcu');
+        const warehouseResults = await searchItems(searchQuery);
         console.log('====================================');
         console.log(warehouseResults);
         console.log('====================================');
