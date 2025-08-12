@@ -55,6 +55,6 @@ export default {
       favicon: "./assets/favicon.png",
     },
 
-    plugins: ["expo-sqlite"],
+    plugins: ["expo-sqlite",'expo-asset'],
   },
 };
