@@ -23,3 +23,4 @@ echo.
 echo Please restart your terminal/command prompt for changes to take effect.
 echo Then run: java -version
 pause
+

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Linking } from "react-native";
 import { toggleFavorite } from "../store/favoritesSlice";
-import SparesComponent from "../components/SparesComponent";
+import SparesComponent from '../components/SparesComponent'
 import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,7 +12,7 @@ import { FlatList, TextInput, ActivityIndicator } from "react-native";
 import { colors } from "../constants/color";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
-import { searchWarehouse, searchItems, getTasksFromSQLite, testDatabase, initializeDatabase, checkDatabaseFile, resetDatabase } from "../helper/database";
+
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
   const [dataError, setDataError] = useState(false);
@@ -65,50 +65,6 @@ const SparesScreen = () => {
     };
 
     fetchSpares();
-  }, []);
-
-  // Test warehouse database on component load
-  useEffect(() => {
-    const testWarehouseDatabase = async () => {
-      try {
-        console.log("🧪 Testing warehouse database...");
-        
-        // Reset database state first
-        resetDatabase();
-        
-        // First check if database file exists
-        const fileExists = await checkDatabaseFile();
-        console.log("Database file exists:", fileExists);
-        
-        // Initialize database
-        const initResult = await initializeDatabase();
-        console.log("Database initialization result:", initResult);
-        
-        if (initResult.success) {
-          console.log("✅ Warehouse database is working!");
-          
-          // Test search functionality
-          try {
-            const searchResult = await searchWarehouse('sample', 5);
-            console.log("Sample search result:", searchResult);
-            
-            if (searchResult && searchResult.length > 0) {
-              console.log("✅ Search functionality is working!");
-            } else {
-              console.log("⚠️ Search returned no results (this might be normal)");
-            }
-          } catch (searchError) {
-            console.error("❌ Search test failed:", searchError);
-          }
-        } else {
-          console.log("❌ Warehouse database initialization failed:", initResult.error);
-        }
-      } catch (error) {
-        console.error("❌ Error testing warehouse database:", error);
-      }
-    };
-
-    testWarehouseDatabase();
   }, []);
 
   // Detect when spares is set to empty array and trigger error state
@@ -223,87 +179,121 @@ const SparesScreen = () => {
     );
   }
 
-  const handleSearch = async (text) => {
+  const handleSearch = (text) => {
     setSearchQuery(text);
-    
-    if (selectedCategory === "warehouse") {
-      // Search in warehouse database
-      try {
-        const warehouseResults = await searchWarehouse(text, 100);
-        console.log("Warehouse search results:", warehouseResults);
-        
-        // Convert warehouse results to match spares format
-        const convertedResults = warehouseResults.map(item => ({
-          id: item.id,
-          code: item.new || item.old || '',
-          title: item.description || '',
-          category: 'warehouse',
-          new_code: item.new || '',
-          old_code: item.old || '',
-          description: item.description || ''
-        }));
-        
-        setFilteredSpares(convertedResults);
-      } catch (error) {
-        console.error("Warehouse search error:", error);
-        setFilteredSpares([]);
-      }
-    } else {
-      // Search in regular spares
-      const filtered = spares.filter((item) => {
-        const matchesSearch =
-          item.title.toLowerCase().includes(text.toLowerCase()) ||
-          item.code.toLowerCase().includes(text.toLowerCase());
-        const matchesCategory =
-          selectedCategory === "all" || item.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-      });
-      setFilteredSpares(filtered);
-    }
+    const filtered = spares.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(text.toLowerCase()) ||
+        item.code.toLowerCase().includes(text.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "all" || item.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+    setFilteredSpares(filtered);
   };
 
-  const handleCategoryChange = async (category) => {
+  const RenderItem = ({ item }) => {
+    const dispatch = useDispatch();
+    const favorites = useSelector((state) => state.favorites.items);
+    const isFavorite = favorites.includes(item.code);
+    const navigation = useNavigation();
+    const defaultImage = require("../assets/no-image.webp");
+
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
+
+    const handleFavoriteButton = () => {
+      dispatch(toggleFavorite(item.code));
+    };
+
+    return (
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => navigation.navigate("SpareDetailScreen", { item })}
+      >
+        <View style={styles.imageContainer}>
+          {!imageLoaded && !imageError && (
+            <ActivityIndicator
+              size="small"
+              color={colors.primary}
+              style={styles.imageLoader}
+            />
+          )}
+          <Image
+            source={imageError ? defaultImage : imageUrl}
+            style={styles.itemImage}
+            contentFit="contain"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageError(true);
+              setImageLoaded(true);
+            }}
+            transition={300}
+          />
+        </View>
+
+        <View style={styles.contentContainer}>
+          <View style={styles.textContainer}>
+            <Text style={styles.code}>
+              {item.code} | {item.new_code}
+            </Text>
+            <Text style={styles.title} numberOfLines={3}>
+              {item.title}
+            </Text>
+            <View style={styles.categoryContainer}>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>
+                  {item.category?.toUpperCase() || "GENERAL"}
+                </Text>
+              </View>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  onPress={() => handleShareToWhatsApp(item)}
+                  style={styles.actionButton}
+                >
+                  <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleFavoriteButton}
+                  style={[
+                    styles.actionButton,
+                    isFavorite && styles.favoriteActive,
+                  ]}
+                >
+                  <Ionicons
+                    name={isFavorite ? "pin" : "pin-outline"}
+                    size={20}
+                    color={isFavorite ? "#fff" : colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    console.log("Category changed to:", category);
-    
-    if (category === "warehouse") {
-      // Load warehouse data
-      try {
-        const warehouseResults = await searchWarehouse(searchQuery, 100);
-        console.log("Initial warehouse results:", warehouseResults);
-        
-        // Convert warehouse results to match spares format
-        const convertedResults = warehouseResults.map(item => ({
-          id: item.id,
-          code: item.new || item.old || '',
-          title: item.description || '',
-          category: 'warehouse',
-          new_code: item.new || '',
-          old_code: item.old || '',
-          description: item.description || ''
-        }));
-        
-        setFilteredSpares(convertedResults);
-      } catch (error) {
-        console.error("Warehouse category error:", error);
-        setFilteredSpares([]);
-      }
-    } else {
-      // Handle other categories
-      const filtered = spares.filter((item) => {
-        const matchesSearch =
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.code.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory =
-          category === "all"
-            ? true
-            : category === "favorites"
-            ? favorites.includes(item.code)
-            : item.category === category;
-        return matchesSearch && matchesCategory;
-      });
-      setFilteredSpares(filtered);
-    }
+    console.log('====================================');
+    console.log(category);
+    console.log('====================================');
+    const filtered = spares.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        category === "all"
+          ? true
+          : category === "favorites"
+          ? favorites.includes(item.code)
+          : item.category === category;
+      return matchesSearch && matchesCategory;
+    });
+    setFilteredSpares(filtered);
   };
 
   const handleShareToWhatsApp = (item) => {
@@ -312,7 +302,6 @@ const SparesScreen = () => {
     Linking.openURL(url)
       .then(() => {})
       .catch(() => {
-        0;
         alert("WhatsApp not installed on your device");
       });
   };
@@ -340,7 +329,7 @@ const SparesScreen = () => {
             name="search"
             size={20}
             color={colors.textSecondary}
-            style={styles.searchIcon}
+            style={styles.searchIcon} 
           />
           <TextInput
             placeholder="Search by title or SAP code"

@@ -1,50 +1,26 @@
-import * as FileSystem from 'expo-file-system';
-import * as Asset from 'expo-asset';
-import * as SQLite from 'expo-sqlite';
+// import * as SQLite from 'expo-sqlite' 
 
-const dbFileName = 'warehouse.db';
-
-async function openDatabase() {
-  const dbFile = `${FileSystem.documentDirectory}${dbFileName}`;
-
-  // Check if DB file already copied
-  const fileInfo = await FileSystem.getInfoAsync(dbFile);
-  if (!fileInfo.exists) {
-    // Copy from assets to document directory
-    const asset = Asset.Asset.fromModule(require('../assets/warehouse.db'));
-    await asset.downloadAsync();
-    await FileSystem.copyAsync({
-      from: asset.localUri,
-      to: dbFile,
-    });
-  }
-
-  // Open DB from copied location
-  const db = SQLite.openDatabaseAsync(dbFile);
-  return db;
-}
-// export const initDb = async (update = false) => {
-//     try {
-//         db = await SQLite.openDatabaseAsync('qcc_hcc_all_warehouse.db');
+// const   db = await SQLite.openDatabaseAsync('qcc_hcc_all_warehouse.db');
+// // export const initDb = async (update = false) => {
+// //     try {
+// //         db = await SQLite.openDatabaseAsync('qcc_hcc_all_warehouse.db');
 
 
-//         await db.execAsync(`
-//       CREATE TABLE IF NOT EXISTS qcc_hcc_all_warehouse (
-//         new TEXT PRIMARY KEY NOT NULL,
-//         old  TEXT NOT NULL,
-//         description TEXT NOT NULL
-//       );
-//     `);
-//     } catch (error) {
-//         console.error('❌ Error initializing DB:', error);
-//     }
-// };
-
-const db = await openDatabase();
-const rows = await db.getAllAsync(`SELECT * FROM "items" LIMIT 10;`);
+// //         await db.execAsync(`
+// //       CREATE TABLE IF NOT EXISTS qcc_hcc_all_warehouse (
+// //         new TEXT PRIMARY KEY NOT NULL,
+// //         old  TEXT NOT NULL,
+// //         description TEXT NOT NULL
+// //       );
+// //     `);
+// //     } catch (error) {
+// //         console.error('❌ Error initializing DB:', error);
+// //     }
+// // };
 
 
-// console.log('==============ddddddd==================');
+// const rows = await db.getAllAsync(`SELECT * FROM "${TABLE}" LIMIT 10;`);
+// console.log('====================================');
 // console.log(rows);
 // console.log('====================================');
 
