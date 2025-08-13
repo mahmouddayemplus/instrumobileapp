@@ -12,7 +12,10 @@ import { FlatList, TextInput, ActivityIndicator } from "react-native";
 import { colors } from "../constants/color";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
-import { getItems, searchItems } from "../helper/database";
+import * as FileSystem from "expo-file-system";
+import { Asset } from "expo-asset";
+import sparesData from "../assets/spares.json";
+
 const SparesScreen = () => {
   const [spares, setSpares] = useState(null);
   const [dataError, setDataError] = useState(false);
@@ -25,7 +28,24 @@ const SparesScreen = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSpares, setFilteredSpares] = useState([]);
+  const [query, setQuery] = useState("");
+  const [spareSearch, setSpareSearch] = useState([]);
+  const [allSpares, setAllSpares] = useState([]);
   const navigation = useNavigation();
+  const CSV_NAME = "spares.";
+
+ 
+  function loadSparesJSON() {
+    console.log('=============ffffffffff===================');
+    
+    console.log('====================================');
+    setAllSpares(sparesData);
+    setSpareSearch(sparesData);
+  }
+  useEffect(() => {
+    loadSparesJSON();
+  }, []);
+  ////
 
   useEffect(() => {
     const fetchSpares = async () => {
@@ -68,7 +88,6 @@ const SparesScreen = () => {
   }, []);
 
   // Test warehouse database on component load
-   
 
   // Detect when spares is set to empty array and trigger error state
   useEffect(() => {
@@ -188,25 +207,35 @@ const SparesScreen = () => {
     if (selectedCategory === "warehouse") {
       // Search in warehouse database
       try {
-        const warehouseResults = await searchItems(searchQuery);
-        console.log('====================================');
-        console.log(warehouseResults);
-        console.log('====================================');
-        // const warehouseResults = await searchWarehouse(text, 100);
-        // console.log("Warehouse search results:", warehouseResults);
+        if (text !== "") {
+          console.log('===============search must started=====================');
+           
+          console.log(searchQuery);
+          const filtered = allSpares.filter((item) => {
+            const matchesSearch =
+              item.old.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.new.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.description.toLowerCase().includes(searchQuery.toLowerCase());
+             return matchesSearch    ;
+          });
+          const convertedResults = filtered.map((item) => ({
+            id: item.id || item.old,
+            code: item.old || "",
+            title: item.description || "",
+            category: "",
+            new_code: item.new || "",
+            old_code: item.old || "",
+            description: item.description || "",
+          }));
+
+          setFilteredSpares(convertedResults);
+        }else{
+          setFilteredSpares({
+         
+          });
+        }
 
         // // Convert warehouse results to match spares format
-        // const convertedResults = warehouseResults.map(item => ({
-        //   id: item.id,
-        //   code: item.new || item.old || '',
-        //   title: item.description || '',
-        //   category: '',
-        //   new_code: item.new || '',
-        //   old_code: item.old || '',
-        //   description: item.description || ''
-        // }));
-
-        // setFilteredSpares(convertedResults);
       } catch (error) {
         console.error("Warehouse search error:", error);
         setFilteredSpares([]);
@@ -232,25 +261,41 @@ const SparesScreen = () => {
     if (category === "warehouse") {
       // Load warehouse data
       try {
-        // const warehouseResults = await searchWarehouse(searchQuery, 100);
-        // console.log("Initial warehouse results:", warehouseResults);
+        if (searchQuery !== "") {
+          console.log('====================================');
+          console.log(searchQuery);
+          console.log('====================================');
+          const filteredItems = allSpares.filter((item) => {
+            const matchesSearch =
+              item.old.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.new.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.description.toLowerCase().includes(searchQuery.toLowerCase());
+             return matchesSearch    ;
+          });
+          console.log('============filtererd==============');
+          console.log(filteredItems);
+          console.log('====================================');
+          const convertedResults = filteredItems.map((item) => ({
+            id: item.id || item.old,
+            code: item.old || "",
+            title: item.description || "",
+            category: "",
+            new_code: item.new || "",
+            old_code: item.old || "",
+            description: item.description || "",
+          }));
+
+          setFilteredSpares(convertedResults);
+        }else{
+          setFilteredSpares([]);
+        }
 
         // // Convert warehouse results to match spares format
-        // const convertedResults = warehouseResults.map((item) => ({
-        //   id: item.id,
-        //   code: item.new || item.old || "",
-        //   title: item.description || "",
-        //   category: "warehouse",
-        //   new_code: item.new || "",
-        //   old_code: item.old || "",
-        //   description: item.description || "",
-        // }));
-
-        // setFilteredSpares(convertedResults);
       } catch (error) {
-        console.error("Warehouse category error:", error);
-        // setFilteredSpares([]);
+        console.error("Warehouse search error:", error);
+        setFilteredSpares([]);
       }
+ 
     } else {
       // Handle other categories
       const filtered = spares.filter((item) => {
