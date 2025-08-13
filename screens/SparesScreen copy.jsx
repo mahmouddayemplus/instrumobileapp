@@ -13,6 +13,8 @@
 // import { Image } from "expo-image";
 // import { FlashList } from "@shopify/flash-list";
 // import * as FileSystem from "expo-file-system";
+// import { Asset } from "expo-asset";
+// import sparesData from "../assets/spares.json";
 
 // const SparesScreen = () => {
 //   const [spares, setSpares] = useState(null);
@@ -30,54 +32,20 @@
 //   const [spareSearch, setSpareSearch] = useState([]);
 //   const [allSpares, setAllSpares] = useState([]);
 //   const navigation = useNavigation();
+//   const CSV_NAME = "spares.";
 
-//   //
-//   async function loadSparesJSON() {
-//     try {
-//       // Local file in assets
-//       const jsonUri = FileSystem.documentDirectory + "spares.json";
-//       const fileInfo = await FileSystem.getInfoAsync(jsonUri);
-
-//       let jsonString;
-
-//       if (fileInfo.exists) {
-//         jsonString = await FileSystem.readAsStringAsync(jsonUri);
-//       } else {
-//         // If file not exists locally, load bundled asset
-//         jsonString = await FileSystem.readAsStringAsync(
-//           require("../assets/spares.json")
-//         );
-//       }
-
-//       const data = JSON.parse(jsonString);
-//       setAllSpares(data);
-//       setSpareSearch(data);
-//     } catch (err) {
-//       console.error("Error loading JSON:", err);
-//     }
+ 
+//   function loadSparesJSON() {
+//     console.log('=============ffffffffff===================');
+    
+//     console.log('====================================');
+//     setAllSpares(sparesData);
+//     setSpareSearch(sparesData);
 //   }
-
-//   // Filter spares based on query
-//   useEffect(() => {
-//     if (!query || query.trim() === "") {
-//       setSpareSearch(allSpares);
-//     } else {
-//       const q = query.toLowerCase();
-//       const results = allSpares.filter(
-//         (s) =>
-//           s.new.toLowerCase().includes(q) ||
-//           s.old.toLowerCase().includes(q) ||
-//           s.description.toLowerCase().includes(q)
-//       );
-//       setSpareSearch(results);
-//     }
-//   }, [query, allSpares]);
-
 //   useEffect(() => {
 //     loadSparesJSON();
 //   }, []);
-
-//   ///
+//   ////
 
 //   useEffect(() => {
 //     const fetchSpares = async () => {
@@ -118,6 +86,8 @@
 
 //     fetchSpares();
 //   }, []);
+
+//   // Test warehouse database on component load
 
 //   // Detect when spares is set to empty array and trigger error state
 //   useEffect(() => {
@@ -231,121 +201,112 @@
 //     );
 //   }
 
-//   const handleSearch = (text) => {
+//   const handleSearch = async (text) => {
 //     setSearchQuery(text);
-//     const filtered = spares.filter((item) => {
-//       const matchesSearch =
-//         item.title.toLowerCase().includes(text.toLowerCase()) ||
-//         item.code.toLowerCase().includes(text.toLowerCase());
-//       const matchesCategory =
-//         selectedCategory === "all" || item.category === selectedCategory;
-//       return matchesSearch && matchesCategory;
-//     });
-//     setFilteredSpares(filtered);
+
+//     if (selectedCategory === "warehouse") {
+//       // Search in warehouse database
+    
+//         if (text !== "") {
+//           console.log('===============search must started=====================');
+           
+//           console.log(searchQuery);
+//           const filtered = allSpares.filter((item) => {
+//             const matchesSearch =
+//               item.old.toLowerCase().includes(text.toLowerCase()) ||
+//               item.new.toLowerCase().includes(text.toLowerCase()) ||
+//               item.description.toLowerCase().includes(text.toLowerCase());
+//              return matchesSearch    ;
+//           });
+//           const convertedResults = filtered.map((item) => ({
+//             id: item.id || item.old,
+//             code: item.old || "",
+//             title: item.description || "",
+//             category: "",
+//             new_code: item.new || "",
+//             old_code: item.old || "",
+//             description: item.description || "",
+//           }));
+
+//           setFilteredSpares(convertedResults);
+//         }else{
+//           setFilteredSpares( []);
+//         }
+
+//         // // Convert warehouse results to match spares format
+      
+//     } else {
+//       // Search in regular spares
+//       const filtered = spares.filter((item) => {
+//         const matchesSearch =
+//           item.title.toLowerCase().includes(text.toLowerCase()) ||
+//           item.code.toLowerCase().includes(text.toLowerCase());
+//         const matchesCategory =
+//           selectedCategory === "all" || item.category === selectedCategory;
+//         return matchesSearch && matchesCategory;
+//       });
+//       setFilteredSpares(filtered);
+//     }
 //   };
 
-//   const RenderItem = ({ item }) => {
-//     const dispatch = useDispatch();
-//     const favorites = useSelector((state) => state.favorites.items);
-//     const isFavorite = favorites.includes(item.code);
-//     const navigation = useNavigation();
-//     const defaultImage = require("../assets/no-image.webp");
-
-//     const [imageLoaded, setImageLoaded] = useState(false);
-//     const [imageError, setImageError] = useState(false);
-//     const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
-
-//     const handleFavoriteButton = () => {
-//       dispatch(toggleFavorite(item.code));
-//     };
-
-//     return (
-//       <TouchableOpacity
-//         style={styles.item}
-//         onPress={() => navigation.navigate("SpareDetailScreen", { item })}
-//       >
-//         <View style={styles.imageContainer}>
-//           {!imageLoaded && !imageError && (
-//             <ActivityIndicator
-//               size="small"
-//               color={colors.primary}
-//               style={styles.imageLoader}
-//             />
-//           )}
-//           <Image
-//             source={imageError ? defaultImage : imageUrl}
-//             style={styles.itemImage}
-//             contentFit="contain"
-//             onLoad={() => setImageLoaded(true)}
-//             onError={() => {
-//               setImageError(true);
-//               setImageLoaded(true);
-//             }}
-//             transition={300}
-//           />
-//         </View>
-
-//         <View style={styles.contentContainer}>
-//           <View style={styles.textContainer}>
-//             <Text style={styles.code}>
-//               {item.code} | {item.new_code}
-//             </Text>
-//             <Text style={styles.title} numberOfLines={3}>
-//               {item.title}
-//             </Text>
-//             <View style={styles.categoryContainer}>
-//               <View style={styles.categoryBadge}>
-//                 <Text style={styles.categoryText}>
-//                   {item.category?.toUpperCase() || "GENERAL"}
-//                 </Text>
-//               </View>
-//               <View style={styles.actionButtons}>
-//                 <TouchableOpacity
-//                   onPress={() => handleShareToWhatsApp(item)}
-//                   style={styles.actionButton}
-//                 >
-//                   <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
-//                 </TouchableOpacity>
-
-//                 <TouchableOpacity
-//                   onPress={handleFavoriteButton}
-//                   style={[
-//                     styles.actionButton,
-//                     isFavorite && styles.favoriteActive,
-//                   ]}
-//                 >
-//                   <Ionicons
-//                     name={isFavorite ? "pin" : "pin-outline"}
-//                     size={20}
-//                     color={isFavorite ? "#fff" : colors.textSecondary}
-//                   />
-//                 </TouchableOpacity>
-//               </View>
-//             </View>
-//           </View>
-//         </View>
-//       </TouchableOpacity>
-//     );
-//   };
-
-//   const handleCategoryChange = (category) => {
+//   const handleCategoryChange = async (category) => {
 //     setSelectedCategory(category);
-//     console.log("====================================");
-//     console.log(category);
-//     console.log("====================================");
-//     const filtered = spares.filter((item) => {
-//       const matchesSearch =
-//         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//         item.code.toLowerCase().includes(searchQuery.toLowerCase());
-//       const matchesCategory =
-//         category === "all"
-//           ? true
-//           : category === "favorites"
-//           ? favorites.includes(item.code)
-//           : item.category === category;
-//       return matchesSearch && matchesCategory;
-//     });
-//     setFilteredSpares(filtered);
+//     console.log("Category changed to:", category);
+
+//     if (category === "warehouse") {
+//       // Load warehouse data
+//       try {
+//         if (searchQuery !== "") {
+//           console.log('====================================');
+//           console.log(searchQuery);
+//           console.log('====================================');
+//           const filteredItems = allSpares.filter((item) => {
+//             const matchesSearch =
+//               item.old.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//               item.new.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//               item.description.toLowerCase().includes(searchQuery.toLowerCase());
+//              return matchesSearch    ;
+//           });
+//           console.log('============filtererd==============');
+//           console.log(filteredItems);
+//           console.log('====================================');
+//           const convertedResults = filteredItems.map((item) => ({
+//             id: item.id || item.old,
+//             code: item.old || "",
+//             title: item.description || "",
+//             category: "",
+//             new_code: item.new || "",
+//             old_code: item.old || "",
+//             description: item.description || "",
+//           }));
+
+//           setFilteredSpares(convertedResults);
+//         }else{
+//           setFilteredSpares([]);
+//         }
+
+//         // // Convert warehouse results to match spares format
+//       } catch (error) {
+//         console.error("Warehouse search error:", error);
+//         setFilteredSpares([]);
+//       }
+ 
+//     } else {
+//       // Handle other categories
+//       const filtered = spares.filter((item) => {
+//         const matchesSearch =
+//           item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//           item.code.toLowerCase().includes(searchQuery.toLowerCase());
+//         const matchesCategory =
+//           category === "all"
+//             ? true
+//             : category === "favorites"
+//             ? favorites.includes(item.code)
+//             : item.category === category;
+//         return matchesSearch && matchesCategory;
+//       });
+//       setFilteredSpares(filtered);
+//     }
 //   };
 
 //   const handleShareToWhatsApp = (item) => {
@@ -354,6 +315,7 @@
 //     Linking.openURL(url)
 //       .then(() => {})
 //       .catch(() => {
+//         0;
 //         alert("WhatsApp not installed on your device");
 //       });
 //   };

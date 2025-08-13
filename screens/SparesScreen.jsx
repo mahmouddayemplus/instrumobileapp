@@ -1,195 +1,182 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, StatusBar, TextInput, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Linking } from "react-native";
-import { toggleFavorite } from "../store/favoritesSlice";
+import { Ionicons } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 import SparesComponent from "../components/SparesComponent";
+import { colors } from "../constants/color";
+import sparesData from "../assets/spares.json";
 import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity, StatusBar, SafeAreaView } from "react-native";
-import { FlatList, TextInput, ActivityIndicator } from "react-native";
-import { colors } from "../constants/color";
-import { Image } from "expo-image";
-import { FlashList } from "@shopify/flash-list";
-import * as FileSystem from "expo-file-system";
-import { Asset } from "expo-asset";
-import sparesData from "../assets/spares.json";
 
 const SparesScreen = () => {
-  const [spares, setSpares] = useState(null);
-  const [dataError, setDataError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const dispatch = useDispatch();
-  const favorites = useSelector((state) => state.favorites.items);
-  const user = useSelector((state) => state.auth.user);
-  const defaultImage = require("../assets/no-image.webp");
+  const [spares, setSpares] = useState([]);
+  const [allSpares, setAllSpares] = useState([]);
+  const [filteredSpares, setFilteredSpares] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSpares, setFilteredSpares] = useState([]);
-  const [query, setQuery] = useState("");
-  const [spareSearch, setSpareSearch] = useState([]);
-  const [allSpares, setAllSpares] = useState([]);
+  const [dataError, setDataError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  
+  const favorites = useSelector((state) => state.favorites.items);
+  const user = useSelector((state) => state.auth.user);
   const navigation = useNavigation();
-  const CSV_NAME = "spares.";
+  const dispatch = useDispatch();
 
- 
-  function loadSparesJSON() {
-    console.log('=============ffffffffff===================');
-    
-    console.log('====================================');
-    setAllSpares(sparesData);
-    setSpareSearch(sparesData);
-  }
+  const categories = [
+    { key: "all", label: "All", icon: "grid-outline" },
+    { key: "general", label: "Inst", icon: "construct-outline" },
+    { key: "plc", label: "PLC", icon: "hardware-chip-outline" },
+    { key: "packing", label: "Packing", icon: "cube-outline" },
+    { key: "warehouse", label: "Warehouse", icon: "storefront-outline" },
+    { key: "favorites", label: "Favorites", icon: "heart-outline" },
+  ];
+
+  // Load JSON spares on mount
   useEffect(() => {
-    loadSparesJSON();
+    setAllSpares(sparesData);
   }, []);
-  ////
 
+  // Load cached spares from Firebase on mount
   useEffect(() => {
     const fetchSpares = async () => {
       try {
         let cached = await loadSpares("cached_spares");
-
         if (!cached || cached.length === 0) {
-          try {
-            await updateSpares();
-            cached = await loadSpares("cached_spares");
-          } catch (error) {
-            console.error("Error fetching from Firestore:", error);
-            setDataError(true);
-            setErrorMessage(
-              "Spares database is not available. Please contact your administrator."
-            );
-            return;
-          }
+          await updateSpares();
+          cached = await loadSpares("cached_spares");
         }
-
         if (cached && cached.length > 0) {
           setSpares(cached);
           setFilteredSpares(cached);
         } else {
           setDataError(true);
-          setErrorMessage(
-            "No spare parts data available. Please try again later."
-          );
+          setErrorMessage("No spare parts data available. Please try again later.");
         }
       } catch (error) {
-        console.error("Error in fetchSpares:", error);
+        console.error(error);
         setDataError(true);
-        setErrorMessage(
-          "Failed to load spare parts. Please check your connection and try again."
-        );
+        setErrorMessage("Failed to load spare parts. Please check your connection and try again.");
       }
     };
-
     fetchSpares();
   }, []);
 
-  // Test warehouse database on component load
-
-  // Detect when spares is set to empty array and trigger error state
-  useEffect(() => {
-    if (spares && spares.length === 0 && !dataError) {
-      setDataError(true);
-      setErrorMessage("No spare parts data available. Please try again later.");
-    }
-  }, [spares, dataError]);
-
+  // Refresh spares
   const handlePress = async () => {
     setLoading(true);
     setDataError(false);
     setErrorMessage("");
-
     try {
       await updateSpares();
       const cached = await loadSpares("cached_spares");
-      setLoading(false);
-
       if (cached && cached.length > 0) {
         setSpares(cached);
-        setFilteredSpares(cached);
+        filterSpares(searchQuery, selectedCategory, cached);
       } else {
         setDataError(true);
-        setErrorMessage(
-          "No spare parts data available. Please try again later."
-        );
+        setErrorMessage("No spare parts data available. Please try again later.");
       }
     } catch (error) {
-      console.error("Error refreshing spares:", error);
-      setLoading(false);
+      console.error(error);
       setDataError(true);
-      setErrorMessage(
-        "Failed to refresh spare parts. Please check your connection and try again."
-      );
+      setErrorMessage("Failed to refresh spare parts. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Filter function for search + category
+  const filterSpares = (text = searchQuery, category = selectedCategory, sparesSource = spares) => {
+    let results = [];
+    if (category === "warehouse") {
+      if (text.trim() === "") return setFilteredSpares([]);
+      results = allSpares.filter(
+        (item) =>
+          item.old.toLowerCase().includes(text.toLowerCase()) ||
+          item.new.toLowerCase().includes(text.toLowerCase()) ||
+          item.description.toLowerCase().includes(text.toLowerCase())
+      );
+      results = results.map((item) => ({
+        id: item.id || item.old,
+        code: item.old || "",
+        title: item.description || "",
+        category: "",
+        new_code: item.new || "",
+        old_code: item.old || "",
+        description: item.description || "",
+      }));
+    } else {
+      results = sparesSource.filter((item) => {
+        const matchesSearch =
+          item.title.toLowerCase().includes(text.toLowerCase()) ||
+          item.code.toLowerCase().includes(text.toLowerCase());
+        const matchesCategory =
+          category === "all"
+            ? true
+            : category === "favorites"
+            ? favorites.includes(item.code)
+            : item.category === category;
+        return matchesSearch && matchesCategory;
+      });
+    }
+    setFilteredSpares(results);
+  };
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    filterSpares(text);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    filterSpares(searchQuery, category);
+  };
+
+  const handleShareToWhatsApp = (item) => {
+    const message = `Check out this spare part:\n\nCode: ${item.code}\nTitle: ${item.title}\n`;
+    const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
+    Linking.openURL(url).catch(() => alert("WhatsApp not installed"));
+  };
+
+  // Header
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Spare Parts",
-      headerStyle: {
-        backgroundColor: colors.primary,
-      },
+      headerStyle: { backgroundColor: colors.primary },
       headerTintColor: "#fff",
-      headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: "600",
-      },
+      headerTitleStyle: { fontSize: 18, fontWeight: "600" },
       headerRight: () => (
-        <View style={styles.headerRight}>
-          <Ionicons name="person-circle" size={20} color={"#fff"} />
-
-          <Text style={styles.userName}>{user.displayName}</Text>
-          <TouchableOpacity onPress={handlePress} style={styles.refreshButton}>
-            {loading ? (
-              <ActivityIndicator size={20} color="#fff" />
-            ) : (
-              <Ionicons name="refresh" size={24} color="#fff" />
-            )}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Ionicons name="person-circle" size={20} color="#fff" />
+          <Text style={{ color: "#fff", fontSize: 14, fontWeight: "500" }}>{user.displayName}</Text>
+          <TouchableOpacity onPress={handlePress} style={{ padding: 4 }}>
+            {loading ? <ActivityIndicator size={20} color="#fff" /> : <Ionicons name="refresh" size={24} color="#fff" />}
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation, spares, loading]);
+  }, [navigation, user, loading]);
 
-  // Show error state when data is not available
   if (dataError) {
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={colors.primary || "#34C759"}
-        />
-
+        <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
         <View style={styles.errorContainer}>
-          <View style={styles.errorIconContainer}>
-            <Ionicons name="alert-circle-outline" size={80} color="#FF6B35" />
-          </View>
+          <Ionicons name="alert-circle-outline" size={80} color="#FF6B35" />
           <Text style={styles.errorTitle}>No Data Available</Text>
           <Text style={styles.errorMessage}>{errorMessage}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={handlePress}
-            disabled={loading}
-          >
+          <TouchableOpacity style={styles.retryButton} onPress={handlePress} disabled={loading}>
             <Ionicons name="refresh" size={20} color="#fff" />
-            <Text style={styles.retryButtonText}>
-              {loading ? "Retrying..." : "Try Again"}
-            </Text>
+            <Text style={styles.retryButtonText}>{loading ? "Retrying..." : "Try Again"}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
-  // Show loading state only if not in error state and still loading
   if (!spares || spares.length === 0) {
-    // Don't show loading if we have an error
-    if (dataError) {
-      return null; // This should not happen due to the order, but just in case
-    }
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
@@ -201,155 +188,13 @@ const SparesScreen = () => {
     );
   }
 
-  const handleSearch = async (text) => {
-    setSearchQuery(text);
-
-    if (selectedCategory === "warehouse") {
-      // Search in warehouse database
-      try {
-        if (text !== "") {
-          console.log('===============search must started=====================');
-           
-          console.log(searchQuery);
-          const filtered = allSpares.filter((item) => {
-            const matchesSearch =
-              item.old.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.new.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.description.toLowerCase().includes(searchQuery.toLowerCase());
-             return matchesSearch    ;
-          });
-          const convertedResults = filtered.map((item) => ({
-            id: item.id || item.old,
-            code: item.old || "",
-            title: item.description || "",
-            category: "",
-            new_code: item.new || "",
-            old_code: item.old || "",
-            description: item.description || "",
-          }));
-
-          setFilteredSpares(convertedResults);
-        }else{
-          setFilteredSpares({
-         
-          });
-        }
-
-        // // Convert warehouse results to match spares format
-      } catch (error) {
-        console.error("Warehouse search error:", error);
-        setFilteredSpares([]);
-      }
-    } else {
-      // Search in regular spares
-      const filtered = spares.filter((item) => {
-        const matchesSearch =
-          item.title.toLowerCase().includes(text.toLowerCase()) ||
-          item.code.toLowerCase().includes(text.toLowerCase());
-        const matchesCategory =
-          selectedCategory === "all" || item.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-      });
-      setFilteredSpares(filtered);
-    }
-  };
-
-  const handleCategoryChange = async (category) => {
-    setSelectedCategory(category);
-    console.log("Category changed to:", category);
-
-    if (category === "warehouse") {
-      // Load warehouse data
-      try {
-        if (searchQuery !== "") {
-          console.log('====================================');
-          console.log(searchQuery);
-          console.log('====================================');
-          const filteredItems = allSpares.filter((item) => {
-            const matchesSearch =
-              item.old.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.new.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.description.toLowerCase().includes(searchQuery.toLowerCase());
-             return matchesSearch    ;
-          });
-          console.log('============filtererd==============');
-          console.log(filteredItems);
-          console.log('====================================');
-          const convertedResults = filteredItems.map((item) => ({
-            id: item.id || item.old,
-            code: item.old || "",
-            title: item.description || "",
-            category: "",
-            new_code: item.new || "",
-            old_code: item.old || "",
-            description: item.description || "",
-          }));
-
-          setFilteredSpares(convertedResults);
-        }else{
-          setFilteredSpares([]);
-        }
-
-        // // Convert warehouse results to match spares format
-      } catch (error) {
-        console.error("Warehouse search error:", error);
-        setFilteredSpares([]);
-      }
- 
-    } else {
-      // Handle other categories
-      const filtered = spares.filter((item) => {
-        const matchesSearch =
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.code.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory =
-          category === "all"
-            ? true
-            : category === "favorites"
-            ? favorites.includes(item.code)
-            : item.category === category;
-        return matchesSearch && matchesCategory;
-      });
-      setFilteredSpares(filtered);
-    }
-  };
-
-  const handleShareToWhatsApp = (item) => {
-    const message = `Check out this spare part:\n\nCode: ${item.code}\nTitle: ${item.title}\n`;
-    const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
-    Linking.openURL(url)
-      .then(() => {})
-      .catch(() => {
-        0;
-        alert("WhatsApp not installed on your device");
-      });
-  };
-
-  const categories = [
-    { key: "all", label: "All", icon: "grid-outline" },
-    { key: "general", label: "Inst", icon: "construct-outline" },
-    { key: "plc", label: "PLC", icon: "hardware-chip-outline" },
-    { key: "packing", label: "Packing", icon: "cube-outline" },
-    { key: "favorites", label: "Favorites", icon: "heart-outline" },
-    { key: "warehouse", label: "warehouse", icon: "grid-outline" },
-  ];
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={colors.primary || "#34C759"}
-      />
-
-      {/* Search Section */}
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      {/* Search */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
-          <Ionicons
-            name="search"
-            size={20}
-            color={colors.textSecondary}
-            style={styles.searchIcon}
-          />
+          <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
           <TextInput
             placeholder="Search by title or SAP code"
             value={searchQuery}
@@ -358,62 +203,25 @@ const SparesScreen = () => {
             placeholderTextColor={colors.textSecondary}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity
-              onPress={() => handleSearch("")}
-              style={styles.clearButton}
-            >
-              <Ionicons
-                name="close-circle"
-                size={20}
-                color={colors.textSecondary}
-              />
+            <TouchableOpacity onPress={() => handleSearch("")} style={styles.clearButton}>
+              <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
-
-        {searchQuery && (
-          <Text style={styles.resultCount}>
-            Found {filteredSpares.length} item
-            {filteredSpares.length !== 1 ? "s" : ""}
-          </Text>
-        )}
+        {searchQuery && <Text style={styles.resultCount}>Found {filteredSpares.length} item{filteredSpares.length !== 1 ? "s" : ""}</Text>}
       </View>
 
-      {/* Category Filters */}
+      {/* Categories */}
       <View style={styles.categorySection}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScroll}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
           {categories.map((category) => (
             <TouchableOpacity
               key={category.key}
-              style={[
-                styles.categoryButton,
-                selectedCategory === category.key &&
-                  styles.categoryButtonActive,
-              ]}
+              style={[styles.categoryButton, selectedCategory === category.key && styles.categoryButtonActive]}
               onPress={() => handleCategoryChange(category.key)}
             >
-              <Ionicons
-                name={category.icon}
-                size={16}
-                color={
-                  selectedCategory === category.key
-                    ? "#fff"
-                    : colors.textSecondary
-                }
-              />
-              <Text
-                style={[
-                  styles.categoryButtonText,
-                  selectedCategory === category.key &&
-                    styles.categoryButtonTextActive,
-                ]}
-              >
-                {category.label}
-              </Text>
+              <Ionicons name={category.icon} size={16} color={selectedCategory === category.key ? "#fff" : colors.textSecondary} />
+              <Text style={[styles.categoryButtonText, selectedCategory === category.key && styles.categoryButtonTextActive]}>{category.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -437,7 +245,7 @@ const SparesScreen = () => {
 
 export default SparesScreen;
 
-const styles = StyleSheet.create({
+ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
