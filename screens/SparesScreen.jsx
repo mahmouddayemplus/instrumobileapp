@@ -29,8 +29,8 @@ const SparesScreen = () => {
     { key: "general", label: "Inst", icon: "construct-outline" },
     { key: "plc", label: "PLC", icon: "hardware-chip-outline" },
     { key: "packing", label: "Packing", icon: "cube-outline" },
-    { key: "warehouse", label: "Warehouse", icon: "storefront-outline" },
     { key: "favorites", label: "Favorites", icon: "heart-outline" },
+    { key: "warehouse", label: "Warehouse", icon: "storefront-outline" },
   ];
 
   // Load JSON spares on mount
