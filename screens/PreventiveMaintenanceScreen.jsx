@@ -14,14 +14,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-import {
-  initDb,
-  getTasksFromSQLite,
-  saveTasksToSQLite,
-} from "../helper/database";
 import { loadData, updateDetailedTasks } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 
@@ -122,7 +116,7 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
           <View style={styles.userInfo}>
             <Ionicons name="person-circle" size={20} color={colors.primary} />
             <Text style={styles.welcomeText}>
-              {user?.displayName || "User"}
+              {user?.displayName +' : '+ (user?.companyId) || "User"}
             </Text>
           </View>
           <TouchableOpacity
@@ -164,7 +158,6 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
           <Ionicons name="shield-checkmark" size={40} color={colors.card} />
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerTitle}>Maintenance Tasks</Text>
- 
           </View>
         </View>
       </View>

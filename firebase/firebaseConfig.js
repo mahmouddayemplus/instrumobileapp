@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { collection, query, where, getDocs,setDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, setDoc, doc, getDoc } from "firebase/firestore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getAuth, createUserWithEmailAndPassword, updateProfile, getReactNativePersistence, initializeAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -24,7 +24,7 @@ const firebaseConfig = {
   messagingSenderId: firebaseMessagingSenderId,
   appId: firebaseAppId,
 };
- 
+
 const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 
@@ -72,11 +72,18 @@ export async function signin({ email, password }) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+    const companyId = docSnap.data().companyId;
+    // await AsyncStorage.setItem("companyId", companyId);
+
+    // console.log("Fetched and cached companyId:", companyId);
 
     return {
       status: 'ok',
       error: false,
       message: user,
+      companyId
     };
   } catch (error) {
     return {
@@ -115,7 +122,7 @@ export const updateDetailedTasks = async () => {
     // Save to cache
     await storeData('cached_tasks', tasks);
 
-   } catch (error) {
+  } catch (error) {
     console.error("Error fetching tasks:", error);
   }
 };
@@ -161,7 +168,7 @@ export const updateSpares = async () => {
     // Save to cache
     await storeData('cached_spares', spares);
 
-   } catch (error) {
+  } catch (error) {
     console.error("Error fetching spares:", error);
   }
 };
@@ -200,3 +207,52 @@ export const storeFavorites = async (key, value) => {
 };
 
 //////////////////
+
+
+/**
+ * Loads the companyId for the current user.
+ * 1. Checks AsyncStorage first
+ * 2. If not found, fetch from Firestore
+ * 3. Cache it in AsyncStorage
+ */
+export async function loadCompanyId() {
+  const auth = getAuth();
+  console.log('====================================');
+  console.log(auth);
+  console.log('====================================');
+  try {
+    // 1️⃣ Check AsyncStorage first
+    const cachedId = await AsyncStorage.getItem("companyId");
+    if (cachedId) {
+      console.log("Using cached companyId:", cachedId);
+      return cachedId;
+    }
+
+    // 2️⃣ Get from Firestore if not cached
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("No user is signed in");
+    }
+
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      throw new Error("User document not found");
+    }
+
+    const companyId = docSnap.data().companyId;
+    if (!companyId) {
+      throw new Error("companyId is missing in user document");
+    }
+
+    // 3️⃣ Save to AsyncStorage for future use
+    await AsyncStorage.setItem("companyId", companyId);
+
+    console.log("Fetched and cached companyId:", companyId);
+    return companyId;
+  } catch (error) {
+    console.error("Error loading companyId:", error);
+    return null;
+  }
+}

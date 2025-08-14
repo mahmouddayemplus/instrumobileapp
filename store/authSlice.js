@@ -20,6 +20,7 @@ const authSlice = createSlice({
         displayName: firebaseUser.displayName,
         photoURL: firebaseUser.photoURL,
         token: firebaseUser.token,
+        companyId:firebaseUser.companyId
       };
       state.isAuthenticated = true;
     },

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Alert } from 'react-native';
+import { StyleSheet, Text, View, Alert,ActivityIndicator  } from 'react-native';
 import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -28,6 +28,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 import SpareDetailScreen from './screens/SparesDetailScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Overtime from './screens/Overtime';
 
 
 function HomeTabs() {
@@ -41,7 +42,7 @@ function HomeTabs() {
             <MaterialCommunityIcons
               name="logout"
               size={24}
-              color="#2e7d32" 
+              color="#2e7d32"
               onPress={() => {
                 Alert.alert(
                   "Confirm Logout",
@@ -152,14 +153,14 @@ function RootStack() {
       setIsTryingLogin(false);
     };
     const loadFavorites = async () => {
- 
+
       const json = await AsyncStorage.getItem('favorite_spares')
       if (json) {
         const favorites = JSON.parse(json);
         dispatch(setFavorites(favorites));
- 
+
       }
- 
+
     }
 
     loadFavorites();
@@ -303,7 +304,25 @@ function RootStack() {
               name="PackerScreen"
               component={PackerScreen}
               options={({ navigation }) => ({
-                title: "Packer  Calibrator",
+                title: "Packer Calibrator",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="Overtime"
+              component={Overtime}
+              options={({ navigation }) => ({
+                title: "Overtime ",
 
                 headerRight: () => (
                   <MaterialCommunityIcons
@@ -326,6 +345,10 @@ function RootStack() {
   );
 }
 export default function App() {
+ 
+
+  
+
 
   return (
 

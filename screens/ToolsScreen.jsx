@@ -131,12 +131,21 @@ const ToolsScreen = ({ navigation }) => {
               screenName="WeighFeeder"
             />
           </View>
+
           <View style={styles.toolsGrid}>
             <ToolComponent
               iconName="calculator"
               titleLine1="Packer | VentoCheck"
               titleLine2="Calibrator"
               screenName="PackerScreen"
+            />
+        
+          
+            <ToolComponent
+              iconName="time-outline"
+              titleLine1="Overtime"
+              titleLine2="Tracker"
+              screenName="Overtime"
             />
           </View>
         </View>
@@ -221,7 +230,7 @@ const styles = StyleSheet.create({
     // flexWrap: "wrap",
     justifyContent: "center",
     marginBottom: 24,
-    flexWrap:"nowrap"
+    flexWrap: "nowrap",
   },
   comingSoonSection: {
     marginTop: 20,

@@ -94,10 +94,15 @@ export default function AuthScreen() {
       setLoading(false);
 
       if (result.status === "ok") {
+       
+
+
         const user = {
           email: result.message.email,
           token: result.message.accessToken,
-          displayName: result.message.displayName
+          displayName: result.message.displayName,
+          companyId:result.companyId
+
         };
 
         storeUser(user);
@@ -110,6 +115,7 @@ export default function AuthScreen() {
           displayName: result.message.displayName,
           photoURL: result.message.photoURL,
           token: result.message.accessToken,
+          companyId:result.companyId
         };
 
         dispatch(login(dispatchPayload)); // result.message contains user object

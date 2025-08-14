@@ -6,8 +6,10 @@ import {
   View,
   Pressable,
   Platform,
-  Dimensions,
+  Dimensions,ActivityIndicator
 } from "react-native";
+import { loadCompanyId } from "../firebase/firebaseConfig";
+import { useState,useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // You can use other icon sets too
 
@@ -16,6 +18,9 @@ const itemWidth = Platform.OS === "ios" ? screenWidth / 2.4 : screenWidth / 2.2;
 
 const ToolComponent = ({ iconName,titleLine1,titleLine2, screenName }) => {
   const navigation = useNavigation();
+  const [companyId, setCompanyId] = useState(null);
+  const [loading, setLoading] = useState(true);
+ 
 
   return (
     <Pressable
