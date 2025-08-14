@@ -31,9 +31,7 @@ export default function OvertimeList() {
 
       snapshot.forEach((doc) => {
         const data = doc.data();
-        console.log('====================================');
-        console.log(data);
-        console.log('====================================');
+ 
         temp.push({
           id: doc.id,
           date: data.date,
@@ -42,6 +40,7 @@ export default function OvertimeList() {
         });
         sum += Number(data.hours);
       });
+      temp.sort((a, b) => new Date(b.date) - new Date(a.date)); // descending
 
       setOvertimes(temp);
       setTotalHours(sum);
