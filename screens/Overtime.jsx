@@ -29,7 +29,7 @@ import {
 
 const Overtime = () => {
   const db = getFirestore();
-  const auth = getAuth();
+  // const auth = getAuth();
   const user = useSelector((state) => state.auth.user);
   const navigation = useNavigation();
 
@@ -39,6 +39,7 @@ const Overtime = () => {
   const [hours, setHours] = useState("");
   const [reason, setReason] = useState("");
   const [reload, setReload] = useState(false);
+  const [loading, setLoading] = useState(false);
   const idForm = "entry.1448286481";
   const hoursForm = "entry.1722567950";
   const reasonForm = "entry.1660518312";
@@ -63,7 +64,7 @@ const Overtime = () => {
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <View style={styles.headerIconContainer}>
-            <Ionicons name="time-outline" size={24} color="#fff" />
+            <Ionicons name="hourglass-outline" size={24} color="#fff" />
           </View>
         </View>
       ),
@@ -74,8 +75,9 @@ const Overtime = () => {
     setShowDatePicker(false);
     if (selectedDate) setDate(selectedDate);
   };
-
+  //////////////////////////////////////////////////////////////////////////////////////
   async function sendRequest() {
+    
     if (!hours.trim() || !reason.trim()) {
       Alert.alert(
         "Missing Information",
@@ -83,18 +85,24 @@ const Overtime = () => {
       );
       return;
     }
+    if (isNaN(hours) || Number(hours) <= 0) {
+      Alert.alert("Invalid Hours", "Please enter a valid number of hours.");
+      return;
+    }
 
     try {
-      const userAuth = auth.currentUser;
+      setLoading(true);
+      // const userAuth = auth.currentUser;
+      const cltDate = new Date(date.getTime() + 3 * 60 * 60 * 1000);
 
       // Send to Firestore
       await addDoc(collection(db, "overtime"), {
         id,
         hours,
         reason,
-        date: date.toISOString(),
+        date: cltDate.toISOString(),
         createdAt: serverTimestamp(),
-        uid: userAuth ? userAuth.uid : null,
+        uid: user ? user.uid : null,
       });
       //   Send to Google Sheets via Google Form
       const formBody = new URLSearchParams();
@@ -112,7 +120,11 @@ const Overtime = () => {
         },
       });
 
+      setReload((prev) => !prev);
+      (prev) => !prev;
       Alert.alert("Success", "Your overtime request has been submitted.");
+      setLoading(false);
+
       setHours("");
       setReason("");
       setDate(new Date());
@@ -169,7 +181,7 @@ const Overtime = () => {
                 keyboardType="numeric"
                 value={hours}
                 onChangeText={setHours}
-                placeholder="e.g. 4"
+                placeholder="e.g. 1"
                 placeholderTextColor="#999"
               />
             </View>
@@ -204,15 +216,21 @@ const Overtime = () => {
             </View>
 
             {/* Submit */}
-            <TouchableOpacity style={styles.button} onPress={sendRequest}>
-              <Text style={styles.buttonText}>Submit</Text>
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.5 }]}
+              onPress={sendRequest}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? "Submitting..." : "Submit"}
+              </Text>
             </TouchableOpacity>
           </View>
         </TouchableWithoutFeedback>
 
         {/* Overtime List */}
         <View style={styles.listContainer}>
-          <OvertimeList />
+          <OvertimeList reload={reload} setReload={setReload} user={user} />
         </View>
 
         {showDatePicker && (

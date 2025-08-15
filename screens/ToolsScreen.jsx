@@ -142,7 +142,7 @@ const ToolsScreen = ({ navigation }) => {
         
           
             <ToolComponent
-              iconName="time-outline"
+              iconName="hourglass-outline"
               titleLine1="Overtime"
               titleLine2="Tracker"
               screenName="Overtime"

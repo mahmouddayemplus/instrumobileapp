@@ -68,7 +68,6 @@ export default function AuthScreen() {
     if (isSignup && !isExistingUser) {
       const result = await signup({ email, password, displayName, companyId });
       setLoading(false);
- 
 
       if (result.status === "ok") {
         const dispatchPayload = {
@@ -94,18 +93,16 @@ export default function AuthScreen() {
       setLoading(false);
 
       if (result.status === "ok") {
-       
-
-
         const user = {
+          uid: result.message.uid,
           email: result.message.email,
           token: result.message.accessToken,
           displayName: result.message.displayName,
-          companyId:result.companyId
-
+          companyId: result.companyId,
         };
-
+        // store user in async cached
         storeUser(user);
+        
         // Navigate to home or update Redux state
 
         const dispatchPayload = {
@@ -115,7 +112,7 @@ export default function AuthScreen() {
           displayName: result.message.displayName,
           photoURL: result.message.photoURL,
           token: result.message.accessToken,
-          companyId:result.companyId
+          companyId: result.companyId,
         };
 
         dispatch(login(dispatchPayload)); // result.message contains user object
@@ -154,7 +151,7 @@ export default function AuthScreen() {
           <Text style={styles.title}>
             {isSignup ? (isExistingUser ? "Login" : "Sign Up") : "Login"}
           </Text>
-          
+
           {/* Developer Attribution */}
           <View style={styles.developerContainer}>
             <Text style={styles.developerText}>Developed by</Text>

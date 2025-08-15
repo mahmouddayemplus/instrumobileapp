@@ -1,30 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Platform } from "react-native";
-import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 const auth = getAuth();
 const db = getFirestore();
 
-export default function OvertimeList({reload}) {
+export default function OvertimeList({ reload, setReload, user }) {
+  const [date, setDate] = useState(new Date());
   const [overtimes, setOvertimes] = useState([]);
   const [totalHours, setTotalHours] = useState(0);
 
-  const today = new Date();
+  const today = new Date(date.getTime() + 3 * 60 * 60 * 1000);
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
   const [startDate, setStartDate] = useState(startOfMonth);
   const [endDate, setEndDate] = useState(today);
   const [showPicker, setShowPicker] = useState({ type: null, visible: false });
+const END_DATE_GRACE_MINUTES = 15;
+  const fetchData = async () => {
 
-  useEffect(() => {
-    const user = auth.currentUser;
     if (!user) return;
 
-    const q = query(collection(db, "overtime"), where("uid", "==", user.uid));
+    try {
+      const q = query(collection(db, "overtime"), where("uid", "==", user.uid));
+      const snapshot = await getDocs(q);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
       let temp = [];
       let sum = 0;
 
@@ -32,7 +47,7 @@ export default function OvertimeList({reload}) {
         const data = doc.data();
         const date = new Date(data.date);
 
-        if (date >= startDate && date <= endDate) {
+        if (date >= startDate && date <=  new Date(endDate.getTime() + END_DATE_GRACE_MINUTES * 60 * 1000)) {
           const hours = Number(data.hours);
           temp.push({
             id: doc.id,
@@ -47,10 +62,16 @@ export default function OvertimeList({reload}) {
       temp.sort((a, b) => b.date - a.date);
       setOvertimes(temp);
       setTotalHours(sum);
-    });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
-    return () => unsubscribe();
-  }, [startDate, endDate,reload]);
+  // Trigger fetch when reload, startDate, or endDate changes
+  useEffect(() => {
+ 
+    fetchData();
+  }, [startDate, endDate, reload]);
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
@@ -76,16 +97,20 @@ export default function OvertimeList({reload}) {
     <View style={styles.container}>
       {/* Filter */}
       <View style={styles.filter}>
-        <TouchableOpacity style={styles.dateButton} onPress={() => showDatePicker("start")}>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => showDatePicker("start")}
+        >
           <Text style={styles.dateText}>{startDate.toDateString()}</Text>
         </TouchableOpacity>
-           <Text style={styles.total}>Total: {totalHours} h</Text>
-        <TouchableOpacity style={styles.dateButton} onPress={() => showDatePicker("end")}>
+        <Text style={styles.total}>Total: {totalHours.toFixed(1)} h</Text>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => showDatePicker("end")}
+        >
           <Text style={styles.dateText}>{endDate.toDateString()}</Text>
         </TouchableOpacity>
       </View>
-
-   
 
       <FlatList
         data={overtimes}
@@ -107,7 +132,11 @@ export default function OvertimeList({reload}) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12, backgroundColor: "#F7F7F7" },
-  filter: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  filter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   dateButton: {
     paddingVertical: 6,
     paddingHorizontal: 10,
@@ -124,7 +153,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     elevation: 1,
   },
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
   date: { fontWeight: "500", fontSize: 12, color: "#333" },
   hours: { fontSize: 12, color: "#34C759", fontWeight: "600" },
   reason: { fontSize: 11, color: "#555" },
