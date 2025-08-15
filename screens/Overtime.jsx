@@ -145,13 +145,9 @@ const Overtime = () => {
           barStyle="light-content"
           backgroundColor={colors.primary || "#34C759"}
         />
-        {/* 
-        <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 20 }}
-          showsVerticalScrollIndicator={false}
-        > */}
+     
         
-        {  !user?.isAdmin ? 
+        {   user?.isAdmin ? 
           (
           <>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

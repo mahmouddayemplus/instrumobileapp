@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Switch,
-  Dimensions,Platform
+  Dimensions,
+  Platform,
 } from "react-native";
 import { getFirestore, collection, getDocs, query } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
@@ -19,7 +20,7 @@ const db = getFirestore();
 const screenWidth = Dimensions.get("window").width - 32;
 
 export default function AdminOvertimeList() {
-    const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date());
 
   const today = new Date(date.getTime() + 3 * 60 * 60 * 1000);
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -49,13 +50,24 @@ export default function AdminOvertimeList() {
 
       for (const userDoc of usersSnapshot.docs) {
         const user = userDoc.data();
+
         const overtimeSnapshot = await getDocs(
           query(collection(db, "overtime"))
         );
+        const adjustedEndDate = new Date(endDate);
+        adjustedEndDate.setHours(23, 59, 59, 999);
+        // Filter by user ID and date range
+        const userOvertimes = overtimeSnapshot.docs.filter((doc) => {
+          const data = doc.data();
+          if (data.uid !== user.uid) return false;
 
-        const userOvertimes = overtimeSnapshot.docs.filter(
-          (doc) => doc.data().uid === user.uid
-        );
+          // Convert Firestore timestamp to JS Date
+          const overtimeDate = data.date?.toDate
+            ? data.date.toDate()
+            : new Date(data.date);
+
+          return overtimeDate >= startDate && overtimeDate <= adjustedEndDate;
+        });
 
         const totalHours = userOvertimes.reduce(
           (sum, doc) => sum + Number(doc.data().hours),
@@ -79,7 +91,7 @@ export default function AdminOvertimeList() {
 
   useEffect(() => {
     fetchUsersOvertime();
-  }, []);
+  }, [startDate, endDate]);
 
   const toggleChart = () => {
     setChartType((prev) => (prev === "bar" ? "pie" : "bar"));
@@ -110,12 +122,11 @@ export default function AdminOvertimeList() {
       <Text style={[styles.cell, styles.hours]}>{item.totalHours} h</Text>
     </TouchableOpacity>
   );
-
   const renderHeader = () => (
     <View style={[styles.header]}>
       <Text style={[styles.cell, styles.headerText]}>ID</Text>
       <Text style={[styles.cell, styles.headerText]}>Name</Text>
-      <Text style={[styles.cell, styles.headerText, { alignSelf: "flex-end" }]}>
+      <Text style={[styles.cell, styles.headerText, styles.hours]}>
         Total Hours
       </Text>
     </View>
@@ -137,7 +148,6 @@ export default function AdminOvertimeList() {
           <Text style={styles.dateText}>{endDate.toDateString()}</Text>
         </TouchableOpacity>
       </View>
- 
 
       <BarChart
         data={barData}
@@ -151,8 +161,15 @@ export default function AdminOvertimeList() {
           backgroundGradientFrom: "#fff",
           backgroundGradientTo: "#fff",
           decimalPlaces: 1,
+          barPercentage: 0.4, // lower value = narrower bars (default ~0.8)
+
           color: (opacity = 1) => `rgba(52,199,89, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(0,0,0, ${opacity})`,
+          propsForLabels: {
+            // control label font
+            fontSize: 10, // change this to your desired size
+            fontWeight: "500",
+          },
         }}
         style={{ marginVertical: 8, borderRadius: 16 }}
         verticalLabelRotation={90}
@@ -199,7 +216,7 @@ const styles = StyleSheet.create({
   hours: {
     color: "#34C759",
     fontWeight: "600",
-    textAlign: "right",
+    textAlign: "right", // Works for both header & rows
   },
   header: {
     backgroundColor: "#444",
