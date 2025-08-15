@@ -151,7 +151,7 @@ const Overtime = () => {
           showsVerticalScrollIndicator={false}
         > */}
         
-        { !user?.isAdmin ? 
+        {  !user?.isAdmin ? 
           (
           <>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

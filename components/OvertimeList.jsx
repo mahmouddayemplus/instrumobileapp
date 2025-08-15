@@ -31,9 +31,8 @@ export default function OvertimeList({ reload, setReload, user }) {
   const [startDate, setStartDate] = useState(startOfMonth);
   const [endDate, setEndDate] = useState(today);
   const [showPicker, setShowPicker] = useState({ type: null, visible: false });
-const END_DATE_GRACE_MINUTES = 15;
+  const END_DATE_GRACE_MINUTES = 15;
   const fetchData = async () => {
-
     if (!user) return;
 
     try {
@@ -47,7 +46,11 @@ const END_DATE_GRACE_MINUTES = 15;
         const data = doc.data();
         const date = new Date(data.date);
 
-        if (date >= startDate && date <=  new Date(endDate.getTime() + END_DATE_GRACE_MINUTES * 60 * 1000)) {
+        if (
+          date >= startDate &&
+          date <=
+            new Date(endDate.getTime() + END_DATE_GRACE_MINUTES * 60 * 1000)
+        ) {
           const hours = Number(data.hours);
           temp.push({
             id: doc.id,
@@ -69,7 +72,6 @@ const END_DATE_GRACE_MINUTES = 15;
 
   // Trigger fetch when reload, startDate, or endDate changes
   useEffect(() => {
- 
     fetchData();
   }, [startDate, endDate, reload]);
 
