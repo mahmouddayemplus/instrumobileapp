@@ -48,6 +48,7 @@ export async function signup({ email, password, displayName, companyId }) {
       displayName,
       companyId,
       createdAt: new Date().toISOString(),
+      isAdmin:false 
     });
 
 
@@ -75,6 +76,7 @@ export async function signin({ email, password }) {
     const docRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(docRef);
     const companyId = docSnap.data().companyId;
+    const isAdmin = docSnap.data().isAdmin;
     // await AsyncStorage.setItem("companyId", companyId);
 
     // console.log("Fetched and cached companyId:", companyId);
@@ -83,7 +85,8 @@ export async function signin({ email, password }) {
       status: 'ok',
       error: false,
       message: user,
-      companyId
+      companyId,
+      isAdmin
     };
   } catch (error) {
     return {

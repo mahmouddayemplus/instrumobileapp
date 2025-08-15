@@ -116,7 +116,7 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
           <View style={styles.userInfo}>
             <Ionicons name="person-circle" size={20} color={colors.primary} />
             <Text style={styles.welcomeText}>
-              {user?.displayName +' : '+ (user?.companyId) || "User"}
+              {user?.displayName +' : '+ (user?.companyId) + user?.isAdmin|| "User"}
             </Text>
           </View>
           <TouchableOpacity

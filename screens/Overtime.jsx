@@ -7,6 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Alert } from "react-native";
 import { useSelector } from "react-redux";
 import { getAuth } from "firebase/auth";
+import AdminOvertimeList from '../components/AdminOvertimeList'
 import {
   getFirestore,
   collection,
@@ -29,6 +30,7 @@ import {
 
 const Overtime = () => {
   const db = getFirestore();
+
   // const auth = getAuth();
   const user = useSelector((state) => state.auth.user);
   const navigation = useNavigation();
@@ -77,7 +79,6 @@ const Overtime = () => {
   };
   //////////////////////////////////////////////////////////////////////////////////////
   async function sendRequest() {
-    
     if (!hours.trim() || !reason.trim()) {
       Alert.alert(
         "Missing Information",
@@ -149,90 +150,98 @@ const Overtime = () => {
           contentContainerStyle={{ padding: 20, paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
         > */}
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.card}>
-            {/* ID */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>ID</Text>
-              <Text style={styles.input}>{id}</Text>
-            </View>
+        
+        { !user?.isAdmin ? 
+          (
+          <>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.card}>
+              {/* ID */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>ID</Text>
+                <Text style={styles.input}>{id}</Text>
+              </View>
 
-            {/* Date */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Date</Text>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={styles.dateText}>{date.toDateString()}</Text>
-                <Ionicons
-                  name="calendar-outline"
-                  size={20}
-                  color={colors.primary || "#34C759"}
+              {/* Date */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Date</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={styles.dateText}>{date.toDateString()}</Text>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    color={colors.primary || "#34C759"}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Hours */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Hours</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={hours}
+                  onChangeText={setHours}
+                  placeholder="e.g. 1"
+                  placeholderTextColor="#999"
                 />
+              </View>
+
+              {/* Reason */}
+              <View
+                style={[
+                  styles.inputGroup,
+                  { flexDirection: "column", alignItems: "flex-start" },
+                ]}
+              >
+                <Text style={[styles.inputLabel, { marginBottom: 5 }]}>
+                  Reason
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      width: "100%",
+                      minHeight: 60,
+                      textAlignVertical: "top",
+                      padding: 12,
+                      backgroundColor: "#F4F6F8",
+                    },
+                  ]}
+                  value={reason}
+                  onChangeText={setReason}
+                  placeholder="Reason for overtime"
+                  placeholderTextColor="#999"
+                  multiline
+                />
+              </View>
+
+              {/* Submit */}
+              <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.5 }]}
+                onPress={sendRequest}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? "Submitting..." : "Submit"}
+                </Text>
               </TouchableOpacity>
             </View>
-
-            {/* Hours */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Hours</Text>
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={hours}
-                onChangeText={setHours}
-                placeholder="e.g. 1"
-                placeholderTextColor="#999"
-              />
-            </View>
-
-            {/* Reason */}
-            <View
-              style={[
-                styles.inputGroup,
-                { flexDirection: "column", alignItems: "flex-start" },
-              ]}
-            >
-              <Text style={[styles.inputLabel, { marginBottom: 5 }]}>
-                Reason
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    width: "100%",
-                    minHeight: 60,
-                    textAlignVertical: "top",
-                    padding: 12,
-                    backgroundColor: "#F4F6F8",
-                  },
-                ]}
-                value={reason}
-                onChangeText={setReason}
-                placeholder="Reason for overtime"
-                placeholderTextColor="#999"
-                multiline
-              />
-            </View>
-
-            {/* Submit */}
-            <TouchableOpacity
-              style={[styles.button, loading && { opacity: 0.5 }]}
-              onPress={sendRequest}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? "Submitting..." : "Submit"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableWithoutFeedback>
-
-        {/* Overtime List */}
-        <View style={styles.listContainer}>
+          </TouchableWithoutFeedback> 
+          <View style={styles.listContainer}>
           <OvertimeList reload={reload} setReload={setReload} user={user} />
         </View>
+        </>
 
+
+                ): <AdminOvertimeList/> 
+        }
+     
+        
         {showDatePicker && (
           <DateTimePicker
             value={date}
