@@ -7,7 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 const auth = getAuth();
 const db = getFirestore();
 
-export default function OvertimeList() {
+export default function OvertimeList({reload}) {
   const [overtimes, setOvertimes] = useState([]);
   const [totalHours, setTotalHours] = useState(0);
 
@@ -50,7 +50,7 @@ export default function OvertimeList() {
     });
 
     return () => unsubscribe();
-  }, [startDate, endDate]);
+  }, [startDate, endDate,reload]);
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
@@ -79,12 +79,13 @@ export default function OvertimeList() {
         <TouchableOpacity style={styles.dateButton} onPress={() => showDatePicker("start")}>
           <Text style={styles.dateText}>{startDate.toDateString()}</Text>
         </TouchableOpacity>
+           <Text style={styles.total}>Total: {totalHours} h</Text>
         <TouchableOpacity style={styles.dateButton} onPress={() => showDatePicker("end")}>
           <Text style={styles.dateText}>{endDate.toDateString()}</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.total}>Total: {totalHours} h</Text>
+   
 
       <FlatList
         data={overtimes}

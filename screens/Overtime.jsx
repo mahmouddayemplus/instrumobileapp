@@ -7,7 +7,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Alert } from "react-native";
 import { useSelector } from "react-redux";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import OvertimeList from "../components/OvertimeList";
 import {
   StyleSheet,
@@ -33,6 +38,15 @@ const Overtime = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [hours, setHours] = useState("");
   const [reason, setReason] = useState("");
+  const [reload, setReload] = useState(false);
+  const idForm = "entry.1448286481";
+  const hoursForm = "entry.1722567950";
+  const reasonForm = "entry.1660518312";
+  const yearForm = "entry.1145477684_year";
+  const monthForm = "entry.1145477684_month";
+  const dayForm = "entry.1145477684_day";
+  const googleFormUrl =
+    "https://docs.google.com/forms/u/0/d/e/1FAIpQLSdYyjgPU5G8p1E6WPYYIzgw6YdYqzYihO7zW82I0M92wuL73A/formResponse";
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -63,7 +77,10 @@ const Overtime = () => {
 
   async function sendRequest() {
     if (!hours.trim() || !reason.trim()) {
-      Alert.alert("Missing Information", "Please fill in all fields before submitting.");
+      Alert.alert(
+        "Missing Information",
+        "Please fill in all fields before submitting."
+      );
       return;
     }
 
@@ -78,6 +95,21 @@ const Overtime = () => {
         date: date.toISOString(),
         createdAt: serverTimestamp(),
         uid: userAuth ? userAuth.uid : null,
+      });
+      //   Send to Google Sheets via Google Form
+      const formBody = new URLSearchParams();
+      formBody.append(idForm, id);
+      formBody.append(hoursForm, hours);
+      formBody.append(reasonForm, reason);
+      formBody.append(yearForm, date.getFullYear());
+      formBody.append(monthForm, date.getMonth() + 1); // Month is 0-indexed
+      formBody.append(dayForm, date.getDate());
+      await fetch(googleFormUrl, {
+        method: "POST",
+        body: formBody.toString(),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       });
 
       Alert.alert("Success", "Your overtime request has been submitted.");
@@ -96,67 +128,92 @@ const Overtime = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.primary || "#34C759"} />
-{/* 
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.primary || "#34C759"}
+        />
+        {/* 
         <ScrollView
           contentContainerStyle={{ padding: 20, paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
         > */}
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.card}>
-              {/* ID */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>ID</Text>
-                <Text style={styles.input}>{id}</Text>
-              </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.card}>
+            {/* ID */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>ID</Text>
+              <Text style={styles.input}>{id}</Text>
+            </View>
 
-              {/* Date */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Date</Text>
-                <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-                  <Text style={styles.dateText}>{date.toDateString()}</Text>
-                  <Ionicons name="calendar-outline" size={20} color={colors.primary || "#34C759"} />
-                </TouchableOpacity>
-              </View>
-
-              {/* Hours */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Hours</Text>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={hours}
-                  onChangeText={setHours}
-                  placeholder="e.g. 4"
-                  placeholderTextColor="#999"
+            {/* Date */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Date</Text>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Text style={styles.dateText}>{date.toDateString()}</Text>
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={colors.primary || "#34C759"}
                 />
-              </View>
-
-              {/* Reason */}
-              <View style={[styles.inputGroup, { flexDirection: "column", alignItems: "flex-start" }]}>
-                <Text style={[styles.inputLabel, { marginBottom: 5 }]}>Reason</Text>
-                <TextInput
-                  style={[styles.input, { width: "100%", minHeight: 60, textAlignVertical: "top", padding: 12, backgroundColor: "#F4F6F8" }]}
-                  value={reason}
-                  onChangeText={setReason}
-                  placeholder="Reason for overtime"
-                  placeholderTextColor="#999"
-                  multiline
-                />
-              </View>
-
-              {/* Submit */}
-              <TouchableOpacity style={styles.button} onPress={sendRequest}>
-                <Text style={styles.buttonText}>Submit</Text>
               </TouchableOpacity>
             </View>
-          </TouchableWithoutFeedback>
 
-          {/* Overtime List */}
-          <View style={styles.listContainer}>
-            <OvertimeList />
+            {/* Hours */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Hours</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={hours}
+                onChangeText={setHours}
+                placeholder="e.g. 4"
+                placeholderTextColor="#999"
+              />
+            </View>
+
+            {/* Reason */}
+            <View
+              style={[
+                styles.inputGroup,
+                { flexDirection: "column", alignItems: "flex-start" },
+              ]}
+            >
+              <Text style={[styles.inputLabel, { marginBottom: 5 }]}>
+                Reason
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    width: "100%",
+                    minHeight: 60,
+                    textAlignVertical: "top",
+                    padding: 12,
+                    backgroundColor: "#F4F6F8",
+                  },
+                ]}
+                value={reason}
+                onChangeText={setReason}
+                placeholder="Reason for overtime"
+                placeholderTextColor="#999"
+                multiline
+              />
+            </View>
+
+            {/* Submit */}
+            <TouchableOpacity style={styles.button} onPress={sendRequest}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
           </View>
-       
+        </TouchableWithoutFeedback>
+
+        {/* Overtime List */}
+        <View style={styles.listContainer}>
+          <OvertimeList />
+        </View>
 
         {showDatePicker && (
           <DateTimePicker
@@ -185,14 +242,60 @@ const styles = StyleSheet.create({
     elevation: 4,
     marginBottom: 20,
   },
-  inputGroup: { marginBottom: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  inputLabel: { fontSize: 18, fontWeight: "600", color: "#333", marginRight: 10 },
-  input: { borderWidth: 1, borderColor: "#E1E5E9", borderRadius: 12, padding: 8, fontSize: 16, backgroundColor: "#FAFBFC", color: "#333", fontWeight: "500", textAlign: "center", width: 80 },
-  dateButton: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#E1E5E9", borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: "#FAFBFC" },
+  inputGroup: {
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  inputLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginRight: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#E1E5E9",
+    borderRadius: 12,
+    padding: 8,
+    fontSize: 16,
+    backgroundColor: "#FAFBFC",
+    color: "#333",
+    fontWeight: "500",
+    textAlign: "center",
+    width: 80,
+  },
+  dateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E1E5E9",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#FAFBFC",
+  },
   dateText: { fontSize: 16, color: "#333", marginRight: 8 },
-  button: { backgroundColor: colors.primary || "#34C759", paddingVertical: 16, borderRadius: 12, alignItems: "center", shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  button: {
+    backgroundColor: colors.primary || "#34C759",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
   buttonText: { color: "#fff", fontSize: 18, fontWeight: "700" },
   headerLeft: { flexDirection: "row", alignItems: "center", marginLeft: 15 },
-  headerIconContainer: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(255, 255, 255, 0.2)", justifyContent: "center", alignItems: "center", marginRight: 8 },
+  headerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
   listContainer: { marginTop: 10, flex: 1 },
 });
