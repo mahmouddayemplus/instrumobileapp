@@ -1,4 +1,15 @@
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, StatusBar, TextInput, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Linking,
+} from "react-native";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +19,7 @@ import { colors } from "../constants/color";
 import sparesData from "../assets/spares.json";
 import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
+import { Image } from "expo-image";
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState([]);
@@ -18,20 +30,29 @@ const SparesScreen = () => {
   const [loading, setLoading] = useState(false);
   const [dataError, setDataError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   const favorites = useSelector((state) => state.favorites.items);
   const user = useSelector((state) => state.auth.user);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const categories = [
+  const commonCategories = [
     { key: "all", label: "All", icon: "grid-outline" },
     { key: "general", label: "Inst", icon: "construct-outline" },
     { key: "plc", label: "PLC", icon: "hardware-chip-outline" },
     { key: "packing", label: "Packing", icon: "cube-outline" },
     { key: "favorites", label: "Favorites", icon: "heart-outline" },
+  ];
+  const privilegedCategories = [
     { key: "warehouse", label: "Warehouse", icon: "storefront-outline" },
   ];
+  const isPrivileged = false;
+
+  // Merge lists depending on privilege
+
+  const categories = isPrivileged
+    ? [...commonCategories, ...privilegedCategories]
+    : commonCategories;
 
   // Load JSON spares on mount
   useEffect(() => {
@@ -52,12 +73,16 @@ const SparesScreen = () => {
           setFilteredSpares(cached);
         } else {
           setDataError(true);
-          setErrorMessage("No spare parts data available. Please try again later.");
+          setErrorMessage(
+            "No spare parts data available. Please try again later."
+          );
         }
       } catch (error) {
         console.error(error);
         setDataError(true);
-        setErrorMessage("Failed to load spare parts. Please check your connection and try again.");
+        setErrorMessage(
+          "Failed to load spare parts. Please check your connection and try again."
+        );
       }
     };
     fetchSpares();
@@ -76,19 +101,27 @@ const SparesScreen = () => {
         filterSpares(searchQuery, selectedCategory, cached);
       } else {
         setDataError(true);
-        setErrorMessage("No spare parts data available. Please try again later.");
+        setErrorMessage(
+          "No spare parts data available. Please try again later."
+        );
       }
     } catch (error) {
       console.error(error);
       setDataError(true);
-      setErrorMessage("Failed to refresh spare parts. Please check your connection and try again.");
+      setErrorMessage(
+        "Failed to refresh spare parts. Please check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   // Filter function for search + category
-  const filterSpares = (text = searchQuery, category = selectedCategory, sparesSource = spares) => {
+  const filterSpares = (
+    text = searchQuery,
+    category = selectedCategory,
+    sparesSource = spares
+  ) => {
     let results = [];
     if (category === "warehouse") {
       if (text.trim() === "") return setFilteredSpares([]);
@@ -150,9 +183,15 @@ const SparesScreen = () => {
       headerRight: () => (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <Ionicons name="person-circle" size={20} color="#fff" />
-          <Text style={{ color: "#fff", fontSize: 14, fontWeight: "500" }}>{user.displayName}</Text>
+          <Text style={{ color: "#fff", fontSize: 14, fontWeight: "500" }}>
+            {user.displayName}
+          </Text>
           <TouchableOpacity onPress={handlePress} style={{ padding: 4 }}>
-            {loading ? <ActivityIndicator size={20} color="#fff" /> : <Ionicons name="refresh" size={24} color="#fff" />}
+            {loading ? (
+              <ActivityIndicator size={20} color="#fff" />
+            ) : (
+              <Ionicons name="refresh" size={24} color="#fff" />
+            )}
           </TouchableOpacity>
         </View>
       ),
@@ -167,9 +206,15 @@ const SparesScreen = () => {
           <Ionicons name="alert-circle-outline" size={80} color="#FF6B35" />
           <Text style={styles.errorTitle}>No Data Available</Text>
           <Text style={styles.errorMessage}>{errorMessage}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={handlePress} disabled={loading}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={handlePress}
+            disabled={loading}
+          >
             <Ionicons name="refresh" size={20} color="#fff" />
-            <Text style={styles.retryButtonText}>{loading ? "Retrying..." : "Try Again"}</Text>
+            <Text style={styles.retryButtonText}>
+              {loading ? "Retrying..." : "Try Again"}
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -194,7 +239,12 @@ const SparesScreen = () => {
       {/* Search */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+          <Ionicons
+            name="search"
+            size={20}
+            color={colors.textSecondary}
+            style={styles.searchIcon}
+          />
           <TextInput
             placeholder="Search by title or SAP code"
             value={searchQuery}
@@ -203,25 +253,61 @@ const SparesScreen = () => {
             placeholderTextColor={colors.textSecondary}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => handleSearch("")} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+            <TouchableOpacity
+              onPress={() => handleSearch("")}
+              style={styles.clearButton}
+            >
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={colors.textSecondary}
+              />
             </TouchableOpacity>
           )}
         </View>
-        {searchQuery && <Text style={styles.resultCount}>Found {filteredSpares.length} item{filteredSpares.length !== 1 ? "s" : ""}</Text>}
+        {searchQuery && (
+          <Text style={styles.resultCount}>
+            Found {filteredSpares.length} item
+            {filteredSpares.length !== 1 ? "s" : ""}
+          </Text>
+        )}
       </View>
 
       {/* Categories */}
       <View style={styles.categorySection}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScroll}
+        >
           {categories.map((category) => (
             <TouchableOpacity
               key={category.key}
-              style={[styles.categoryButton, selectedCategory === category.key && styles.categoryButtonActive]}
+              style={[
+                styles.categoryButton,
+                selectedCategory === category.key &&
+                  styles.categoryButtonActive,
+              ]}
               onPress={() => handleCategoryChange(category.key)}
             >
-              <Ionicons name={category.icon} size={16} color={selectedCategory === category.key ? "#fff" : colors.textSecondary} />
-              <Text style={[styles.categoryButtonText, selectedCategory === category.key && styles.categoryButtonTextActive]}>{category.label}</Text>
+              <Ionicons
+                name={category.icon}
+                size={16}
+                color={
+                  selectedCategory === category.key
+                    ? "#fff"
+                    : colors.textSecondary
+                }
+              />
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  selectedCategory === category.key &&
+                    styles.categoryButtonTextActive,
+                ]}
+              >
+                {category.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -245,7 +331,7 @@ const SparesScreen = () => {
 
 export default SparesScreen;
 
- const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
