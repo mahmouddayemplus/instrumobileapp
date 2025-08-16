@@ -33,6 +33,8 @@ const SparesScreen = () => {
 
   const favorites = useSelector((state) => state.favorites.items);
   const user = useSelector((state) => state.auth.user);
+  const isPrivileged = user.isPrivileged;
+ 
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -46,8 +48,7 @@ const SparesScreen = () => {
   const privilegedCategories = [
     { key: "warehouse", label: "Warehouse", icon: "storefront-outline" },
   ];
-  const isPrivileged = false;
-
+ 
   // Merge lists depending on privilege
 
   const categories = isPrivileged

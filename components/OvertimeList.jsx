@@ -138,7 +138,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 12,
-  },
+    alignItems:"baseline",
+   },
   dateButton: {
     paddingVertical: 6,
     paddingHorizontal: 10,

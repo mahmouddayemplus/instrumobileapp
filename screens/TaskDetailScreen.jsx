@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   StatusBar,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -377,7 +378,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   areaTitle: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 2,
@@ -408,7 +409,7 @@ const styles = StyleSheet.create({
   },
   safetyToggleText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: "#333",
     marginLeft: 8,
@@ -426,7 +427,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   safetyText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
     lineHeight: 20,
     marginBottom: 12,
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#333",
     marginLeft: 8,
@@ -516,5 +517,11 @@ const styles = StyleSheet.create({
   },
   rotating: {
     transform: [{ rotate: "360deg" }],
+  },
+  headerSection: {
+    backgroundColor: colors.primary || "#34C759",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
 });

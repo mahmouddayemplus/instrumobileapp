@@ -78,6 +78,7 @@ export default function AuthScreen() {
           photoURL: result.message.photoURL,
           token: result.message.accessToken,
           isAdmin:false,
+          isPrivileged:false,
           companyId 
         };
 
@@ -102,6 +103,7 @@ export default function AuthScreen() {
           displayName: result.message.displayName,
           companyId: result.companyId,
           isAdmin:result.isAdmin,
+          isPrivileged:result.isPrivileged,
         };
         // store user in async cached
         storeUser(user);
@@ -117,6 +119,7 @@ export default function AuthScreen() {
           token: result.message.accessToken,
           companyId: result.companyId,
           isAdmin:result.isAdmin,
+          isPrivileged:result.isPrivileged,
         };
 
         dispatch(login(dispatchPayload)); // result.message contains user object

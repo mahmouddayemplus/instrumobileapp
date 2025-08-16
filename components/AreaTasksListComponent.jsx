@@ -13,9 +13,9 @@ const AreaTasksListComponent = ({ data }) => {
   const handleComplete = () => {};
   const renderTagItem = ({ item }) => (
     <View style={styles.tagContainer}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={styles.heading}> {item.tag}</Text>
-        <Text style={styles.title}>| {item.title}</Text>
+      <View  >
+        <Text style={styles.heading}>{item.tag}</Text>
+        <Text style={styles.title}>{item.title}</Text>
       </View>
 
       <FlatList
@@ -60,12 +60,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   heading: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700",
     color: "#1c1c1e",
   },
   title: {
-    fontSize: 15,
+    fontSize: 12,
     color: "#555",
   },
   taskItem: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   taskText: {
-    fontSize: 15,
+    fontSize: 12,
     flex: 1,
     color: "#333",
     paddingRight: 10,

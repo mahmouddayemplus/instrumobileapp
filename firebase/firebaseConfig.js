@@ -48,7 +48,8 @@ export async function signup({ email, password, displayName, companyId }) {
       displayName,
       companyId,
       createdAt: new Date().toISOString(),
-      isAdmin:false 
+      isAdmin:false ,
+      isPrivileged:false
     });
 
 
@@ -77,6 +78,7 @@ export async function signin({ email, password }) {
     const docSnap = await getDoc(docRef);
     const companyId = docSnap.data().companyId;
     const isAdmin = docSnap.data().isAdmin;
+    const isPrivileged = docSnap.data().isPrivileged;
     // await AsyncStorage.setItem("companyId", companyId);
 
  
@@ -85,7 +87,8 @@ export async function signin({ email, password }) {
       error: false,
       message: user,
       companyId,
-      isAdmin
+      isAdmin,
+      isPrivileged
     };
   } catch (error) {
     return {
