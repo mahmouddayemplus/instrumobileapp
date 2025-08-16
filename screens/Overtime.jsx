@@ -35,7 +35,7 @@ const Overtime = () => {
   const user = useSelector((state) => state.auth.user);
   const navigation = useNavigation();
 
-  const [id] = useState(user.companyId);
+  const [companyId] = useState(user.companyId);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [hours, setHours] = useState("");
@@ -98,7 +98,7 @@ const Overtime = () => {
 
       // Send to Firestore
       await addDoc(collection(db, "overtime"), {
-        id,
+        companyId,
         hours,
         reason,
         date: cltDate.toISOString(),
@@ -107,7 +107,7 @@ const Overtime = () => {
       });
       //   Send to Google Sheets via Google Form
       const formBody = new URLSearchParams();
-      formBody.append(idForm, id);
+      formBody.append(idForm, companyId);
       formBody.append(hoursForm, hours);
       formBody.append(reasonForm, reason);
       formBody.append(yearForm, date.getFullYear());
@@ -147,7 +147,7 @@ const Overtime = () => {
         />
      
         
-        {   user?.isAdmin ? 
+        {    !user?.isAdmin ? 
           (
           <>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -155,7 +155,7 @@ const Overtime = () => {
               {/* ID */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>ID</Text>
-                <Text style={styles.input}>{id}</Text>
+                <Text style={styles.input}>{companyId}</Text>
               </View>
 
               {/* Date */}

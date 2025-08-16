@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Alert,ActivityIndicator  } from 'react-native';
+import { StyleSheet, Text, View, Alert, ActivityIndicator } from 'react-native';
 import PackerScreen from './screens/PackerScreen'
 import AuthScreen from './screens/AuthScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -29,6 +29,8 @@ const Tab = createBottomTabNavigator();
 import SpareDetailScreen from './screens/SparesDetailScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Overtime from './screens/Overtime';
+import OvertimeDetails from './screens/OvertimeDetails'
+
 
 
 function HomeTabs() {
@@ -336,6 +338,24 @@ function RootStack() {
               })}
 
             />
+            <Stack.Screen
+              name="OvertimeDetails"
+              component={OvertimeDetails}
+              options={({ navigation }) => ({
+                title: "Overtime Details ",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} options={{ headerShown: false }} />
@@ -345,9 +365,9 @@ function RootStack() {
   );
 }
 export default function App() {
- 
 
-  
+
+
 
 
   return (
