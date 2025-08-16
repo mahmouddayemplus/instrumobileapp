@@ -100,9 +100,9 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Plant Maintenance",
+      title: "Plant Tasks",
       headerTitleStyle: {
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: "bold",
         color: colors.primary,
       },
@@ -114,9 +114,9 @@ const PreventiveMaintenanceScreen = ({ navigation }) => {
       headerRight: () => (
         <View style={styles.headerRight}>
           <View style={styles.userInfo}>
-            <Ionicons name="person-circle" size={20} color={colors.primary} />
+            <Ionicons name="person-circle" size={18} color={colors.primary} />
             <Text style={styles.welcomeText}>
-              {user?.displayName +' : '+ (user?.companyId) + user?.isAdmin|| "User"}
+              {user?.displayName +' : '+ (user?.companyId) || "User"}
             </Text>
           </View>
           <TouchableOpacity

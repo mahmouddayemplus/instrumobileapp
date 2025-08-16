@@ -24,7 +24,7 @@ const ToolsScreen = ({ navigation }) => {
     navigation.setOptions({
       title: "Tools & Calculators",
       headerTitleStyle: {
-        fontSize: 20,
+        fontSize: 14,
         fontWeight: "bold",
         color: colors.primary,
       },

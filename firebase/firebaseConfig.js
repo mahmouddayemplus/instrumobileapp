@@ -79,8 +79,7 @@ export async function signin({ email, password }) {
     const isAdmin = docSnap.data().isAdmin;
     // await AsyncStorage.setItem("companyId", companyId);
 
-    // console.log("Fetched and cached companyId:", companyId);
-
+ 
     return {
       status: 'ok',
       error: false,
@@ -220,15 +219,12 @@ export const storeFavorites = async (key, value) => {
  */
 export async function loadCompanyId() {
   const auth = getAuth();
-  console.log('====================================');
-  console.log(auth);
-  console.log('====================================');
+ 
   try {
     // 1️⃣ Check AsyncStorage first
     const cachedId = await AsyncStorage.getItem("companyId");
     if (cachedId) {
-      console.log("Using cached companyId:", cachedId);
-      return cachedId;
+       return cachedId;
     }
 
     // 2️⃣ Get from Firestore if not cached
@@ -252,8 +248,7 @@ export async function loadCompanyId() {
     // 3️⃣ Save to AsyncStorage for future use
     await AsyncStorage.setItem("companyId", companyId);
 
-    console.log("Fetched and cached companyId:", companyId);
-    return companyId;
+     return companyId;
   } catch (error) {
     console.error("Error loading companyId:", error);
     return null;

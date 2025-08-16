@@ -79,6 +79,7 @@ const Overtime = () => {
   };
   //////////////////////////////////////////////////////////////////////////////////////
   async function sendRequest() {
+    Keyboard.dismiss();
     if (!hours.trim() || !reason.trim()) {
       Alert.alert(
         "Missing Information",
@@ -122,7 +123,8 @@ const Overtime = () => {
       });
 
       setReload((prev) => !prev);
-      (prev) => !prev;
+      // (prev) => !prev;
+      
       Alert.alert("Success", "Your overtime request has been submitted.");
       setLoading(false);
 
@@ -194,9 +196,7 @@ const Overtime = () => {
                   { flexDirection: "column", alignItems: "flex-start" },
                 ]}
               >
-                <Text style={[styles.inputLabel, { marginBottom: 5 }]}>
-                  Reason
-                </Text>
+               
                 <TextInput
                   style={[
                     styles.input,
@@ -257,22 +257,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background || "#F8F9FA" },
   card: {
     backgroundColor: "#fff",
-    padding: 24,
+    padding: 22,
     borderRadius: 16,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   inputLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#333",
     marginRight: 10,

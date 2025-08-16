@@ -37,7 +37,7 @@ export default function OvertimeDetails({ route }) {
 
     const filtered = overtimes.filter(
       (item) => item.date >= startDate && item.date <= adjustedEndDate
-    );
+    ).sort((a, b) => b.date - a.date);
 
     setFilteredData(filtered);
   }, [startDate, endDate, overtimes]);
@@ -81,7 +81,7 @@ export default function OvertimeDetails({ route }) {
       <View style={styles.totalBox}>
        
           <Text style={styles.totalText}>{name}</Text>
-          <Text style={styles.totalText}>Id: {companyId}</Text>
+          <Text style={styles.totalText}>ID: {companyId}</Text>
       
      
           <Text style={styles.totalText}>Total : {totalHours} h</Text>

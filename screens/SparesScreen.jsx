@@ -146,7 +146,7 @@ const SparesScreen = () => {
       title: "Spare Parts",
       headerStyle: { backgroundColor: colors.primary },
       headerTintColor: "#fff",
-      headerTitleStyle: { fontSize: 18, fontWeight: "600" },
+      headerTitleStyle: { fontSize: 14, fontWeight: "600" },
       headerRight: () => (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <Ionicons name="person-circle" size={20} color="#fff" />

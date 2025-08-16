@@ -77,7 +77,8 @@ export default function AuthScreen() {
           displayName: result.message.displayName,
           photoURL: result.message.photoURL,
           token: result.message.accessToken,
-          isAdmin:false
+          isAdmin:false,
+          companyId 
         };
 
         dispatch(login(dispatchPayload)); // result.message contains user object
@@ -224,7 +225,7 @@ export default function AuthScreen() {
               />
               <TextInput
                 style={[styles.input]}
-                placeholder="Id"
+                placeholder="ID"
                 value={companyId}
                 onChangeText={(text) => {
                   setCompanyId(text);
