@@ -117,7 +117,7 @@ function HomeTabs() {
         name="SparesScreen"
         component={SparesScreen}
         options={{
-
+          title: "Spare Parts",
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name="warehouse"
