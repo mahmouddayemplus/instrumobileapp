@@ -156,8 +156,8 @@ export default function AdminOvertimeList() {
           labelColor: (opacity = 1) => `rgba(0,0,0, ${opacity})`,
           propsForLabels: { fontSize: 10, fontWeight: "500" },
         }}
-        style={{ marginVertical: 8, borderRadius: 16 }}
-        verticalLabelRotation={90}
+        style={{ marginVertical: 8, borderRadius: 16,padding:6, }}
+        verticalLabelRotation={45}
       />
 
       <FlatList

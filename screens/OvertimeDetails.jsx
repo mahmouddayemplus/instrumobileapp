@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     justifyContent:"space-between"
   },
-  totalText: { fontSize: 16, fontWeight: "700", color: "#34C759" },
+  totalText: { fontSize: 12, fontWeight: "700", color: "#34C759" },
   filter: {
     flexDirection: "row",
     justifyContent: "space-between",

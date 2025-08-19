@@ -177,7 +177,7 @@ const SparesScreen = () => {
   // Header
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Spare Parts",
+      title: "Warehouse",
       headerStyle: { backgroundColor: colors.primary },
       headerTintColor: "#fff",
       headerTitleStyle: { fontSize: 14, fontWeight: "600" },
