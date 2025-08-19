@@ -12,7 +12,7 @@ import { colors } from "../constants/color";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
 
-const SparesComponent = ({ item }) => {
+const SparesComponent = React.memo(({ item })  => {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.items);
   const isFavorite = favorites.includes(item.code);
@@ -23,7 +23,8 @@ const SparesComponent = ({ item }) => {
   const [imageError, setImageError] = useState(false);
   const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
   const handleShareToWhatsApp = (item) => {
-    const message = `Check out this spare part:\n\nCode: ${item.code}\nTitle: ${item.title}\n`;
+  
+    const message = `Check out this spare part:\n\nOld Code: ${item.code}\nNew Code: ${item.new_code} \n\nTitle: ${item.title}\n`;
     const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
     Linking.openURL(url)
       .then(() => {})
@@ -111,7 +112,7 @@ const SparesComponent = ({ item }) => {
       </View>
     </TouchableOpacity>
   );
-};
+});
 
 export default SparesComponent;
 

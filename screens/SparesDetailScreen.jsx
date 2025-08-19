@@ -123,7 +123,7 @@ const SpareDetailScreen = ({ route }) => {
               <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
                 <Ionicons
                   name="copy-outline"
-                  size={16}
+                  size={20}
                   color={colors.primary}
                 />
               </TouchableOpacity>
@@ -141,33 +141,10 @@ const SpareDetailScreen = ({ route }) => {
               <Text style={styles.detailLabel}>Category</Text>
               <Text style={styles.detailValue}>{item.category}</Text>
             </View>
-
-            {/* <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Availability</Text>
-              <View style={styles.availabilityContainer}>
-                <View style={styles.availabilityDot} />
-                <Text style={styles.availabilityText}>In Stock</Text>
-              </View>
-            </View> */}
-
-            {/* <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Last Updated</Text>
-              <Text style={styles.detailValue}>Today</Text>
-            </View> */}
+ 
           </View>
 
-          {/* Action Buttons */}
-          {/* <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.primaryButton}>
-              <Ionicons name="call-outline" size={20} color="#fff" />
-              <Text style={styles.primaryButtonText}>Contact Supplier</Text>
-            </TouchableOpacity> */}
-
-          {/* <TouchableOpacity style={styles.secondaryButton}>
-              <Ionicons name="document-text-outline" size={20} color={colors.primary} />
-              <Text style={styles.secondaryButtonText}>View Specifications</Text>
-            </TouchableOpacity> */}
-          {/* </View> */}
+       
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -267,19 +244,20 @@ const styles = StyleSheet.create({
   codeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     backgroundColor: colors.background,
     padding: 12,
     borderRadius: 8,
   },
   codeText: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 12,
+    fontWeight: "500",
     color: colors.text,
     fontFamily: "monospace",
+    
   },
   copyButton: {
-    padding: 8,
+    padding: 10,
   },
   detailRow: {
     flexDirection: "row",

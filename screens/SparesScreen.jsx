@@ -8,7 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Linking,
+  Linking,FlatList
 } from "react-native";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -20,6 +20,7 @@ import sparesData from "../assets/spares.json";
 import { loadSpares, updateSpares } from "../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
+// import { FlatList } from "react-native-gesture-handler";
 
 const SparesScreen = () => {
   const [spares, setSpares] = useState([]);
@@ -316,7 +317,7 @@ const SparesScreen = () => {
 
       {/* Spares List */}
       <View style={styles.listContainer}>
-        <FlashList
+        <FlatList
           data={filteredSpares}
           estimatedItemSize={120}
           keyExtractor={(item) => item.code}
