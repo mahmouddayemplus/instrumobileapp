@@ -14,7 +14,10 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
+  Modal,
 } from "react-native";
+// Import the image zoom viewer
+import ImageViewer from 'react-native-image-zoom-viewer';
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { colors } from "../constants/color";
@@ -29,6 +32,9 @@ const SpareDetailScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const imageUrl = `https://res.cloudinary.com/dsnl3mogn/image/upload/${item.code}.webp`;
+
+  // State for modal visibility
+  const [modalVisible, setModalVisible] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -56,19 +62,36 @@ const SpareDetailScreen = ({ route }) => {
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
-      >
+      > 
         {/* Hero Image Section */}
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: imageUrl }}
-            defaultSource={defaultImage}
-            onError={() => {}}
-            style={styles.image}
-            resizeMode="contain"
-          />
+          <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.8}>
+            <Image
+              source={{ uri: imageUrl }}
+              defaultSource={defaultImage}
+              onError={() => {}}
+              style={styles.image}
+              resizeMode="contain"
+            />
+            {/* Gradient overlay for better icon visibility */}
+            <View style={styles.imageOverlay} pointerEvents="none" />
+          </TouchableOpacity>
 
-          {/* Gradient overlay for better icon visibility */}
-          <View style={styles.imageOverlay} />
+          {/* Modal for zoomable image */}
+          <Modal visible={modalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
+            <ImageViewer
+              imageUrls={[{ url: imageUrl, props: { source: { uri: imageUrl }, defaultSource: defaultImage } }]}
+              enableSwipeDown={true} 
+              onSwipeDown={() => setModalVisible(false)}
+              onCancel={() => setModalVisible(false)}
+              renderIndicator={() => null}
+              backgroundColor="rgba(0,0,0,0.95)"
+              saveToLocalByLongPress={false}
+            />
+            <TouchableOpacity style={styles.closeModalButton} onPress={() => setModalVisible(false)}>
+              <Ionicons name="close" size={32} color="#fff" />
+            </TouchableOpacity>
+          </Modal>
 
           {/* Action Icons */}
           <View style={styles.actionIcons}>
@@ -156,6 +179,15 @@ export default SpareDetailScreen;
 const screenWidth = Dimensions.get("window").width;
 
 const styles = StyleSheet.create({
+  closeModalButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 100,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 4,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -169,19 +201,6 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: colors.card,
     overflow: "visible",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: colors.background,
-  },
-  imageOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: "rgba(0,0,0,0.1)",
     zIndex: 1,
   },
   actionIcons: {
@@ -333,4 +352,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+image: {
+  width: '100%',
+  height: '100%',
+},
+
 });
