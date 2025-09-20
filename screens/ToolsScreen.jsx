@@ -154,7 +154,7 @@ const ToolsScreen = ({ navigation }) => {
               &&
               <View style={styles.toolsGrid}>
                         <ToolComponent
-                          iconName="calculator"
+                          iconName="clipboard"
                           titleLine1="PLC Change "
                           titleLine2="Request"
                           screenName="PlcModification"/>

@@ -141,39 +141,47 @@ const PlcModification = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.filterContainer}>
-        <TouchableOpacity 
-          style={[
-            styles.filterButton, 
-            statusFilter === 'active' && styles.filterButtonActive
-          ]}
-          onPress={() => setStatusFilter('active')}
-        >
-          <Text style={[
-            styles.filterButtonText,
-            statusFilter === 'active' && styles.filterButtonTextActive
-          ]}>Active</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[
-            styles.filterButton, 
-            statusFilter === 'cancelled' && styles.filterButtonActive
-          ]}
-          onPress={() => setStatusFilter('cancelled')}
-        >
-          <Text style={[
-            styles.filterButtonText,
-            statusFilter === 'cancelled' && styles.filterButtonTextActive
-          ]}>Cancelled</Text>
-        </TouchableOpacity>
+      <View style={styles.headerContainer}>
+        <View style={styles.filterContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.filterButton, 
+              statusFilter === 'active' && styles.filterButtonActive
+            ]}
+            onPress={() => setStatusFilter('active')}
+          >
+            <Text style={[
+              styles.filterButtonText,
+              statusFilter === 'active' && styles.filterButtonTextActive
+            ]}>Active</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[
+              styles.filterButton, 
+              statusFilter === 'cancelled' && styles.filterButtonActive
+            ]}
+            onPress={() => setStatusFilter('cancelled')}
+          >
+            <Text style={[
+              styles.filterButtonText,
+              statusFilter === 'cancelled' && styles.filterButtonTextActive
+            ]}>Completed</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       ) : (
         <ScrollView style={styles.listContainer}>
           {modifications
-            .filter(mod => mod.status === statusFilter)
+            .filter(mod => {
+              // Status filter
+              if (mod.status !== statusFilter) return false;
+              return true;
+            })
             .map((modification) => (
             <View key={modification.id} style={styles.row}>
               <View style={styles.rowContent}>
@@ -315,19 +323,27 @@ const PlcModification = () => {
         </View>
       </Modal>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 10,
   },
   filterContainer: {
     flexDirection: 'row',
+    gap: 15,
     justifyContent: 'center',
-    marginBottom: 15,
-    gap: 10,
+    alignItems: 'center',
   },
   filterButton: {
     paddingVertical: 8,
@@ -336,6 +352,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderWidth: 1,
     borderColor: colors.primary,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   filterButtonActive: {
     backgroundColor: colors.primary,
@@ -354,7 +375,8 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
-    marginBottom: 80, // Space for the add button
+    marginBottom: 80,
+    paddingTop: 10,
   },
   row: {
     backgroundColor: 'white',
@@ -416,7 +438,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor:  colors.primary ,
+    backgroundColor: colors.primary,
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -482,7 +504,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
-  }
+  },
 });
 
-export default PlcModification
+export default PlcModification;

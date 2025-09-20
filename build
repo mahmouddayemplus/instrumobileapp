@@ -11,3 +11,16 @@
 //npx expo start --clear
 //npx expo run:android 
 // npx expo run:ios 
+# # Delete existing node_modules and package-lock.json
+# rm -rf node_modules package-lock.json
+
+# # Install dependencies
+# npm install
+
+# # Install specific expo packages
+# npm install expo-asset
+# npm install expo-constants
+# npm install @expo/vector-icons
+
+# # Start the app
+# npx expo start --clear
