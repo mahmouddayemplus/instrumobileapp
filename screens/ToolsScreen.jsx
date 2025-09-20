@@ -18,6 +18,7 @@ import { colors } from "../constants/color";
 
 const ToolsScreen = ({ navigation }) => {
   const user = useSelector((state) => state.auth.user);
+   const isPrivileged = user.isPrivileged;
   const dispatch = useDispatch();
 
   useLayoutEffect(() => {
@@ -148,6 +149,20 @@ const ToolsScreen = ({ navigation }) => {
               screenName="Overtime"
             />
           </View>
+          {
+              isPrivileged 
+              &&
+              <View style={styles.toolsGrid}>
+                        <ToolComponent
+                          iconName="calculator"
+                          titleLine1="PLC Change "
+                          titleLine2="Request"
+                          screenName="PlcModification"/>
+              
+ 
+          </View>
+}
+          
         </View>
       </ScrollView>
     </SafeAreaView>

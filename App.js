@@ -30,6 +30,7 @@ import SpareDetailScreen from './screens/SparesDetailScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Overtime from './screens/Overtime';
 import OvertimeDetails from './screens/OvertimeDetails'
+import PlcModification from './screens/PlcModification'
 
 
 
@@ -343,6 +344,24 @@ function RootStack() {
               component={OvertimeDetails}
               options={({ navigation }) => ({
                 title: "Overtime Details ",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="PlcModification"
+              component={PlcModification}
+              options={({ navigation }) => ({
+                title: "PLC Change Request ",
 
                 headerRight: () => (
                   <MaterialCommunityIcons
