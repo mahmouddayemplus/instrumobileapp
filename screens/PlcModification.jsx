@@ -19,6 +19,7 @@ const PlcModification = () => {
   const [modifications, setModifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('active'); // Default filter is active
+  const [searchQuery, setSearchQuery] = useState('');
 
   const db = getFirestore();
   const auth = getAuth();
@@ -170,6 +171,24 @@ const PlcModification = () => {
         </View>
       </View>
 
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Ionicons name="search" size={20} color={colors.primary} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by signal,details, or requester."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#666"
+          />
+          {searchQuery !== '' && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+              <Ionicons name="close-circle" size={20} color="#666" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -180,7 +199,16 @@ const PlcModification = () => {
             .filter(mod => {
               // Status filter
               if (mod.status !== statusFilter) return false;
-              return true;
+              
+              // Search filter
+              if (searchQuery.trim() === '') return true;
+              
+              const query = searchQuery.toLowerCase();
+              return (
+                mod.requestName?.toLowerCase().includes(query) ||
+                mod.signalName?.toLowerCase().includes(query) ||
+                mod.details?.toLowerCase().includes(query)
+              );
             })
             .map((modification) => (
             <View key={modification.id} style={styles.row}>
@@ -209,7 +237,7 @@ const PlcModification = () => {
                 <View style={[
                   styles.statusIndicator, 
                   { backgroundColor: modification.status === 'active' ? '#FFD700' 
-                    : modification.status === 'cancelled' ? '#ff6b6b' 
+                    : modification.status === 'cancelled' ? colors.primary 
                     : '#ddd' }
                 ]} />
               </View>
@@ -336,8 +364,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  searchContainer: {
     marginBottom: 15,
     paddingHorizontal: 10,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 45,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 45,
+    fontSize: 12,
+    color: '#333',
+  },
+  clearButton: {
+    padding: 4,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -429,7 +488,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   cancelledText: {
-    color: '#ff6b6b',
+    color: colors.primary,
     fontSize: 12,
     fontStyle: 'italic',
     marginTop: 4,
