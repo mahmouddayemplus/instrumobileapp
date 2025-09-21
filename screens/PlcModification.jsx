@@ -249,6 +249,62 @@ const PlcModification = () => {
                 </View>
               </View>
               <View style={styles.rowActions}>
+                {/* Days since modification */}
+                <Text style={styles.daysSince}>
+                  {(() => {
+                    try {
+                      console.log('Original date:', modification.date);
+                      
+                      // Check if date exists
+                      if (!modification.date) return 'No Date';
+                      
+                      // Try different date parsing approaches
+                      let modDate;
+                      
+                      // First try: direct parsing
+                      modDate = new Date(modification.date);
+                      console.log('Parsed date 1:', modDate);
+                      
+                      // If invalid, try manual parsing for MM/DD/YYYY format
+                      if (isNaN(modDate.getTime())) {
+                        const dateParts = modification.date.split('/');
+                        if (dateParts.length === 3) {
+                          // Assume MM/DD/YYYY format
+                          modDate = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
+                          console.log('Parsed date 2:', modDate);
+                        }
+                      }
+                      
+                      // Check if we got a valid date
+                      if (isNaN(modDate.getTime())) {
+                        console.log('Failed to parse date:', modification.date);
+                        return 'Invalid';
+                      }
+                      
+                      const today = new Date();
+                      
+                      // Set time to start of day for accurate day calculation
+                      modDate.setHours(0, 0, 0, 0);
+                      today.setHours(0, 0, 0, 0);
+                      
+                      const diffTime = today - modDate;
+                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                      
+                      console.log('Diff days:', diffDays);
+                      
+                      // Return appropriate text based on the difference
+                      if (diffDays === 0) return 'Today';
+                      if (diffDays === 1) return '1d ago';
+                      if (diffDays > 1) return `${diffDays}d ago`;
+                      if (diffDays === -1) return 'Tomorrow';
+                      return `${Math.abs(diffDays)}d future`;
+                    } catch (error) {
+                      console.error('Date calculation error:', error);
+                      return 'Error';
+                    }
+                  })()}
+                </Text>
+                
                 {modification.status === 'active' && (
                   <TouchableOpacity 
                     onPress={() => handleCancelModification(modification.id)}
@@ -530,15 +586,25 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginLeft: 10,
   },
   rowActions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
+    gap: 8,
+  },
+  daysSince: {
+    fontSize: 10,
+    color: '#666',
+    fontWeight: '600',
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    minWidth: 30,
+    textAlign: 'center',
   },
   cancelButton: {
     padding: 5,
-    marginRight: 5,
   },
   cancelledText: {
     color: colors.primary,
