@@ -253,8 +253,6 @@ const PlcModification = () => {
                 <Text style={styles.daysSince}>
                   {(() => {
                     try {
-                      console.log('Original date:', modification.date);
-                      
                       // Check if date exists
                       if (!modification.date) return 'No Date';
                       
@@ -263,7 +261,6 @@ const PlcModification = () => {
                       
                       // First try: direct parsing
                       modDate = new Date(modification.date);
-                      console.log('Parsed date 1:', modDate);
                       
                       // If invalid, try manual parsing for MM/DD/YYYY format
                       if (isNaN(modDate.getTime())) {
@@ -271,13 +268,11 @@ const PlcModification = () => {
                         if (dateParts.length === 3) {
                           // Assume MM/DD/YYYY format
                           modDate = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
-                          console.log('Parsed date 2:', modDate);
                         }
                       }
                       
                       // Check if we got a valid date
                       if (isNaN(modDate.getTime())) {
-                        console.log('Failed to parse date:', modification.date);
                         return 'Invalid';
                       }
                       
@@ -290,8 +285,6 @@ const PlcModification = () => {
                       const diffTime = today - modDate;
                       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                       
-                      console.log('Diff days:', diffDays);
-                      
                       // Return appropriate text based on the difference
                       if (diffDays === 0) return 'Today';
                       if (diffDays === 1) return '1d ago';
@@ -299,7 +292,6 @@ const PlcModification = () => {
                       if (diffDays === -1) return 'Tomorrow';
                       return `${Math.abs(diffDays)}d future`;
                     } catch (error) {
-                      console.error('Date calculation error:', error);
                       return 'Error';
                     }
                   })()}
