@@ -127,12 +127,14 @@ const SparesScreen = () => {
     let results = [];
     if (category === "warehouse") {
       if (text.trim() === "") return setFilteredSpares([]);
-      results = allSpares.filter(
-        (item) =>
-          item.old.toLowerCase().includes(text.toLowerCase()) ||
-          item.new.toLowerCase().includes(text.toLowerCase()) ||
-          item.description.toLowerCase().includes(text.toLowerCase())
-      );
+      
+      // Split search text into words and check that ALL words are present
+      const searchWords = text.toLowerCase().trim().split(/\s+/);
+      
+      results = allSpares.filter((item) => {
+        const searchableText = `${item.old} ${item.new} ${item.description}`.toLowerCase();
+        return searchWords.every(word => searchableText.includes(word));
+      });
       results = results.map((item) => ({
         id: item.id || item.old,
         code: item.old || "",
@@ -143,10 +145,12 @@ const SparesScreen = () => {
         description: item.description || "",
       }));
     } else {
+      // Split search text into words and check that ALL words are present
+      const searchWords = text.toLowerCase().trim().split(/\s+/);
+      
       results = sparesSource.filter((item) => {
-        const matchesSearch =
-          item.title.toLowerCase().includes(text.toLowerCase()) ||
-          item.code.toLowerCase().includes(text.toLowerCase());
+        const searchableText = `${item.title} ${item.code}`.toLowerCase();
+        const matchesSearch = text.trim() === "" || searchWords.every(word => searchableText.includes(word));
         const matchesCategory =
           category === "all"
             ? true

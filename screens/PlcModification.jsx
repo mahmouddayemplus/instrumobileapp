@@ -20,6 +20,7 @@ const PlcModification = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('active'); // Default filter is active
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' for oldest first, 'desc' for newest first
 
   const db = getFirestore();
   const auth = getAuth();
@@ -57,7 +58,7 @@ const PlcModification = () => {
 
   const fetchModifications = async () => {
     try {
-      const q = query(collection(db, 'plcModifications'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'plcModifications'), orderBy('date', sortOrder));
       const querySnapshot = await getDocs(q);
       const modificationsList = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -73,7 +74,11 @@ const PlcModification = () => {
 
   useEffect(() => {
     fetchModifications();
-  }, []);
+  }, [sortOrder]);
+
+  const toggleSortOrder = () => {
+    setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+  };
 
   const onTimeChange = (event, selectedTime) => {
     setShowTimePicker(false);
@@ -143,31 +148,49 @@ const PlcModification = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <View style={styles.filterContainer}>
-          <TouchableOpacity 
-            style={[
-              styles.filterButton, 
-              statusFilter === 'active' && styles.filterButtonActive
-            ]}
-            onPress={() => setStatusFilter('active')}
-          >
-            <Text style={[
-              styles.filterButtonText,
-              statusFilter === 'active' && styles.filterButtonTextActive
-            ]}>Active</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[
-              styles.filterButton, 
-              statusFilter === 'cancelled' && styles.filterButtonActive
-            ]}
-            onPress={() => setStatusFilter('cancelled')}
-          >
-            <Text style={[
-              styles.filterButtonText,
-              statusFilter === 'cancelled' && styles.filterButtonTextActive
-            ]}>Completed</Text>
-          </TouchableOpacity>
+        <View style={styles.headerRow}>
+          <View style={styles.filterContainer}>
+            <TouchableOpacity 
+              style={[
+                styles.filterButton, 
+                statusFilter === 'active' && styles.filterButtonActive
+              ]}
+              onPress={() => setStatusFilter('active')}
+            >
+              <Text style={[
+                styles.filterButtonText,
+                statusFilter === 'active' && styles.filterButtonTextActive
+              ]}>Active</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[
+                styles.filterButton, 
+                statusFilter === 'cancelled' && styles.filterButtonActive
+              ]}
+              onPress={() => setStatusFilter('cancelled')}
+            >
+              <Text style={[
+                styles.filterButtonText,
+                statusFilter === 'cancelled' && styles.filterButtonTextActive
+              ]}>Completed</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.sortContainer}>
+            <Text style={styles.sortLabel}>Sort:</Text>
+            <TouchableOpacity 
+              style={styles.sortButton}
+              onPress={toggleSortOrder}
+            >
+              <Ionicons 
+                name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} 
+                size={16} 
+                color={colors.primary} 
+              />
+              <Text style={styles.sortButtonText}>
+                {sortOrder === 'asc' ? 'Old' : 'New'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -361,11 +384,47 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   headerContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#f8f9fa',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-    paddingHorizontal: 10,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    flex: 1,
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sortLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    gap: 4,
+  },
+  sortButtonText: {
+    fontSize: 12,
+    color: colors.primary,
+    fontWeight: '500',
   },
   searchContainer: {
     marginBottom: 15,
@@ -397,12 +456,6 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    gap: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   filterButton: {
     paddingVertical: 8,
