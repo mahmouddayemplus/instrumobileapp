@@ -21,6 +21,8 @@ const PlcModification = () => {
   const [statusFilter, setStatusFilter] = useState('active'); // Default filter is active
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' for oldest first, 'desc' for newest first
+  const [editingItem, setEditingItem] = useState(null); // Track which item is being edited
+  const [isEditing, setIsEditing] = useState(false); // Track if we're in edit mode
 
   const db = getFirestore();
   const auth = getAuth();
@@ -54,6 +56,51 @@ const PlcModification = () => {
         }
       ]
     );
+  };
+
+  const handleEditItem = (modification) => {
+    // Populate the form with existing data
+    setRequestName(modification.requestName || '');
+    setSignalName(modification.signalName || '');
+    setDetails(modification.details || '');
+    
+    // Parse the existing date and time
+    if (modification.date) {
+      const dateParts = modification.date.split('/');
+      if (dateParts.length === 3) {
+        const parsedDate = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
+        if (!isNaN(parsedDate.getTime())) {
+          setDate(parsedDate);
+        }
+      }
+    }
+    
+    if (modification.time) {
+      const timeString = modification.time;
+      const today = new Date();
+      const [timeOnly] = timeString.split(' ');
+      const [hours, minutes, seconds] = timeOnly.split(':');
+      const parsedTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+        parseInt(hours), parseInt(minutes), seconds ? parseInt(seconds) : 0);
+      if (!isNaN(parsedTime.getTime())) {
+        setTime(parsedTime);
+      }
+    }
+    
+    setEditingItem(modification);
+    setIsEditing(true);
+    setModalVisible(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItem(null);
+    setIsEditing(false);
+    // Clear form
+    setRequestName('');
+    setSignalName('');
+    setTime(new Date());
+    setDate(new Date());
+    setDetails('');
   };
 
   const fetchModifications = async () => {
@@ -109,7 +156,7 @@ const PlcModification = () => {
       }
 
       if (!signalName.trim()) {
-        console.error('Signal name is required');
+        Alert.alert('Error', 'Signal name is required');
         return;
       }
 
@@ -118,30 +165,50 @@ const PlcModification = () => {
         time: time.toLocaleTimeString(),
         date: date.toLocaleDateString(),
         details,
-        createdAt: new Date().toISOString(),
-        uid: user.uid,  // Changed from userId to uid to match Firestore rules
-        userName: user.displayName || 'Anonymous',
-        status: 'active',
         requestName: requestName.trim(),
       };
 
-      // Add to Firestore
-      await addDoc(collection(db, 'plcModifications'), formData);
+      if (isEditing && editingItem) {
+        // Update existing document - only update the fields that can be changed
+        const docRef = doc(db, 'plcModifications', editingItem.id);
+        await updateDoc(docRef, {
+          signalName: signalName.toUpperCase(),
+          time: time.toLocaleTimeString(),
+          date: date.toLocaleDateString(),
+          details,
+          requestName: requestName.trim(),
+          updatedAt: new Date().toISOString(),
+          updatedBy: user.uid
+        });
+        console.log('PLC Modification updated successfully');
+      } else {
+        // Create new document
+        await addDoc(collection(db, 'plcModifications'), {
+          ...formData,
+          createdAt: new Date().toISOString(),
+          uid: user.uid,
+          userName: user.displayName || 'Anonymous',
+          status: 'active',
+        });
+        console.log('PLC Modification saved successfully');
+      }
       
-      console.log('PLC Modification saved successfully');
       setModalVisible(false);
-      fetchModifications(); // Refresh the list after adding new item
+      fetchModifications(); // Refresh the list
       
-      // Clear form
+      // Clear form and reset edit state
       setRequestName('');
       setSignalName('');
       setTime(new Date());
       setDate(new Date());
       setDetails('');
+      setEditingItem(null);
+      setIsEditing(false);
       
     } catch (error) {
       console.error('Error saving PLC modification:', error);
-      // Here you might want to show an error message to the user
+      console.error('Error details:', error.message);
+      Alert.alert('Error', `Failed to save modification: ${error.message}`);
     }
   };
 
@@ -296,6 +363,14 @@ const PlcModification = () => {
                     }
                   })()}
                 </Text>
+
+                {/* Edit button */}
+                <TouchableOpacity 
+                  onPress={() => handleEditItem(modification)}
+                  style={styles.editButton}
+                >
+                  <Ionicons name="pencil" size={14} color={colors.primary} />
+                </TouchableOpacity>
                 
                 {modification.status === 'active' && (
                   <TouchableOpacity 
@@ -319,7 +394,12 @@ const PlcModification = () => {
       
       <TouchableOpacity 
         style={styles.addButton}
-        onPress={() => setModalVisible(true)}
+        onPress={() => {
+          // Clear edit state when adding new item
+          setEditingItem(null);
+          setIsEditing(false);
+          setModalVisible(true);
+        }}
       >
         <AntDesign name="plus" size={24} color="white" />
       </TouchableOpacity>
@@ -408,12 +488,17 @@ const PlcModification = () => {
                 style={[styles.button, styles.saveButton]}
                 onPress={handleSave}
               >
-                <Text style={styles.buttonText}>Save</Text>
+                <Text style={styles.buttonText}>{isEditing ? 'Update' : 'Save'}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
                 style={[styles.button, styles.closeButton]}
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  setModalVisible(false);
+                  if (isEditing) {
+                    handleCancelEdit();
+                  }
+                }}
               >
                 <Text style={styles.buttonText}>Close</Text>
               </TouchableOpacity>
@@ -603,6 +688,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     minWidth: 30,
     textAlign: 'center',
+  },
+  editButton: {
+    padding: 4,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    marginBottom: 4,
   },
   cancelButton: {
     padding: 5,
