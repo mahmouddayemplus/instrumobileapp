@@ -3,12 +3,12 @@ import {
   Text,
   View,
   TouchableWithoutFeedback,
-  SafeAreaView,
   TextInput,
   Keyboard,
   ScrollView,
   StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../constants/color";
 import { KeyboardAvoidingView, Platform, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";

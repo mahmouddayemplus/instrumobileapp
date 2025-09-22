@@ -13,9 +13,9 @@ import {
   Dimensions,
   TouchableOpacity,
   StatusBar,
-  SafeAreaView,
   Modal,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 // Import the image zoom viewer
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { useNavigation } from "@react-navigation/native";

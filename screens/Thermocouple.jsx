@@ -1,11 +1,11 @@
 import React, { useState, useLayoutEffect } from "react";
 import Slider from "@react-native-community/slider"; // make sure installed
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   Switch,
   TextInput,
   Keyboard,

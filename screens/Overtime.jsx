@@ -15,12 +15,12 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import OvertimeList from "../components/OvertimeList";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   StyleSheet,
   Text,
   View,
   TouchableWithoutFeedback,
-  SafeAreaView,
   TextInput,
   Keyboard,
   ScrollView,
