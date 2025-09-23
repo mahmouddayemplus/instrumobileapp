@@ -1,26 +1,113 @@
-//git remote set-url origin git@github.com:mahmouddayemplus/instrumobileapp.git
-//eas secret:push
-//eas build -p android --clear-cache
-//eas secret:list --profile preview
-//eas build -p android --profile preview //use it to generate apk file
-//# Clear cache and rebuild
-// eas build --platform android --clear-cache //use it to generate aab file
+# =============================================================================
+# INSTRUMENTATION MOBILE APP - BUILD COMMANDS REFERENCE
+# =============================================================================
+# This file contains essential commands for building, deploying, and managing
+# the React Native/Expo application. Use these commands for development,
+# testing, and production builds.
+# =============================================================================
+
+# =============================================================================
+# GIT REPOSITORY SETUP
+# =============================================================================
+# Configure the remote repository URL for GitHub
+# Use this when setting up the project or changing repository location
+# git remote set-url origin git@github.com:mahmouddayemplus/instrumobileapp.git
+
+# =============================================================================
+# EXPO APPLICATION SERVICES (EAS) - SECRETS MANAGEMENT
+# =============================================================================
+# Push environment secrets to EAS servers
+# Required before building if you have environment variables or API keys
+# eas secret:push
+
+# List all secrets for the preview profile
+# Useful for debugging environment variable issues
+# eas secret:list --profile preview
+
+# =============================================================================
+# ANDROID BUILD COMMANDS
+# =============================================================================
+
+# DEVELOPMENT BUILD (with cache clearing)
+# Use this when you encounter caching issues during development
+# eas build -p android --clear-cache
+
+# PREVIEW/TESTING BUILD (APK file generation)
+# Generates an APK file for testing on Android devices
+# APK files are smaller and easier to distribute for testing
+eas build -p android --profile preview # Generates APK file for testing
+
+# PRODUCTION BUILD (AAB file generation)  
+# Generates an Android App Bundle (AAB) for Google Play Store submission
+# AAB files are optimized for Play Store distribution
+# eas build --platform android --clear-cache # Generates AAB file for Play Store
+
+# Alternative preview build command (same as above)
 # eas build --platform android --profile preview
 
-// eas build --platform ios --clear-cache
-//npx expo start --clear
-//npx expo run:android 
-// npx expo run:ios 
-# # Delete existing node_modules and package-lock.json
+# =============================================================================
+# iOS BUILD COMMANDS  
+# =============================================================================
+# iOS build with cache clearing
+# Use this for iOS app builds (requires Apple Developer account)
+# eas build --platform ios --clear-cache
+
+# =============================================================================
+# LOCAL DEVELOPMENT COMMANDS
+# =============================================================================
+
+# Start Expo development server with cleared cache
+# Use this when Metro bundler has caching issues
+# npx expo start --clear
+
+# Run app directly on Android device/emulator
+# Requires Android Studio and ADB setup
+# npx expo run:android 
+
+# Run app directly on iOS simulator (macOS only)
+# Requires Xcode and iOS simulator
+# npx expo run:ios 
+
+# =============================================================================
+# DEPENDENCY MANAGEMENT & TROUBLESHOOTING
+# =============================================================================
+
+# COMPLETE DEPENDENCY RESET (when facing package conflicts)
+# Step 1: Delete existing dependencies and lock files
+# This clears all installed packages and version locks
 # rm -rf node_modules package-lock.json
 
-# # Install dependencies
+# Step 2: Reinstall all dependencies from package.json
+# This ensures clean installation of all required packages
 # npm install
 
-# # Install specific expo packages
+# =============================================================================
+# CRITICAL PACKAGE INSTALLATIONS
+# =============================================================================
+# These packages are essential for the app functionality
+# Install these if they're missing or causing issues
+
+# Asset management for images, fonts, and static files
 # npm install expo-asset
+
+# Access to app configuration and environment variables
 # npm install expo-constants
+
+# Icon library used throughout the application
 # npm install @expo/vector-icons
 
-# # Start the app
+# =============================================================================
+# FINAL STARTUP COMMAND
+# =============================================================================
+# Start the development server with cleared cache
+# Use this after dependency installation or when facing cache issues
 # npx expo start --clear
+
+# =============================================================================
+# QUICK REFERENCE GUIDE
+# =============================================================================
+# For Testing: eas build -p android --profile preview
+# For Production: eas build --platform android --clear-cache  
+# For Development: npx expo start --clear
+# For Troubleshooting: Delete node_modules → npm install → npx expo start --clear
+# =============================================================================

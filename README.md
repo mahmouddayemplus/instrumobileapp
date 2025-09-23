@@ -21,18 +21,85 @@ Instrumobile is a comprehensive mobile application for industrial maintenance te
 
 <div align="center">
 
-<img src="assets/screenshots/plc spares.png" alt="PLC Spares" width="220" />
-<img src="assets/screenshots/all spares.png" alt="All Spares" width="220" />
-<img src="assets/screenshots/overtime tracker.png" alt="Overtime Tracker" width="220" />
-<img src="assets/screenshots/pm tasks.png" alt="PM Tasks" width="220" />
-<img src="assets/screenshots/pressure converter.png" alt="Pressure Converter" width="220" />
-<img src="assets/screenshots/pt100 calculator.png" alt="PT100 Calculator" width="220" />
-<img src="assets/screenshots/tasks details.png" alt="Tasks Details" width="220" />
-<img src="assets/screenshots/themorcouple tool.png" alt="Thermocouple Tool" width="220" />
-<img src="assets/screenshots/Tools.png" alt="Tools" width="220" />
-<img src="assets/screenshots/ventocheck.png" alt="VentoCheck" width="220" />
-<img src="assets/screenshots/warehouse search.png" alt="Warehouse Search" width="220" />
-<img src="assets/screenshots/weigh feeder calibration.png" alt="Weigh Feeder Calibration" width="220" />
+### 🔧 Main Features
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/plc spares.png" alt="PLC Spares" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>PLC Modifications</b>
+      <br /><sub>Manage PLC changes & requests</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/all spares.png" alt="All Spares" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Spares Inventory</b>
+      <br /><sub>View & search spare parts</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/warehouse search.png" alt="Warehouse Search" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Warehouse Search</b>
+      <br /><sub>Advanced search & filtering</sub>
+    </td>
+  </tr>
+</table>
+
+### 📊 Task Management
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/pm tasks.png" alt="PM Tasks" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>PM Tasks</b>
+      <br /><sub>Preventive maintenance tracking</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/tasks details.png" alt="Tasks Details" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Task Details</b>
+      <br /><sub>Detailed task information</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/overtime tracker.png" alt="Overtime Tracker" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Overtime Tracker</b>
+      <br /><sub>Time management & reports</sub>
+    </td>
+  </tr>
+</table>
+
+### 🧮 Engineering Tools
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/Tools.png" alt="Tools" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Tools Dashboard</b>
+      <br /><sub>Engineering calculation tools</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/pressure converter.png" alt="Pressure Converter" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Pressure Converter</b>
+      <br /><sub>Unit conversion tool</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/pt100 calculator.png" alt="PT100 Calculator" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>PT100 Calculator</b>
+      <br /><sub>Temperature sensor calculations</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/themorcouple tool.png" alt="Thermocouple Tool" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Thermocouple Tool</b>
+      <br /><sub>Temperature measurement helper</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/weigh feeder calibration.png" alt="Weigh Feeder Calibration" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>Weigh Feeder Calibration</b>
+      <br /><sub>Equipment calibration tool</sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/ventocheck.png" alt="VentoCheck" width="200" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+      <br /><b>VentoCheck</b>
+      <br /><sub>Ventilation monitoring</sub>
+    </td>
+  </tr>
+</table>
 
 </div>
 
@@ -147,10 +214,145 @@ For more information, connect with me on [LinkedIn](https://linkedin.com/in/mahm
 
 ---
 
+## Build Commands Reference
 
+This section provides a comprehensive guide for building, testing, and deploying the Instrumentation Mobile App using Expo Application Services (EAS).
+
+### 🚀 Quick Start Commands
+
+```bash
+# For testing (APK generation)
+eas build -p android --profile preview
+
+# For production (AAB generation)
+eas build --platform android --clear-cache
+
+# For development
+npx expo start --clear
+```
+
+### 📱 Android Builds
+
+#### Testing Build (APK)
+```bash
+# Generate APK file for testing on devices
+eas build -p android --profile preview
+```
+- **Use Case**: Internal testing, QA, beta testing
+- **Output**: APK file (smaller, easier to distribute)
+- **Installation**: Direct APK installation on Android devices
+
+#### Production Build (AAB)
+```bash
+# Generate Android App Bundle for Play Store
+eas build --platform android --clear-cache
+```
+- **Use Case**: Google Play Store submission
+- **Output**: AAB file (optimized for Play Store)
+- **Benefits**: Smaller download size, dynamic delivery
+
+#### Development Build with Cache Clear
+```bash
+# Clear cache and rebuild (troubleshooting)
+eas build -p android --clear-cache
+```
+
+### 🍎 iOS Builds
+
+```bash
+# iOS build with cache clearing
+eas build --platform ios --clear-cache
+```
+- **Requirements**: Apple Developer account
+- **Output**: IPA file for App Store or TestFlight
+
+### 🔧 Development Commands
+
+#### Start Development Server
+```bash
+# Standard development server
+npx expo start
+
+# With cache clearing (recommended for troubleshooting)
+npx expo start --clear
+```
+
+#### Run on Devices/Simulators
+```bash
+# Android device/emulator
+npx expo run:android
+
+# iOS simulator (macOS only)
+npx expo run:ios
+```
+
+### 🛠️ Troubleshooting
+
+#### Complete Dependency Reset
+When facing package conflicts or mysterious errors:
+
+```bash
+# Step 1: Clean slate
+rm -rf node_modules package-lock.json
+
+# Step 2: Fresh installation
+npm install
+
+# Step 3: Install critical packages
+npm install expo-asset expo-constants @expo/vector-icons
+
+# Step 4: Start with cleared cache
+npx expo start --clear
+```
+
+#### Environment Secrets Management
+```bash
+# Push secrets to EAS
+eas secret:push
+
+# List current secrets
+eas secret:list --profile preview
+```
+
+### 📋 Build Profiles
+
+The app uses different build profiles for different purposes:
+
+- **`preview`**: Testing builds (APK generation)
+- **`production`**: Store-ready builds (AAB/IPA generation)
+- **`development`**: Development builds with debugging enabled
+
+### 🔍 Common Issues & Solutions
+
+| Issue | Solution |
+|-------|----------|
+| Metro bundler cache issues | `npx expo start --clear` |
+| Package version conflicts | Delete `node_modules` → `npm install` |
+| Missing environment variables | `eas secret:push` |
+| Build fails with cache errors | Add `--clear-cache` flag |
+| Android build not installing | Use preview profile for APK |
+
+### 📦 Critical Dependencies
+
+Make sure these packages are always installed:
+
+```bash
+npm install expo-asset          # Asset management
+npm install expo-constants      # App configuration
+npm install @expo/vector-icons  # Icon library
+```
+
+### 🏗️ Build Process Flow
+
+1. **Development** → `npx expo start --clear`
+2. **Testing** → `eas build -p android --profile preview`
+3. **Production** → `eas build --platform android --clear-cache`
+4. **Deployment** → Upload to respective app stores
+
+For detailed build configurations, check the `eas.json` file in the project root.
 
 ---
 
- 
+
 
 
