@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getAuth, createUserWithEmailAndPassword, updateProfile, getReactNativePersistence, initializeAuth, signInWithEmailAndPassword } from "firebase/auth";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
+import Constants from 'expo-constants'; 
 const {
   firebaseApiKey,
   firebaseAuthDomain,

@@ -385,10 +385,6 @@ function RootStack() {
 }
 export default function App() {
 
-
-
-
-
   return (
 
     <SafeAreaProvider >

@@ -1,4 +1,4 @@
-# Instrumobile App
+# InstruPro App
 
 Instrumobile is a comprehensive mobile application for industrial maintenance teams, designed to manage PLC modifications, spares, preventive maintenance, overtime, and more. Built with React Native, Expo, and Firebase, it provides a modern, cross-platform experience for plant engineers and technicians.
 
