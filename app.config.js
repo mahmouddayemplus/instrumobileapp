@@ -4,9 +4,9 @@ export default {
   expo: {
     name: "instrupro",
     slug: "instrupro",
-    version: "1.0.0",
+    version: "1.0.1",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/adaptive-icon.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
 
@@ -29,11 +29,11 @@ export default {
 
     splash: {
       image: "./assets/splash-icon.png",
-      resizeMode: "contain",
+      resizeMode: "cover",
       backgroundColor: "#ffffff",
       dark: {
         image: "./assets/splash-icon.png",
-        resizeMode: "contain",
+        resizeMode: "cover",
         backgroundColor: "#ffffff",
       },
       tabletImage: "./assets/splash-icon.png",
