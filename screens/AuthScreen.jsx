@@ -24,6 +24,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { signup, signin } from "../firebase/firebaseConfig";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 export default function AuthScreen() {
   const dispatch = useDispatch();
@@ -38,6 +39,7 @@ export default function AuthScreen() {
   const [password, setPassword] = useState("");
   const [companyId, setCompanyId] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   const [errors, setErrors] = useState({});
 
@@ -134,6 +136,30 @@ export default function AuthScreen() {
       }
     }
   };
+
+  const handleResetPassword = async () => {
+    if (!emailRegex.test(email)) {
+      Alert.alert("Enter a valid email", "Please type your account email first.");
+      return;
+    }
+    try {
+      setResetting(true);
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email.trim());
+      Alert.alert(
+        "Password reset sent",
+        "Check your inbox for a reset link. If you don't see it, check spam."
+      );
+    } catch (err) {
+      let message = "Couldn't send reset email.";
+      if (err?.code === "auth/user-not-found") message = "No user found with this email.";
+      else if (err?.code === "auth/invalid-email") message = "The email address is invalid.";
+      else if (err?.code === "auth/too-many-requests") message = "Too many attempts. Try again later.";
+      Alert.alert("Reset failed", message);
+    } finally {
+      setResetting(false);
+    }
+  };
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -193,6 +219,23 @@ export default function AuthScreen() {
           />
           {errors.password && (
             <Text style={styles.errorText}>{errors.password}</Text>
+          )}
+
+          {(!isSignup || isExistingUser) && (
+            <TouchableOpacity
+              onPress={handleResetPassword}
+              disabled={resetting}
+              style={styles.forgotPasswordWrapper}
+            >
+              {resetting ? (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <ActivityIndicator size="small" color={colors.primaryDark} />
+                  <Text style={styles.forgotPassword}>Sending reset email…</Text>
+                </View>
+              ) : (
+                <Text style={styles.forgotPassword}>Forgot password?</Text>
+              )}
+            </TouchableOpacity>
           )}
 
           {isSignup && !isExistingUser && (
@@ -322,6 +365,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
     color: colors.primaryDark,
     textAlign: "center",
+    fontWeight: "600",
+  },
+  forgotPasswordWrapper: {
+    alignSelf: "flex-end",
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  forgotPassword: {
+    color: colors.primaryDark,
     fontWeight: "600",
   },
   switchContainer: {
