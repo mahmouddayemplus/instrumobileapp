@@ -10,6 +10,33 @@ export default {
     userInterfaceStyle: "light",
     newArchEnabled: true,
 
+    // Android config is defined later with splash settings
+
+    ios: {
+      buildNumber: "1.0.0",
+      supportsTablet: true,
+      icon: "./assets/icon.png",
+      splash: {
+        image: "./assets/splash-icon.png",
+        resizeMode: "cover",
+        backgroundColor: "#ffffff",
+      },
+    },
+    
+
+    splash: {
+      image: "./assets/splash-icon.png",
+      resizeMode: "cover",
+      backgroundColor: "#ffffff",
+    },
+
+    androidStatusBar: {
+      backgroundColor: "#ffffff",
+      translucent: false,
+      barStyle: "dark-content",
+      hidden: false,
+    },
+
     android: {
       package: "com.mahmoud.instrupro", // ✅ required
       versionCode: 1,
@@ -18,20 +45,11 @@ export default {
         backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
-    },
-
-    ios: {
-      buildNumber: "1.0.0",
-      supportsTablet: true,
-      icon: "./assets/icon.png",
-    },
-    
-
-    splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "cover",
-      backgroundColor: "#ffffff",
-    
+      splash: {
+        image: "./assets/splash-icon.png",
+        resizeMode: "cover",
+        backgroundColor: "#ffffff",
+      },
     },
 
     extra: {

@@ -7,6 +7,9 @@ import {
   StatusBar,
   TouchableOpacity,
   Platform,
+  Modal,
+  TextInput,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useLayoutEffect, useState, useEffect } from "react";
@@ -17,6 +20,9 @@ import { Ionicons } from "@expo/vector-icons"; // or use Feather, MaterialIcons,
 import { writeAllTasksToFirestore } from "../firebase/fireStoreBulkWrite";
 import { demoData } from "../firebase/demoData";
 import { colors } from "../constants/color";
+import { useSelector } from "react-redux";
+import { db } from "../firebase/firebaseConfig";
+import { doc, updateDoc } from "firebase/firestore";
 
 const TaskDetailScreen = () => {
   const route = useRoute();
@@ -26,8 +32,14 @@ const TaskDetailScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSafetyWarning, setShowSafetyWarning] = useState(false);
+  const [addTagVisible, setAddTagVisible] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagTitle, setNewTagTitle] = useState("");
+  const [savingTag, setSavingTag] = useState(false);
   const { task } = route.params;
   const taskId = task.id; // Assuming task has an id field
+  const user = useSelector((state) => state.auth.user);
+  const isAdmin = !!user?.isAdmin;
 
   // Helper function to get the actual task count
   const getTaskCount = () => {
@@ -243,12 +255,36 @@ const TaskDetailScreen = () => {
             />
             <Text style={styles.sectionTitle}>Available Tasks</Text>
           </View>
-          <View style={styles.sectionBadge}>
-            <Text style={styles.sectionBadgeText}>{getTaskCount()}</Text>
+          <View style={styles.sectionRight}>
+            <View style={styles.sectionBadge}>
+              <Text style={styles.sectionBadgeText}>{getTaskCount()}</Text>
+            </View>
+            {isAdmin && (
+              <TouchableOpacity
+                onPress={() => {
+                  setNewTagName("");
+                  setNewTagTitle("");
+                  setAddTagVisible(true);
+                }}
+                style={styles.addTagBtn}
+              >
+                <Ionicons name="add" size={20} color="#fff" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        <AreaTasksListComponent data={areaTasks} />
+        <AreaTasksListComponent
+          data={areaTasks}
+          onTasksUpdated={async () => {
+            // Refresh cache and reload
+            await updateDetailedTasks();
+            const cached = await loadData("cached_tasks");
+            if (cached) {
+              setTasks(cached);
+            }
+          }}
+        />
       </View>
 
       {/* Refresh Status Overlay */}
@@ -259,6 +295,98 @@ const TaskDetailScreen = () => {
             <Text style={styles.refreshStatusText}>Updating tasks...</Text>
           </View>
         </View>
+      )}
+      {isAdmin && (
+        <Modal
+          visible={addTagVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => !savingTag && setAddTagVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Add New Tag</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Tag (unique key)"
+                value={newTagName}
+                onChangeText={setNewTagName}
+                editable={!savingTag}
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Title (optional)"
+                value={newTagTitle}
+                onChangeText={setNewTagTitle}
+                editable={!savingTag}
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalBtn}
+                  disabled={savingTag}
+                  onPress={() => setAddTagVisible(false)}
+                >
+                  <Text style={styles.modalBtnText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalBtn, styles.modalPrimary]}
+                  disabled={savingTag}
+                  onPress={async () => {
+                    const section = areaTasks?.[0];
+                    const tagVal = newTagName.trim();
+                    const titleVal = newTagTitle.trim() || tagVal;
+                    if (!section?.id) return;
+                    if (!tagVal) {
+                      Alert.alert("Required", "Please enter a tag.");
+                      return;
+                    }
+                    try {
+                      setSavingTag(true);
+                      const tags = section.tags || [];
+                      const exists = tags.some(
+                        (t) => (t?.tag || "").trim().toLowerCase() === tagVal.toLowerCase()
+                      );
+                      if (exists) {
+                        Alert.alert("Duplicate tag", "A tag with this key already exists.");
+                        return;
+                      }
+                      const updatedTags = [
+                        ...tags,
+                        { tag: tagVal, title: titleVal, tasks: [], archived: false, archive: false },
+                      ];
+                      const ref = doc(db, "allTasks", section.id);
+                      await updateDoc(ref, {
+                        tags: updatedTags,
+                        updatedAt: new Date().toISOString(),
+                      });
+                      setAddTagVisible(false);
+                      setNewTagName("");
+                      setNewTagTitle("");
+                      await updateDetailedTasks();
+                      const cached = await loadData("cached_tasks");
+                      if (cached) setTasks(cached);
+                    } catch (e) {
+                      console.error("Failed to add tag:", e);
+                      Alert.alert("Add failed", e?.message || String(e));
+                    } finally {
+                      setSavingTag(false);
+                    }
+                  }}
+                >
+                  {savingTag ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text style={[styles.modalBtnText, { color: '#fff' }]}>Saving...</Text>
+                    </View>
+                  ) : (
+                    <Text style={[styles.modalBtnText, { color: '#fff' }]}>Add Tag</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       )}
     </SafeAreaView>
   );
@@ -483,6 +611,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
   },
+  sectionRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   refreshOverlay: {
     position: "absolute",
     top: 0,
@@ -523,5 +656,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  },
+  addTagBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.primary || "#34C759",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#111",
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: "#111",
+    marginBottom: 8,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 8,
+  },
+  modalBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#f1f5f9",
+  },
+  modalPrimary: {
+    backgroundColor: colors.primary || "#34C759",
+  },
+  modalBtnText: {
+    color: "#111",
+    fontWeight: "600",
   },
 });
