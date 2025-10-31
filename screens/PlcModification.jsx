@@ -46,8 +46,7 @@ const PlcModification = () => {
                 cancelledDate: new Date().toISOString(),
                 cancelledBy: auth.currentUser.uid
               });
-              console.log('Modification cancelled successfully');
-              fetchModifications(); // Refresh the list
+               fetchModifications(); // Refresh the list
             } catch (error) {
               console.error('Error cancelling modification:', error);
               Alert.alert('Error', 'Failed to cancel modification');
@@ -180,8 +179,7 @@ const PlcModification = () => {
           updatedAt: new Date().toISOString(),
           updatedBy: user.uid
         });
-        console.log('PLC Modification updated successfully');
-      } else {
+       } else {
         // Create new document
         await addDoc(collection(db, 'plcModifications'), {
           ...formData,
@@ -190,8 +188,7 @@ const PlcModification = () => {
           userName: user.displayName || 'Anonymous',
           status: 'active',
         });
-        console.log('PLC Modification saved successfully');
-      }
+       }
       
       setModalVisible(false);
       fetchModifications(); // Refresh the list
