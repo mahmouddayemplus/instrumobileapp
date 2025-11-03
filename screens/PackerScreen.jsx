@@ -82,7 +82,7 @@ const PackerScreen = () => {
       trial2: "",
       trial3: "",
     });
-   };
+  };
 
   // Function to handle spout input changes
   const handleSpoutChange = (spoutKey, value) => {
@@ -333,145 +333,151 @@ const PackerScreen = () => {
     return "Critical";
   };
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
 
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-          alwaysBounceVertical={false}
-        >
-          {/* Header Section */}
 
-          {/* Navigation Button */}
-          <View style={styles.navigationContainer}>
-            <TouchableOpacity
-              style={styles.navigationButton}
-              onPress={() => navigation.navigate('PackersHistory')}
-            >
-              <Ionicons name="time" size={20} color="#fff" />
-              <Text style={styles.navigationButtonText}>View History</Text>
-            </TouchableOpacity>
-          </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView style={styles.container}>
+          <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
 
-          {/* Packer Filter Card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Select Machine</Text>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              onPress={() => setShowPackerDropdown(true)}
-            >
-              <Text style={styles.dropdownText}>{selectedPacker}</Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+            alwaysBounceVertical={false}
+          >
+            {/* Header Section */}
 
-          {/* Spout Inputs Card - Only show for regular packers */}
-          {selectedPacker && !selectedPacker.includes("Ventocheck") && (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Spout Calibration</Text>
-              <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
-
-              {Object.keys(spoutValues).map((spoutKey, index) => {
-                const spoutNumber = index + 1;
-                const value = spoutValues[spoutKey];
-                const error = calculateSpoutError(value);
-
-                return (
-                  <View key={spoutKey} style={styles.spoutRow}>
-                    <View style={styles.spoutLabelContainer}>
-                      <Text style={styles.spoutLabel}>Spout{spoutNumber}</Text>
-                    </View>
-                    <View style={styles.spoutInputContainer}>
-                      <TextInput
-                        style={styles.spoutInput}
-                        keyboardType="numeric"
-                        value={value}
-                        onChangeText={(text) => handleSpoutChange(spoutKey, text)}
-                        placeholder="0.0"
-                        placeholderTextColor="#999"
-                      />
-                    </View>
-                    <View style={styles.errorContainer}>
-                      <Text style={[
-                        styles.errorText,
-                        { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
-                      ]}>
-                        {error !== "" ? `${error.toFixed(2)}%` : "—"}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-
-          {/* Trial Inputs Card - Only show for Ventocheck packers */}
-          {selectedPacker && selectedPacker.includes("Ventocheck") && (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Trial Calibration</Text>
-              <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
-
-              {Object.keys(trialValues).map((trialKey, index) => {
-                const trialNumber = index + 1;
-                const value = trialValues[trialKey];
-                const error = calculateSpoutError(value);
-
-                return (
-                  <View key={trialKey} style={styles.spoutRow}>
-                    <View style={styles.spoutLabelContainer}>
-                      <Text style={styles.spoutLabel}>Trial-{trialNumber}</Text>
-                    </View>
-                    <View style={styles.spoutInputContainer}>
-                      <TextInput
-                        style={styles.spoutInput}
-                        keyboardType="numeric"
-                        value={value}
-                        onChangeText={(text) => handleTrialChange(trialKey, text)}
-                        placeholder="0.0"
-                        placeholderTextColor="#999"
-                      />
-                    </View>
-                    <View style={styles.errorContainer}>
-                      <Text style={[
-                        styles.errorText,
-                        { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
-                      ]}>
-                        {error !== "" ? `${error.toFixed(2)}%` : "—"}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-
-          {/* Save Button - Show when there's data to save */}
-          {selectedPacker && (
-            <View style={styles.saveButtonContainer}>
+            {/* Navigation Button */}
+            <View style={styles.navigationContainer}>
               <TouchableOpacity
-                style={[styles.saveButton, isSaving && styles.disabledButton]}
-                onPress={saveCalibrationData}
-                disabled={isSaving}
+                style={styles.navigationButton}
+                onPress={() => navigation.navigate('PackersHistory')}
               >
-                {isSaving ? (
-                  <View style={styles.loadingContainer}>
-                    <Text style={styles.saveButtonText}>Saving...</Text>
-                  </View>
-                ) : (
-                  <>
-                    <Ionicons name="cloud-upload" size={20} color="#fff" style={styles.buttonIcon} />
-                    <Text style={styles.saveButtonText}>Save to Cloud</Text>
-                  </>
-                )}
+                <Ionicons name="time" size={20} color="#fff" />
+                <Text style={styles.navigationButtonText}>View History</Text>
               </TouchableOpacity>
             </View>
-          )}
 
-          {/* Test Weight Card */}
-          {/* <View style={styles.card_top}>
+            {/* Packer Filter Card */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Select Machine</Text>
+              <TouchableOpacity
+                style={styles.dropdownButton}
+                onPress={() => setShowPackerDropdown(true)}
+              >
+                <Text style={styles.dropdownText}>{selectedPacker}</Text>
+                <Ionicons name="chevron-down" size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Spout Inputs Card - Only show for regular packers */}
+            {selectedPacker && !selectedPacker.includes("Ventocheck") && (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Spout Calibration</Text>
+                <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
+
+                {Object.keys(spoutValues).map((spoutKey, index) => {
+                  const spoutNumber = index + 1;
+                  const value = spoutValues[spoutKey];
+                  const error = calculateSpoutError(value);
+
+                  return (
+                    <View key={spoutKey} style={styles.spoutRow}>
+                      <View style={styles.spoutLabelContainer}>
+                        <Text style={styles.spoutLabel}>Spout{spoutNumber}</Text>
+                      </View>
+                      <View style={styles.spoutInputContainer}>
+                        <TextInput
+                          style={styles.spoutInput}
+                          keyboardType="numeric"
+                          value={value}
+                          onChangeText={(text) => handleSpoutChange(spoutKey, text)}
+                          placeholder="0.0"
+                          placeholderTextColor="#999"
+                        />
+                      </View>
+                      <View style={styles.errorContainer}>
+                        <Text style={[
+                          styles.errorText,
+                          { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
+                        ]}>
+                          {error !== "" ? `${error.toFixed(2)}%` : "—"}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {/* Trial Inputs Card - Only show for Ventocheck packers */}
+            {selectedPacker && selectedPacker.includes("Ventocheck") && (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Trial Calibration</Text>
+                <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
+
+                {Object.keys(trialValues).map((trialKey, index) => {
+                  const trialNumber = index + 1;
+                  const value = trialValues[trialKey];
+                  const error = calculateSpoutError(value);
+
+                  return (
+                    <View key={trialKey} style={styles.spoutRow}>
+                      <View style={styles.spoutLabelContainer}>
+                        <Text style={styles.spoutLabel}>Trial-{trialNumber}</Text>
+                      </View>
+                      <View style={styles.spoutInputContainer}>
+                        <TextInput
+                          style={styles.spoutInput}
+                          keyboardType="numeric"
+                          value={value}
+                          onChangeText={(text) => handleTrialChange(trialKey, text)}
+                          placeholder="0.0"
+                          placeholderTextColor="#999"
+                        />
+                      </View>
+                      <View style={styles.errorContainer}>
+                        <Text style={[
+                          styles.errorText,
+                          { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
+                        ]}>
+                          {error !== "" ? `${error.toFixed(2)}%` : "—"}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {/* Save Button - Show when there's data to save */}
+            {selectedPacker && (
+              <View style={styles.saveButtonContainer}>
+                <TouchableOpacity
+                  style={[styles.saveButton, isSaving && styles.disabledButton]}
+                  onPress={saveCalibrationData}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <View style={styles.loadingContainer}>
+                      <Text style={styles.saveButtonText}>Saving...</Text>
+                    </View>
+                  ) : (
+                    <>
+                      <Ionicons name="cloud-upload" size={20} color="#fff" style={styles.buttonIcon} />
+                      <Text style={styles.saveButtonText}>Save to Cloud</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Test Weight Card */}
+            {/* <View style={styles.card_top}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Test Weight</Text>
               <View style={styles.weightDisplay}>
@@ -482,7 +488,7 @@ const PackerScreen = () => {
           </View>
 
           {/* Input Card */}
-          {/* <View style={styles.card}>
+            {/* <View style={styles.card}>
             {error !== null && (
               <View style={styles.errorSection}>
                 <View style={styles.errorHeader}>
@@ -516,7 +522,7 @@ const PackerScreen = () => {
                   </Text>
                 </View>
               </View> */}
-          {/* )}
+            {/* )}
 
             <TextInput
               style={[styles.input, inputError && styles.inputErrorBorder]}
@@ -540,45 +546,46 @@ const PackerScreen = () => {
               <Text style={styles.buttonText}>Calculate Error</Text>
             </TouchableOpacity>
           </View> */}
-        </ScrollView>
+          </ScrollView>
 
-        {/* Packer Dropdown Modal */}
-        <Modal
-          visible={showPackerDropdown}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowPackerDropdown(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setShowPackerDropdown(false)}>
-            <View style={styles.modalOverlay}>
-              <View style={styles.dropdownModal}>
-                <Text style={styles.modalTitle}>Select Packer</Text>
-                {packerOptions.map((packer, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.dropdownOption,
-                      selectedPacker === packer && styles.selectedOption
-                    ]}
-                    onPress={() => handlePackerSelection(packer)}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      selectedPacker === packer && styles.selectedOptionText
-                    ]}>
-                      {packer}
-                    </Text>
-                    {selectedPacker === packer && (
-                      <Ionicons name="checkmark" size={20} color={colors.primary || "#34C759"} />
-                    )}
-                  </TouchableOpacity>
-                ))}
+          {/* Packer Dropdown Modal */}
+          <Modal
+            visible={showPackerDropdown}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowPackerDropdown(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setShowPackerDropdown(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.dropdownModal}>
+                  <Text style={styles.modalTitle}>Select Packer</Text>
+                  {packerOptions.map((packer, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.dropdownOption,
+                        selectedPacker === packer && styles.selectedOption
+                      ]}
+                      onPress={() => handlePackerSelection(packer)}
+                    >
+                      <Text style={[
+                        styles.optionText,
+                        selectedPacker === packer && styles.selectedOptionText
+                      ]}>
+                        {packer}
+                      </Text>
+                      {selectedPacker === packer && (
+                        <Ionicons name="checkmark" size={20} color={colors.primary || "#34C759"} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
