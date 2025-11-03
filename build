@@ -35,7 +35,7 @@
 # PREVIEW/TESTING BUILD (APK file generation)
 # Generates an APK file for testing on Android devices
 # APK files are smaller and easier to distribute for testing
-eas build -p android --profile preview # Generates APK file for testing
+# eas build -p android --profile preview # Generates APK file for testing
 
 # PRODUCTION BUILD (AAB file generation)  
 # Generates an Android App Bundle (AAB) for Google Play Store submission

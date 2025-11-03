@@ -31,6 +31,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Overtime from './screens/Overtime';
 import OvertimeDetails from './screens/OvertimeDetails'
 import PlcModification from './screens/PlcModification'
+import PackersHistory from './screens/PackersHistory'
 
 
 
@@ -308,6 +309,24 @@ function RootStack() {
               component={PackerScreen}
               options={({ navigation }) => ({
                 title: "Packer Calibrator",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="PackersHistory"
+              component={PackersHistory}
+              options={({ navigation }) => ({
+                title: "Packer History",
 
                 headerRight: () => (
                   <MaterialCommunityIcons

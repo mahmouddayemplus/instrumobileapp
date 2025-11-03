@@ -149,6 +149,16 @@ const ToolsScreen = ({ navigation }) => {
               screenName="Overtime"
             />
           </View>
+          <View style={styles.toolsGrid}>
+            <ToolComponent
+              iconName="calculator"
+              titleLine1="Packer History"
+              titleLine2="Calibrator"
+              screenName="PackersHistory"
+            />
+        
+ 
+          </View>
           {
               isPrivileged 
               &&
