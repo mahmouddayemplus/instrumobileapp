@@ -34,7 +34,7 @@ const WeighFeeder = () => {
     if (fullWeight.trim() && emptyWeight.trim()) {
       const full = parseFloat(fullWeight);
       const empty = parseFloat(emptyWeight);
-      
+
       if (!isNaN(full) && !isNaN(empty) && full > empty) {
         const calculatedWeight = full - empty;
         setActualWeight(calculatedWeight.toString());
@@ -75,17 +75,17 @@ const WeighFeeder = () => {
       }
 
       weight = truckWeightWithMaterial - truckTare;
- 
+
       setActualWeight(weight.toString());
     } else {
       weight = parseFloat(actualWeight);
-      
+
       // Validation: Check if actual weight is provided when truck weights are not
       if (!actualWeight.trim()) {
         setValidationError("Please provide either truck weights (empty & full) or actual weight.");
         return;
       }
-      
+
       if (isNaN(weight)) {
         setValidationError("Please enter a valid numeric value for actual weight.");
         return;
@@ -145,7 +145,7 @@ const WeighFeeder = () => {
   const calculateFactor = () => {
     // Clear previous validation errors
     setValidationError("");
-    
+
     const weight = parseFloat(actualWeight);
     const total = parseFloat(totalizer);
     const factor = parseFloat(oldCorrectionFactor);
@@ -241,15 +241,7 @@ const WeighFeeder = () => {
             </View>
           )}
 
-          {/* Clear All Button */}
-          {/* <View style={styles.clearButtonContainer}>
-            <TouchableOpacity style={styles.clearButton} onPress={clearAllInputs}>
-              <Ionicons name="refresh-outline" size={20} color="#666" />
-              <Text style={styles.clearButtonText}>Clear All Fields</Text>
-            </TouchableOpacity>
-          </View> */}
-
-          {/* Error Calculation Card */}
+ 
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
             <View style={styles.card}>
@@ -319,7 +311,7 @@ const WeighFeeder = () => {
                   )}
                 </View>
               </View>
- 
+
 
               <View style={styles.inputGroup}>
                 <View style={styles.inputLabelContainer}>
@@ -346,7 +338,7 @@ const WeighFeeder = () => {
                     }}
                     placeholder={isActualWeightDisabled ? "Calculated from truck weights" : "Enter actual weight..."}
                     placeholderTextColor={isActualWeightDisabled ? "#ccc" : "#999"}
-                  
+
                     editable={!isActualWeightDisabled}
                   />
                   {actualWeight.length > 0 && !isActualWeightDisabled && (

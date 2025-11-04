@@ -9,7 +9,10 @@ import {
   StatusBar,
   Modal,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { getFirestore, collection, doc, updateDoc, arrayUnion, getDoc, setDoc } from "firebase/firestore";
@@ -254,6 +257,14 @@ const PackerScreen = () => {
           </View>
         </View>
       ),
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerHistoryButton}
+          onPress={() => navigation.navigate('PackersHistory')}
+        >
+          <Ionicons name="time" size={24} color="#fff" />
+        </TouchableOpacity>
+      ),
     });
   }, [navigation]);
 
@@ -336,255 +347,208 @@ const PackerScreen = () => {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
+      <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['bottom']}>
+        <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
 
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={styles.container}>
-          <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
-
-          <ScrollView
-            contentContainerStyle={styles.scroll}
-            showsVerticalScrollIndicator={false}
-            bounces={true}
-            alwaysBounceVertical={false}
-          >
-            {/* Header Section */}
-
-            {/* Navigation Button */}
-            <View style={styles.navigationContainer}>
-              <TouchableOpacity
-                style={styles.navigationButton}
-                onPress={() => navigation.navigate('PackersHistory')}
-              >
-                <Ionicons name="time" size={20} color="#fff" />
-                <Text style={styles.navigationButtonText}>View History</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Packer Filter Card */}
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Select Machine</Text>
-              <TouchableOpacity
-                style={styles.dropdownButton}
-                onPress={() => setShowPackerDropdown(true)}
-              >
-                <Text style={styles.dropdownText}>{selectedPacker}</Text>
-                <Ionicons name="chevron-down" size={20} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Spout Inputs Card - Only show for regular packers */}
-            {selectedPacker && !selectedPacker.includes("Ventocheck") && (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <ScrollView
+              contentContainerStyle={styles.scroll}
+              showsVerticalScrollIndicator={false}
+              bounces={true}
+              alwaysBounceVertical={true}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* Packer Filter Card */}
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Spout Calibration</Text>
-                <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
-
-                {Object.keys(spoutValues).map((spoutKey, index) => {
-                  const spoutNumber = index + 1;
-                  const value = spoutValues[spoutKey];
-                  const error = calculateSpoutError(value);
-
-                  return (
-                    <View key={spoutKey} style={styles.spoutRow}>
-                      <View style={styles.spoutLabelContainer}>
-                        <Text style={styles.spoutLabel}>Spout{spoutNumber}</Text>
-                      </View>
-                      <View style={styles.spoutInputContainer}>
-                        <TextInput
-                          style={styles.spoutInput}
-                          keyboardType="numeric"
-                          value={value}
-                          onChangeText={(text) => handleSpoutChange(spoutKey, text)}
-                          placeholder="0.0"
-                          placeholderTextColor="#999"
-                        />
-                      </View>
-                      <View style={styles.errorContainer}>
-                        <Text style={[
-                          styles.errorText,
-                          { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
-                        ]}>
-                          {error !== "" ? `${error.toFixed(2)}%` : "—"}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-
-            {/* Trial Inputs Card - Only show for Ventocheck packers */}
-            {selectedPacker && selectedPacker.includes("Ventocheck") && (
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Trial Calibration</Text>
-                <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
-
-                {Object.keys(trialValues).map((trialKey, index) => {
-                  const trialNumber = index + 1;
-                  const value = trialValues[trialKey];
-                  const error = calculateSpoutError(value);
-
-                  return (
-                    <View key={trialKey} style={styles.spoutRow}>
-                      <View style={styles.spoutLabelContainer}>
-                        <Text style={styles.spoutLabel}>Trial-{trialNumber}</Text>
-                      </View>
-                      <View style={styles.spoutInputContainer}>
-                        <TextInput
-                          style={styles.spoutInput}
-                          keyboardType="numeric"
-                          value={value}
-                          onChangeText={(text) => handleTrialChange(trialKey, text)}
-                          placeholder="0.0"
-                          placeholderTextColor="#999"
-                        />
-                      </View>
-                      <View style={styles.errorContainer}>
-                        <Text style={[
-                          styles.errorText,
-                          { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
-                        ]}>
-                          {error !== "" ? `${error.toFixed(2)}%` : "—"}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-
-            {/* Save Button - Show when there's data to save */}
-            {selectedPacker && (
-              <View style={styles.saveButtonContainer}>
+                <Text style={styles.cardTitle}>Select Machine</Text>
                 <TouchableOpacity
-                  style={[styles.saveButton, isSaving && styles.disabledButton]}
-                  onPress={saveCalibrationData}
-                  disabled={isSaving}
+                  style={styles.dropdownButton}
+                  onPress={() => setShowPackerDropdown(true)}
                 >
-                  {isSaving ? (
-                    <View style={styles.loadingContainer}>
-                      <Text style={styles.saveButtonText}>Saving...</Text>
-                    </View>
-                  ) : (
-                    <>
-                      <Ionicons name="cloud-upload" size={20} color="#fff" style={styles.buttonIcon} />
-                      <Text style={styles.saveButtonText}>Save to Cloud</Text>
-                    </>
-                  )}
+                  <Text style={styles.dropdownText}>{selectedPacker}</Text>
+                  <Ionicons name="chevron-down" size={20} color="#666" />
                 </TouchableOpacity>
               </View>
-            )}
 
-            {/* Test Weight Card */}
-            {/* <View style={styles.card_top}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Test Weight</Text>
-              <View style={styles.weightDisplay}>
-                <Text style={styles.weightValue}>50,000</Text>
-                <Text style={styles.weightUnit}>grams</Text>
-              </View>
-            </View>
-          </View>
+              {/* Spout Inputs Card - Only show for regular packers */}
+              {selectedPacker && !selectedPacker.includes("Ventocheck") && (
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>Spout Calibration | Test Weight: 50 kg</Text>
 
-          {/* Input Card */}
-            {/* <View style={styles.card}>
-            {error !== null && (
-              <View style={styles.errorSection}>
-                <View style={styles.errorHeader}>
-                  <Text style={styles.errorTitle}>Calculated Error</Text>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: getErrorColor(error) },
-                    ]}
-                  >
-                    <Text style={styles.statusText}>
-                      {getErrorStatus(error)}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.errorDisplay}>
-                  <Text
-                    style={[styles.errorValue, { color: getErrorColor(error) }]}
-                  >
-                    {error}%
-                  </Text>
-                </View>
-                <View style={styles.errorInfo}>
-                  <Text style={styles.errorInfoText}>
-                    {parseFloat(error) >= -0.5 && parseFloat(error) <= 0.5
-                      ? "✅ Weight is within acceptable range"
-                      : (parseFloat(error) > 0.5 && parseFloat(error) <= 2.5) ||
-                        (parseFloat(error) < -0.5 && parseFloat(error) >= -2.5)
-                      ? "⚠️ Weight deviation detected - consider calibration"
-                      : "❌ Significant weight error - immediate calibration required"}
-                  </Text>
-                </View>
-              </View> */}
-            {/* )}
 
-            <TextInput
-              style={[styles.input, inputError && styles.inputErrorBorder]}
-              keyboardType="numeric"
-              value={totalizer}
-              onChangeText={handleTotalizerChange}
-              placeholder="XX,XXX"
-              placeholderTextColor="#999"
-              maxLength={6}
-            />
+                  {/* 4 rows x 2 columns grid */}
+                  {[0, 1, 2, 3].map(rowIndex => (
+                    <View key={rowIndex} style={styles.inputRow}>
+                      {[0, 1].map(colIndex => {
+                        const spoutIndex = rowIndex * 2 + colIndex;
+                        const spoutKey = `spout${spoutIndex + 1}`;
+                        const spoutNumber = spoutIndex + 1;
+                        const value = spoutValues[spoutKey];
+                        const error = calculateSpoutError(value);
 
-            {inputError && (
-              <View style={styles.inputError}>
-                <Text style={styles.inputErrorText}>
-                  Please enter exactly 5 digits.
-                </Text>
-              </View>
-            )}
+                        return (
+                          <View key={spoutKey} style={styles.inputColumn}>
+                            <View style={styles.labelRow}>
+                              <Text style={styles.inputLabel}>Spout{spoutNumber}</Text>
+                              <Text style={[
+                                styles.errorLabel,
+                                { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
+                              ]}>
+                                {error !== "" ? `${error.toFixed(2)}%` : "—"}
+                              </Text>
+                            </View>
+                            <TextInput
+                              style={styles.gridInput}
+                              keyboardType="numeric"
+                              value={value}
+                              onChangeText={(text) => handleSpoutChange(spoutKey, text)}
+                              placeholder="0.0"
+                              placeholderTextColor="#999"
+                              selectTextOnFocus={true}
+                            />
 
-            <TouchableOpacity style={styles.button} onPress={calculateError}>
-              <Text style={styles.buttonText}>Calculate Error</Text>
-            </TouchableOpacity>
-          </View> */}
-          </ScrollView>
-
-          {/* Packer Dropdown Modal */}
-          <Modal
-            visible={showPackerDropdown}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowPackerDropdown(false)}
-          >
-            <TouchableWithoutFeedback onPress={() => setShowPackerDropdown(false)}>
-              <View style={styles.modalOverlay}>
-                <View style={styles.dropdownModal}>
-                  <Text style={styles.modalTitle}>Select Packer</Text>
-                  {packerOptions.map((packer, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.dropdownOption,
-                        selectedPacker === packer && styles.selectedOption
-                      ]}
-                      onPress={() => handlePackerSelection(packer)}
-                    >
-                      <Text style={[
-                        styles.optionText,
-                        selectedPacker === packer && styles.selectedOptionText
-                      ]}>
-                        {packer}
-                      </Text>
-                      {selectedPacker === packer && (
-                        <Ionicons name="checkmark" size={20} color={colors.primary || "#34C759"} />
-                      )}
-                    </TouchableOpacity>
+                          </View>
+                        );
+                      })}
+                    </View>
                   ))}
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-        </SafeAreaView>
-      </TouchableWithoutFeedback>
+              )}
+
+              {/* Trial Inputs Card - Only show for Ventocheck packers */}
+              {selectedPacker && selectedPacker.includes("Ventocheck") && (
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>Trial Calibration</Text>
+                  <Text style={styles.subtitle}>Test Weight: 50 grams</Text>
+
+                  {/* First row with 2 trials */}
+                  <View style={styles.inputRow}>
+                    {[0, 1].map(colIndex => {
+                      const trialIndex = colIndex;
+                      const trialKey = `trial${trialIndex + 1}`;
+                      const trialNumber = trialIndex + 1;
+                      const value = trialValues[trialKey];
+                      const error = calculateSpoutError(value);
+
+                      return (
+                        <View key={trialKey} style={styles.inputColumn}>
+                          <View style={styles.labelRow}>
+                            <Text style={styles.inputLabel}>Trial-{trialNumber}</Text>
+                            <Text style={[
+                              styles.errorLabel,
+                              { color: error !== "" ? getErrorColor(error.toFixed(2)) : "#999" }
+                            ]}>
+                              {error !== "" ? `${error.toFixed(2)}%` : "—"}
+                            </Text>
+                          </View>
+                          <TextInput
+                            style={styles.gridInput}
+                            keyboardType="numeric"
+                            value={value}
+                            onChangeText={(text) => handleTrialChange(trialKey, text)}
+                            placeholder="0.0"
+                            placeholderTextColor="#999"
+                            selectTextOnFocus={true}
+                          />
+                        </View>
+                      );
+                    })}
+                  </View>
+
+                  {/* Second row with third trial centered */}
+                  <View style={styles.inputRow}>
+                    <View style={styles.inputColumn}>
+                      {/* Empty space */}
+                    </View>
+                    <View style={styles.inputColumn}>
+                      <View style={styles.labelRow}>
+                        <Text style={styles.inputLabel}>Trial-3</Text>
+                        <Text style={[
+                          styles.errorLabel,
+                          { color: calculateSpoutError(trialValues.trial3) !== "" ? getErrorColor(calculateSpoutError(trialValues.trial3).toFixed(2)) : "#999" }
+                        ]}>
+                          {calculateSpoutError(trialValues.trial3) !== "" ? `${calculateSpoutError(trialValues.trial3).toFixed(2)}%` : "—"}
+                        </Text>
+                      </View>
+                      <TextInput
+                        style={styles.gridInput}
+                        keyboardType="numeric"
+                        value={trialValues.trial3}
+                        onChangeText={(text) => handleTrialChange('trial3', text)}
+                        placeholder="0.0"
+                        placeholderTextColor="#999"
+                        selectTextOnFocus={true}
+                      />
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {/* Save Button - Show when there's data to save */}
+              {selectedPacker && (
+                <View style={styles.saveButtonContainer}>
+                  <TouchableOpacity
+                    style={[styles.saveButton, isSaving && styles.disabledButton]}
+                    onPress={saveCalibrationData}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <View style={styles.loadingContainer}>
+                        <Text style={styles.saveButtonText}>Saving...</Text>
+                      </View>
+                    ) : (
+                      <>
+                        <Ionicons name="cloud-upload" size={20} color="#fff" style={styles.buttonIcon} />
+                        <Text style={styles.saveButtonText}>Save to Cloud</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Packer Dropdown Modal */}
+            <Modal
+              visible={showPackerDropdown}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setShowPackerDropdown(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setShowPackerDropdown(false)}>
+                <View style={styles.modalOverlay}>
+                  <View style={styles.dropdownModal}>
+                    <Text style={styles.modalTitle}>Select Packer</Text>
+                    {packerOptions.map((packer, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.dropdownOption,
+                          selectedPacker === packer && styles.selectedOption
+                        ]}
+                        onPress={() => handlePackerSelection(packer)}
+                      >
+                        <Text style={[
+                          styles.optionText,
+                          selectedPacker === packer && styles.selectedOptionText
+                        ]}>
+                          {packer}
+                        </Text>
+                        {selectedPacker === packer && (
+                          <Ionicons name="checkmark" size={20} color={colors.primary || "#34C759"} />
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          </View>
+        </TouchableWithoutFeedback>
+      </SafeAreaView >
     </KeyboardAvoidingView>
   );
 };
@@ -595,10 +559,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background || "#F8F9FA",
+
   },
   scroll: {
-    padding: 20,
+    padding: 10,
     paddingBottom: 40,
+    flexGrow: 1,
+
   },
   headerSection: {
     marginBottom: 24,
@@ -618,7 +585,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    padding: 20,
+    padding: 10,
     borderRadius: 16,
     marginBottom: 6,
     shadowColor: "#000",
@@ -642,7 +609,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#666",
-    marginBottom: 16,
+    marginBottom: 5,
   },
   weightDisplay: {
     alignItems: "center",
@@ -818,6 +785,55 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
+  },
+  headerHistoryButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  inputRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
+  inputColumn: {
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 5,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "left",
+  },
+  gridInput: {
+    borderWidth: 1,
+    borderColor: "#E1E5E9",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 14,
+    backgroundColor: "#FAFBFC",
+    textAlign: "center",
+    color: "#333",
+    width: "100%",
+    marginBottom: 3,
+  },
+  errorLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    textAlign: "center",
   },
   dropdownButton: {
     flexDirection: "row",
