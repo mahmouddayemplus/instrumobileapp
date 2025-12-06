@@ -32,6 +32,7 @@ import Overtime from './screens/Overtime';
 import OvertimeDetails from './screens/OvertimeDetails'
 import PlcModification from './screens/PlcModification'
 import PackersHistory from './screens/PackersHistory'
+import GasAnalyzerCalibration from './screens/GasAnalyzerCalibration'
 
 
 
@@ -327,6 +328,24 @@ function RootStack() {
               component={PackersHistory}
               options={({ navigation }) => ({
                 title: "Packer History",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="GasAnalyzerCalibration"
+              component={GasAnalyzerCalibration}
+              options={({ navigation }) => ({
+                title: "Gas Analyzers Calibration",
 
                 headerRight: () => (
                   <MaterialCommunityIcons

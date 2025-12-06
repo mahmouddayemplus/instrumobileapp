@@ -18,7 +18,7 @@ import { colors } from "../constants/color";
 
 const ToolsScreen = ({ navigation }) => {
   const user = useSelector((state) => state.auth.user);
-   const isPrivileged = user.isPrivileged;
+  const isPrivileged = user.isPrivileged;
   const dispatch = useDispatch();
 
   useLayoutEffect(() => {
@@ -140,8 +140,8 @@ const ToolsScreen = ({ navigation }) => {
               titleLine2="Calibrator"
               screenName="PackerScreen"
             />
-        
-          
+
+
             <ToolComponent
               iconName="hourglass-outline"
               titleLine1="Overtime"
@@ -156,23 +156,33 @@ const ToolsScreen = ({ navigation }) => {
               titleLine2="Calibrator"
               screenName="PackersHistory"
             />
-        
- 
+
+            <ToolComponent
+              iconName="calculator"
+              titleLine1="Gas Analyzers"
+              titleLine2="Calibration"
+              screenName="GasAnalyzerCalibration"
+            />
+
+
+
+
           </View>
+
           {
-              isPrivileged 
-              &&
-              <View style={styles.toolsGrid}>
-                        <ToolComponent
-                          iconName="clipboard"
-                          titleLine1="PLC Change "
-                          titleLine2="Request"
-                          screenName="PlcModification"/>
-              
- 
-          </View>
-}
-          
+            isPrivileged
+            &&
+            <View style={styles.toolsGrid}>
+              <ToolComponent
+                iconName="clipboard"
+                titleLine1="PLC Change "
+                titleLine2="Request"
+                screenName="PlcModification" />
+
+
+            </View>
+          }
+
         </View>
       </ScrollView>
     </SafeAreaView>
