@@ -17,13 +17,13 @@ const GasAnalyzerCalibration = () => {
 
 
     // State for Kiln Inlet measurements
-    const [o2Setpoint, setO2Setpoint] = useState('')
+    const [o2Setpoint, setO2Setpoint] = useState('20')
     const [o2Reading, setO2Reading] = useState('')
-    const [coSetpoint, setCoSetpoint] = useState('')
+    const [coSetpoint, setCoSetpoint] = useState('2.4')
     const [coReading, setCoReading] = useState('')
-    const [so2Setpoint, setSo2Setpoint] = useState('')
+    const [so2Setpoint, setSo2Setpoint] = useState('8000')
     const [so2Reading, setSo2Reading] = useState('')
-    const [noxSetpoint, setNoxSetpoint] = useState('')
+    const [noxSetpoint, setNoxSetpoint] = useState('3200')
     const [noxReading, setNoxReading] = useState('')
 
     const locationOptions = [
@@ -197,7 +197,7 @@ const GasAnalyzerCalibration = () => {
                                             <Text style={styles.gasTitle}>O₂ (Oxygen)</Text>
                                             <View style={styles.inputRow}>
                                                 <View style={styles.inputGroup}>
-                                                    <Text style={styles.inputLabel}>Setpoint</Text>
+                                                    <Text style={styles.inputLabel}>Setpoint 10%</Text>
                                                     <TextInput
                                                         style={styles.input}
                                                         value={o2Setpoint}
