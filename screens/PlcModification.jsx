@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { doc, addDoc, collection, getDocs, query, orderBy, updateDoc } from 'firebase/firestore';
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { formatDate, formatTime } from '../utils/dateUtils';
 
 const PlcModification = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,7 +47,7 @@ const PlcModification = () => {
                 cancelledDate: new Date().toISOString(),
                 cancelledBy: auth.currentUser.uid
               });
-               fetchModifications(); // Refresh the list
+              fetchModifications(); // Refresh the list
             } catch (error) {
               console.error('Error cancelling modification:', error);
               Alert.alert('Error', 'Failed to cancel modification');
@@ -62,7 +63,7 @@ const PlcModification = () => {
     setRequestName(modification.requestName || '');
     setSignalName(modification.signalName || '');
     setDetails(modification.details || '');
-    
+
     // Parse the existing date and time
     if (modification.date) {
       const dateParts = modification.date.split('/');
@@ -73,19 +74,19 @@ const PlcModification = () => {
         }
       }
     }
-    
+
     if (modification.time) {
       const timeString = modification.time;
       const today = new Date();
       const [timeOnly] = timeString.split(' ');
       const [hours, minutes, seconds] = timeOnly.split(':');
-      const parsedTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 
+      const parsedTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(),
         parseInt(hours), parseInt(minutes), seconds ? parseInt(seconds) : 0);
       if (!isNaN(parsedTime.getTime())) {
         setTime(parsedTime);
       }
     }
-    
+
     setEditingItem(modification);
     setIsEditing(true);
     setModalVisible(true);
@@ -143,7 +144,7 @@ const PlcModification = () => {
   const handleSave = async () => {
     try {
       const user = auth.currentUser;
-      
+
       if (!user) {
         Alert.alert('Error', 'No authenticated user found');
         return;
@@ -161,8 +162,8 @@ const PlcModification = () => {
 
       const formData = {
         signalName: signalName.toUpperCase(),
-        time: time.toLocaleTimeString(),
-        date: date.toLocaleDateString(),
+        time: formatTime(time),
+        date: formatDate(date),
         details,
         requestName: requestName.trim(),
       };
@@ -172,14 +173,14 @@ const PlcModification = () => {
         const docRef = doc(db, 'plcModifications', editingItem.id);
         await updateDoc(docRef, {
           signalName: signalName.toUpperCase(),
-          time: time.toLocaleTimeString(),
-          date: date.toLocaleDateString(),
+          time: formatTime(time),
+          date: formatDate(date),
           details,
           requestName: requestName.trim(),
           updatedAt: new Date().toISOString(),
           updatedBy: user.uid
         });
-       } else {
+      } else {
         // Create new document
         await addDoc(collection(db, 'plcModifications'), {
           ...formData,
@@ -188,11 +189,11 @@ const PlcModification = () => {
           userName: user.displayName || 'Anonymous',
           status: 'active',
         });
-       }
-      
+      }
+
       setModalVisible(false);
       fetchModifications(); // Refresh the list
-      
+
       // Clear form and reset edit state
       setRequestName('');
       setSignalName('');
@@ -201,7 +202,7 @@ const PlcModification = () => {
       setDetails('');
       setEditingItem(null);
       setIsEditing(false);
-      
+
     } catch (error) {
       console.error('Error saving PLC modification:', error);
       console.error('Error details:', error.message);
@@ -214,9 +215,9 @@ const PlcModification = () => {
       <View style={styles.headerContainer}>
         <View style={styles.headerRow}>
           <View style={styles.filterContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.filterButton, 
+                styles.filterButton,
                 statusFilter === 'active' && styles.filterButtonActive
               ]}
               onPress={() => setStatusFilter('active')}
@@ -226,9 +227,9 @@ const PlcModification = () => {
                 statusFilter === 'active' && styles.filterButtonTextActive
               ]}>Active</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.filterButton, 
+                styles.filterButton,
                 statusFilter === 'cancelled' && styles.filterButtonActive
               ]}
               onPress={() => setStatusFilter('cancelled')}
@@ -241,14 +242,14 @@ const PlcModification = () => {
           </View>
           <View style={styles.sortContainer}>
             <Text style={styles.sortLabel}>Sort:</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sortButton}
               onPress={toggleSortOrder}
             >
-              <Ionicons 
-                name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} 
-                size={16} 
-                color={colors.primary} 
+              <Ionicons
+                name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                size={16}
+                color={colors.primary}
               />
               <Text style={styles.sortButtonText}>
                 {sortOrder === 'asc' ? 'Old' : 'New'}
@@ -286,10 +287,10 @@ const PlcModification = () => {
             .filter(mod => {
               // Status filter
               if (mod.status !== statusFilter) return false;
-              
+
               // Search filter
               if (searchQuery.trim() === '') return true;
-              
+
               const query = searchQuery.toLowerCase();
               return (
                 mod.requestName?.toLowerCase().includes(query) ||
@@ -298,98 +299,100 @@ const PlcModification = () => {
               );
             })
             .map((modification) => (
-            <View key={modification.id} style={styles.row}>
-              <View style={styles.rowContent}>
-                <Text style={styles.signalName}>{modification.signalName}</Text>
-                <View style={styles.rowDetails}>
-                  <Text style={styles.timeDate}>{modification.date} {modification.time}</Text>
-                  <Text style={styles.details}>{modification.details}</Text>
-                  <Text style={styles.userName}>By: {modification.userName}  |  Requester: {modification.requestName}</Text>
-                  {modification.status === 'cancelled' && (
-                    <Text style={styles.cancelledText}>
-                      Cancelled on: {new Date(modification.cancelledDate).toLocaleDateString()}
-                    </Text>
+              <View key={modification.id} style={styles.row}>
+                <View style={styles.rowContent}>
+                  <Text style={styles.signalName}>{modification.signalName}</Text>
+                  <View style={styles.rowDetails}>
+                    <Text style={styles.timeDate}>{modification.date} {modification.time}</Text>
+                    <Text style={styles.details}>{modification.details}</Text>
+                    <Text style={styles.userName}>By: {modification.userName}  |  Requester: {modification.requestName}</Text>
+                    {modification.status === 'cancelled' && (
+                      <Text style={styles.cancelledText}>
+                        Cancelled on: {formatDate(new Date(modification.cancelledDate))}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+                <View style={styles.rowActions}>
+                  {/* Days since modification */}
+                  <Text style={styles.daysSince}>
+                    {(() => {
+                      try {
+                        // Check if date exists
+                        if (!modification.date) return 'No Date';
+
+                        // Try different date parsing approaches
+                        let modDate;
+
+                        // First try: direct parsing
+                        modDate = new Date(modification.date);
+
+                        // If invalid, try manual parsing for MM/DD/YYYY format
+                        if (isNaN(modDate.getTime())) {
+                          const dateParts = modification.date.split('/');
+                          if (dateParts.length === 3) {
+                            // Assume MM/DD/YYYY format
+                            modDate = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
+                          }
+                        }
+
+                        // Check if we got a valid date
+                        if (isNaN(modDate.getTime())) {
+                          return 'Invalid';
+                        }
+
+                        const today = new Date();
+
+                        // Set time to start of day for accurate day calculation
+                        modDate.setHours(0, 0, 0, 0);
+                        today.setHours(0, 0, 0, 0);
+
+                        const diffTime = today - modDate;
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                        // Return appropriate text based on the difference
+                        if (diffDays === 0) return 'Today';
+                        if (diffDays === 1) return '1d ago';
+                        if (diffDays > 1) return `${diffDays}d ago`;
+                        if (diffDays === -1) return 'Tomorrow';
+                        return `${Math.abs(diffDays)}d future`;
+                      } catch (error) {
+                        return 'Error';
+                      }
+                    })()}
+                  </Text>
+
+                  {/* Edit button */}
+                  <TouchableOpacity
+                    onPress={() => handleEditItem(modification)}
+                    style={styles.editButton}
+                  >
+                    <Ionicons name="pencil" size={14} color={colors.primary} />
+                  </TouchableOpacity>
+
+                  {modification.status === 'active' && (
+                    <TouchableOpacity
+                      onPress={() => handleCancelModification(modification.id)}
+                      style={styles.cancelButton}
+                    >
+                      <Ionicons name="close-circle" size={24} color="red" />
+                    </TouchableOpacity>
                   )}
+                  <View style={[
+                    styles.statusIndicator,
+                    {
+                      backgroundColor: modification.status === 'active' ? '#FFD700'
+                        : modification.status === 'cancelled' ? colors.primary
+                          : '#ddd'
+                    }
+                  ]} />
                 </View>
               </View>
-              <View style={styles.rowActions}>
-                {/* Days since modification */}
-                <Text style={styles.daysSince}>
-                  {(() => {
-                    try {
-                      // Check if date exists
-                      if (!modification.date) return 'No Date';
-                      
-                      // Try different date parsing approaches
-                      let modDate;
-                      
-                      // First try: direct parsing
-                      modDate = new Date(modification.date);
-                      
-                      // If invalid, try manual parsing for MM/DD/YYYY format
-                      if (isNaN(modDate.getTime())) {
-                        const dateParts = modification.date.split('/');
-                        if (dateParts.length === 3) {
-                          // Assume MM/DD/YYYY format
-                          modDate = new Date(dateParts[2], dateParts[0] - 1, dateParts[1]);
-                        }
-                      }
-                      
-                      // Check if we got a valid date
-                      if (isNaN(modDate.getTime())) {
-                        return 'Invalid';
-                      }
-                      
-                      const today = new Date();
-                      
-                      // Set time to start of day for accurate day calculation
-                      modDate.setHours(0, 0, 0, 0);
-                      today.setHours(0, 0, 0, 0);
-                      
-                      const diffTime = today - modDate;
-                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                      
-                      // Return appropriate text based on the difference
-                      if (diffDays === 0) return 'Today';
-                      if (diffDays === 1) return '1d ago';
-                      if (diffDays > 1) return `${diffDays}d ago`;
-                      if (diffDays === -1) return 'Tomorrow';
-                      return `${Math.abs(diffDays)}d future`;
-                    } catch (error) {
-                      return 'Error';
-                    }
-                  })()}
-                </Text>
-
-                {/* Edit button */}
-                <TouchableOpacity 
-                  onPress={() => handleEditItem(modification)}
-                  style={styles.editButton}
-                >
-                  <Ionicons name="pencil" size={14} color={colors.primary} />
-                </TouchableOpacity>
-                
-                {modification.status === 'active' && (
-                  <TouchableOpacity 
-                    onPress={() => handleCancelModification(modification.id)}
-                    style={styles.cancelButton}
-                  >
-                    <Ionicons name="close-circle" size={24} color="red" />
-                  </TouchableOpacity>
-                )}
-                <View style={[
-                  styles.statusIndicator, 
-                  { backgroundColor: modification.status === 'active' ? '#FFD700' 
-                    : modification.status === 'cancelled' ? colors.primary 
-                    : '#ddd' }
-                ]} />
-              </View>
-            </View>
-          ))}
+            ))}
         </ScrollView>
       )}
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.addButton}
         onPress={() => {
           // Clear edit state when adding new item
@@ -433,20 +436,20 @@ const PlcModification = () => {
             <View style={styles.rowContainer}>
               <View style={styles.halfInput}>
                 <Text style={styles.label}>Time</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowTimePicker(true)}
                   style={styles.input}
                 >
-                  <Text>{time.toLocaleTimeString()}</Text>
+                  <Text>{formatTime(time)}</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.halfInput}>
                 <Text style={styles.label}>Date</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowDatePicker(true)}
                   style={styles.input}
                 >
-                  <Text>{date.toLocaleDateString()}</Text>
+                  <Text>{formatDate(date)}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -481,14 +484,14 @@ const PlcModification = () => {
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
                 onPress={handleSave}
               >
                 <Text style={styles.buttonText}>{isEditing ? 'Update' : 'Save'}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.button, styles.closeButton]}
                 onPress={() => {
                   setModalVisible(false);

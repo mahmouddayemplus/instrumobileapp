@@ -18,6 +18,7 @@ import { colors } from "../constants/color";
 import React, { useState, useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { formatDateTime } from '../utils/dateUtils';
 
 const PackersHistory = () => {
   const navigation = useNavigation();
@@ -26,13 +27,13 @@ const PackersHistory = () => {
   const [selectedPacker, setSelectedPacker] = useState("Packer-1");
   const [showPackerDropdown, setShowPackerDropdown] = useState(false);
   const packerOptions = [
-    "Packer-1", 
-    "Packer-2", 
-    "Packer-3", 
-    "Packer-4", 
-    "Ventocheck-Packer-1", 
-    "Ventocheck-Packer-2", 
-    "Ventocheck-Packer-3", 
+    "Packer-1",
+    "Packer-2",
+    "Packer-3",
+    "Packer-4",
+    "Ventocheck-Packer-1",
+    "Ventocheck-Packer-2",
+    "Ventocheck-Packer-3",
     "Ventocheck-Packer-4"
   ];
 
@@ -52,36 +53,36 @@ const PackersHistory = () => {
     // Clear previous data when changing packer
     setHistoryData([]);
     setHasData(false);
-   };
+  };
 
   // Function to fetch calibration history from Firestore
   const fetchCalibrationHistory = async () => {
     try {
       setIsFetching(true);
-      
+
       // Get Firestore instance Ventocheck-Packer-1 Ventocheck-Packer-1
       const db = getFirestore();
       const packerDocRef = doc(db, "packers_calibration", selectedPacker);
- 
+
       // Get document
       const docSnap = await getDoc(packerDocRef);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
- 
+
         const calibrations = data.calibrations || [];
-        
+
         if (calibrations.length > 0) {
           // Sort by created_at in descending order (newest first)
-          const sortedCalibrations = calibrations.sort((a, b) => 
+          const sortedCalibrations = calibrations.sort((a, b) =>
             new Date(b.created_at) - new Date(a.created_at)
           );
-          
+
           setHistoryData(sortedCalibrations);
           setHasData(true);
-          
+
           Alert.alert(
-            "Success", 
+            "Success",
             `Found ${calibrations.length} calibration records for ${selectedPacker}`
           );
         } else {
@@ -105,11 +106,7 @@ const PackersHistory = () => {
     }
   };
 
-  // Function to format date
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-  };
+
 
   // Function to handle record click
   const handleRecordClick = (record) => {
@@ -154,7 +151,7 @@ const PackersHistory = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor={colors.primary || '#34C759'} />
-        
+
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
@@ -186,8 +183,8 @@ const PackersHistory = () => {
 
           {/* Fetch Button */}
           <View style={styles.fetchButtonContainer}>
-            <TouchableOpacity 
-              style={[styles.fetchButton, isFetching && styles.disabledButton]} 
+            <TouchableOpacity
+              style={[styles.fetchButton, isFetching && styles.disabledButton]}
               onPress={fetchCalibrationHistory}
               disabled={isFetching}
             >
@@ -212,7 +209,7 @@ const PackersHistory = () => {
               <Text style={styles.subtitle}>
                 {historyData.length} records found for {selectedPacker}
               </Text>
-              
+
               {/* Table Header */}
               <View style={styles.tableHeader}>
                 <Text style={[styles.headerText, styles.dateColumn]}>Date & Time</Text>
@@ -222,15 +219,15 @@ const PackersHistory = () => {
 
               {/* Table Rows */}
               {historyData.map((record, index) => (
-                <TouchableOpacity 
-                  key={index} 
+                <TouchableOpacity
+                  key={index}
                   style={styles.tableRow}
                   onPress={() => handleRecordClick(record)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.dateColumn}>
                     <Text style={styles.cellText}>
-                      {formatDate(record.created_at)}
+                      {formatDateTime(new Date(record.created_at))}
                     </Text>
                   </View>
                   <View style={styles.userColumn}>
@@ -324,7 +321,7 @@ const PackersHistory = () => {
                     <View style={styles.infoRow}>
                       <Text style={styles.infoLabel}>Date & Time:</Text>
                       <Text style={styles.infoValue}>
-                        {formatDate(selectedRecord.created_at)}
+                        {formatDateTime(new Date(selectedRecord.created_at))}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
@@ -349,7 +346,7 @@ const PackersHistory = () => {
                   {selectedRecord.data && selectedRecord.data.length > 0 && (
                     <View style={styles.calibrationDataCard}>
                       <Text style={styles.calibrationDataTitle}>Measurements</Text>
-                      
+
                       {/* Data Table Header */}
                       <View style={styles.dataTableHeader}>
                         <Text style={[styles.dataHeaderText, styles.indexColumn]}>#</Text>
@@ -385,14 +382,14 @@ const PackersHistory = () => {
                               {measurement.input?.toFixed(2) || "N/A"}
                             </Text>
                             <Text style={[
-                              styles.dataCellText, 
+                              styles.dataCellText,
                               styles.errorColumn,
                               { color: getErrorColor(measurement.error) }
                             ]}>
                               {measurement.error?.toFixed(2) || "N/A"}
                             </Text>
                             <Text style={[
-                              styles.dataCellText, 
+                              styles.dataCellText,
                               styles.statusColumn,
                               { color: getErrorColor(measurement.error) }
                             ]}>

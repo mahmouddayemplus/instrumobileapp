@@ -1,22 +1,24 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, SafeAreaView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, Alert, Modal, FlatList, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
-import { Picker } from '@react-native-picker/picker'
+
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { db } from '../firebase/firebaseConfig'
 import { collection, doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSelector } from "react-redux";
+import { formatDate } from '../utils/dateUtils';
 
 const GasAnalyzerCalibration = () => {
     const [selectedLocation, setSelectedLocation] = useState('kiln inlet')
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [showDatePicker, setShowDatePicker] = useState(false)
+    const [showLocationPicker, setShowLocationPicker] = useState(false)
     const [isUploading, setIsUploading] = useState(false)
     const [modalVisible, setModalVisible] = useState(false)
     const [historyRecords, setHistoryRecords] = useState([])
     const [loadingHistory, setLoadingHistory] = useState(false)
     const user = useSelector((state) => state.auth.user);
-     
+
 
 
     // State for Kiln Inlet measurements
@@ -40,137 +42,137 @@ const GasAnalyzerCalibration = () => {
         setShowDatePicker(false)
         if (selectedDate) {
             setSelectedDate(selectedDate)
-            console.log('Selected Date:', selectedDate.toLocaleDateString())
+            console.log('Selected Date:', formatDate(selectedDate))
         }
     }
 
-  const uploadDataToFirebase = async () => {
-    try {
-      setIsUploading(true);
-      
-      // Check if user is logged in
-      if (!user) {
-        Alert.alert('Error', 'Please login to save data');
-        return;
-      }
+    const uploadDataToFirebase = async () => {
+        try {
+            setIsUploading(true);
 
-      // Validate required fields
-      if (!o2Setpoint || !o2Reading || !coSetpoint || !coReading) {
-        Alert.alert('Error', 'Please fill in all O2 and CO fields');
-        return;
-      }
+            // Check if user is logged in
+            if (!user) {
+                Alert.alert('Error', 'Please login to save data');
+                return;
+            }
 
-      if (selectedLocation === 'kiln inlet') {
-        if (!so2Setpoint || !so2Reading || !noxSetpoint || !noxReading) {
-          Alert.alert('Error', 'Please fill in all fields for Kiln Inlet');
-          return;
+            // Validate required fields
+            if (!o2Setpoint || !o2Reading || !coSetpoint || !coReading) {
+                Alert.alert('Error', 'Please fill in all O2 and CO fields');
+                return;
+            }
+
+            if (selectedLocation === 'kiln inlet') {
+                if (!so2Setpoint || !so2Reading || !noxSetpoint || !noxReading) {
+                    Alert.alert('Error', 'Please fill in all fields for Kiln Inlet');
+                    return;
+                }
+            }
+
+            // Convert location to document name format
+            const getDocumentName = (location) => {
+                switch (location) {
+                    case 'kiln inlet': return 'kiln inlet';
+                    case 'pc': return 'pc';
+                    case 'string a': return 'stringA';
+                    case 'string b': return 'stringB';
+                    default: return location;
+                }
+            };
+
+            const documentName = getDocumentName(selectedLocation);
+
+            // Prepare data object
+            const dataObject = {
+                user: user.displayName || user.email || 'Unknown User',
+                date: formatDate(selectedDate),
+                'O2-reading': parseFloat(o2Reading),
+                'O2-setpoint': parseFloat(o2Setpoint),
+                'CO-reading': parseFloat(coReading),
+                'CO-setpoint': parseFloat(coSetpoint),
+            };
+
+            // Add additional fields for kiln inlet
+            if (selectedLocation === 'kiln inlet') {
+                dataObject['NOx-reading'] = parseFloat(noxReading);
+                dataObject['NOx-setpoint'] = parseFloat(noxSetpoint);
+                dataObject['SOx-reading'] = parseFloat(so2Reading);
+                dataObject['SOx-setpoint'] = parseFloat(so2Setpoint);
+            }
+
+            // Reference to the document
+            const docRef = doc(db, 'gasanalyzers', documentName);
+
+            // Check if document exists
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                // Document exists, add to existing array
+                await updateDoc(docRef, {
+                    data: arrayUnion(dataObject)
+                });
+            } else {
+                // Document doesn't exist, create it with the first entry
+                await setDoc(docRef, {
+                    data: [dataObject]
+                });
+            }
+
+            Alert.alert('Success', 'Data uploaded successfully!');
+            console.log('Data uploaded successfully:', dataObject);
+
+            // Optionally clear the form after successful upload
+            setO2Setpoint('');
+            setO2Reading('');
+            setCoSetpoint('');
+            setCoReading('');
+            if (selectedLocation === 'kiln inlet') {
+                setSo2Setpoint('');
+                setSo2Reading('');
+                setNoxSetpoint('');
+                setNoxReading('');
+            }
+
+        } catch (error) {
+            console.error('Error uploading data:', error);
+            Alert.alert('Error', 'Failed to upload data. Please try again.');
+        } finally {
+            setIsUploading(false);
         }
-      }
+    };
 
-      // Convert location to document name format
-      const getDocumentName = (location) => {
-        switch (location) {
-          case 'kiln inlet': return 'kiln inlet';
-          case 'pc': return 'pc';
-          case 'string a': return 'stringA';
-          case 'string b': return 'stringB';
-          default: return location;
+    const fetchHistoryForLocation = async (location) => {
+        try {
+            setLoadingHistory(true)
+
+            const getDocumentName = (loc) => {
+                switch (loc) {
+                    case 'kiln inlet': return 'kiln inlet';
+                    case 'pc': return 'pc';
+                    case 'string a': return 'stringA';
+                    case 'string b': return 'stringB';
+                    default: return loc;
+                }
+            };
+
+            const documentName = getDocumentName(location)
+            const docRef = doc(db, 'gasanalyzers', documentName)
+            const docSnap = await getDoc(docRef)
+            if (docSnap.exists()) {
+                const data = docSnap.data()?.data || []
+                setHistoryRecords(Array.isArray(data) ? data.slice().reverse() : [])
+            } else {
+                setHistoryRecords([])
+            }
+        } catch (error) {
+            console.error('Error fetching history:', error)
+            setHistoryRecords([])
+        } finally {
+            setLoadingHistory(false)
         }
-      };
-
-      const documentName = getDocumentName(selectedLocation);
-
-      // Prepare data object
-      const dataObject = {
-        user: user.displayName || user.email || 'Unknown User',
-        date: selectedDate.toLocaleDateString(),
-        'O2-reading': parseFloat(o2Reading),
-        'O2-setpoint': parseFloat(o2Setpoint),
-        'CO-reading': parseFloat(coReading),
-        'CO-setpoint': parseFloat(coSetpoint),
-      };
-
-      // Add additional fields for kiln inlet
-      if (selectedLocation === 'kiln inlet') {
-        dataObject['NOx-reading'] = parseFloat(noxReading);
-        dataObject['NOx-setpoint'] = parseFloat(noxSetpoint);
-        dataObject['SOx-reading'] = parseFloat(so2Reading);
-        dataObject['SOx-setpoint'] = parseFloat(so2Setpoint);
-      }
-
-      // Reference to the document
-      const docRef = doc(db, 'gasanalyzers', documentName);
-      
-      // Check if document exists
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        // Document exists, add to existing array
-        await updateDoc(docRef, {
-          data: arrayUnion(dataObject)
-        });
-      } else {
-        // Document doesn't exist, create it with the first entry
-        await setDoc(docRef, {
-          data: [dataObject]
-        });
-      }
-
-      Alert.alert('Success', 'Data uploaded successfully!');
-      console.log('Data uploaded successfully:', dataObject);
-      
-      // Optionally clear the form after successful upload
-      setO2Setpoint('');
-      setO2Reading('');
-      setCoSetpoint('');
-      setCoReading('');
-      if (selectedLocation === 'kiln inlet') {
-        setSo2Setpoint('');
-        setSo2Reading('');
-        setNoxSetpoint('');
-        setNoxReading('');
-      }
-      
-    } catch (error) {
-      console.error('Error uploading data:', error);
-      Alert.alert('Error', 'Failed to upload data. Please try again.');
-    } finally {
-      setIsUploading(false);
     }
-  };
 
-  const fetchHistoryForLocation = async (location) => {
-    try {
-      setLoadingHistory(true)
-
-      const getDocumentName = (loc) => {
-        switch (loc) {
-          case 'kiln inlet': return 'kiln inlet';
-          case 'pc': return 'pc';
-          case 'string a': return 'stringA';
-          case 'string b': return 'stringB';
-          default: return loc;
-        }
-      };
-
-      const documentName = getDocumentName(location)
-      const docRef = doc(db, 'gasanalyzers', documentName)
-      const docSnap = await getDoc(docRef)
-      if (docSnap.exists()) {
-        const data = docSnap.data()?.data || []
-        setHistoryRecords(Array.isArray(data) ? data.slice().reverse() : [])
-      } else {
-        setHistoryRecords([])
-      }
-    } catch (error) {
-      console.error('Error fetching history:', error)
-      setHistoryRecords([])
-    } finally {
-      setLoadingHistory(false)
-    }
-  }
-
-  return (
+    return (
         <SafeAreaView style={styles.safeArea}>
             <KeyboardAvoidingView
                 style={styles.keyboardAvoidingView}
@@ -191,7 +193,7 @@ const GasAnalyzerCalibration = () => {
                                     onPress={() => setShowDatePicker(true)}
                                 >
                                     <Text style={styles.dateText}>
-                                        {selectedDate.toLocaleDateString()}
+                                        {formatDate(selectedDate)}
                                     </Text>
                                 </TouchableOpacity>
                                 {showDatePicker && (
@@ -206,21 +208,15 @@ const GasAnalyzerCalibration = () => {
 
                             <View style={styles.dropdownContainer}>
                                 <Text style={styles.label}>Select Gas Analyser:</Text>
-                                <View style={styles.pickerContainer}>
-                                    <Picker
-                                        selectedValue={selectedLocation}
-                                        onValueChange={(itemValue) => setSelectedLocation(itemValue)}
-                                        style={styles.picker}
-                                    >
-                                        {locationOptions.map((option) => (
-                                            <Picker.Item
-                                                key={option.value}
-                                                label={option.label}
-                                                value={option.value}
-                                            />
-                                        ))}
-                                    </Picker>
-                                </View>
+                                <TouchableOpacity
+                                    style={styles.dropdownButton}
+                                    onPress={() => setShowLocationPicker(true)}
+                                >
+                                    <Text style={styles.dropdownText}>
+                                        {locationOptions.find(opt => opt.value === selectedLocation)?.label}
+                                    </Text>
+                                    <Text style={styles.dropdownIcon}>▼</Text>
+                                </TouchableOpacity>
                             </View>
 
                             <View style={styles.content}>
@@ -425,25 +421,25 @@ const GasAnalyzerCalibration = () => {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <Text style={{fontSize:18,fontWeight:'bold'}}>History - {locationOptions.find(opt => opt.value === selectedLocation)?.label}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>History - {locationOptions.find(opt => opt.value === selectedLocation)?.label}</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                                <Text style={{color:'#fff'}}>Close</Text>
+                                <Text style={{ color: '#fff' }}>Close</Text>
                             </TouchableOpacity>
                         </View>
 
                         {loadingHistory ? (
-                            <ActivityIndicator size="large" style={{marginTop:20}} />
+                            <ActivityIndicator size="large" style={{ marginTop: 20 }} />
                         ) : (
-                            <> 
+                            <>
                                 {(!historyRecords || historyRecords.length === 0) ? (
-                                    <Text style={{marginTop:20}}>No history records for this analyzer.</Text>
+                                    <Text style={{ marginTop: 20 }}>No history records for this analyzer.</Text>
                                 ) : (
                                     <FlatList
-                                        style={{marginTop:12}}
+                                        style={{ marginTop: 12 }}
                                         data={historyRecords}
                                         keyExtractor={(item, index) => index.toString()}
-                                        renderItem={({item}) => (
+                                        renderItem={({ item }) => (
                                             <View style={styles.historyItem}>
                                                 <Text style={styles.historyDate}>{item.date || ''}</Text>
                                                 <Text style={styles.historyUser}>{item.user || ''}</Text>
@@ -459,6 +455,52 @@ const GasAnalyzerCalibration = () => {
                         )}
                     </View>
                 </View>
+            </Modal>
+
+            {/* Location Picker Modal */}
+            <Modal
+                visible={showLocationPicker}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowLocationPicker(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setShowLocationPicker(false)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                            <View style={styles.locationPickerModal}>
+                                <View style={styles.locationPickerHeader}>
+                                    <Text style={styles.locationPickerTitle}>Select Gas Analyser</Text>
+                                    <TouchableOpacity onPress={() => setShowLocationPicker(false)}>
+                                        <Text style={styles.closeButtonText}>✕</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                {locationOptions.map((option) => (
+                                    <TouchableOpacity
+                                        key={option.value}
+                                        style={[
+                                            styles.locationOption,
+                                            selectedLocation === option.value && styles.locationOptionSelected
+                                        ]}
+                                        onPress={() => {
+                                            setSelectedLocation(option.value)
+                                            setShowLocationPicker(false)
+                                        }}
+                                    >
+                                        <Text style={[
+                                            styles.locationOptionText,
+                                            selectedLocation === option.value && styles.locationOptionTextSelected
+                                        ]}>
+                                            {option.label}
+                                        </Text>
+                                        {selectedLocation === option.value && (
+                                            <Text style={styles.checkmark}>✓</Text>
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
             </Modal>
         </SafeAreaView>
     )
@@ -672,6 +714,90 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#495057',
         marginBottom: 2,
+    },
+    dropdownButton: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 6,
+        padding: 12,
+        backgroundColor: '#fff',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    dropdownText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    dropdownIcon: {
+        fontSize: 12,
+        color: '#666',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    locationPickerModal: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        width: '80%',
+        maxHeight: '60%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    locationPickerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    locationPickerTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#333',
+    },
+    closeButtonText: {
+        fontSize: 24,
+        color: '#666',
+        fontWeight: '300',
+    },
+    locationOption: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginBottom: 8,
+        backgroundColor: '#f8f9fa',
+    },
+    locationOptionSelected: {
+        backgroundColor: '#e8f5e9',
+        borderWidth: 1,
+        borderColor: '#28a745',
+    },
+    locationOptionText: {
+        fontSize: 16,
+        color: '#333',
+        fontWeight: '500',
+    },
+    locationOptionTextSelected: {
+        color: '#28a745',
+        fontWeight: '600',
+    },
+    checkmark: {
+        fontSize: 20,
+        color: '#28a745',
+        fontWeight: 'bold',
     },
 })
 
