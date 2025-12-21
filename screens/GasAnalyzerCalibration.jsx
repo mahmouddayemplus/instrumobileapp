@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, SafeAreaView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, Alert } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, SafeAreaView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, Alert, Modal, FlatList, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { Picker } from '@react-native-picker/picker'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -12,6 +12,9 @@ const GasAnalyzerCalibration = () => {
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [isUploading, setIsUploading] = useState(false)
+    const [modalVisible, setModalVisible] = useState(false)
+    const [historyRecords, setHistoryRecords] = useState([])
+    const [loadingHistory, setLoadingHistory] = useState(false)
     const user = useSelector((state) => state.auth.user);
      
 
@@ -134,7 +137,40 @@ const GasAnalyzerCalibration = () => {
     } finally {
       setIsUploading(false);
     }
-  };    return (
+  };
+
+  const fetchHistoryForLocation = async (location) => {
+    try {
+      setLoadingHistory(true)
+
+      const getDocumentName = (loc) => {
+        switch (loc) {
+          case 'kiln inlet': return 'kiln inlet';
+          case 'pc': return 'pc';
+          case 'string a': return 'stringA';
+          case 'string b': return 'stringB';
+          default: return loc;
+        }
+      };
+
+      const documentName = getDocumentName(location)
+      const docRef = doc(db, 'gasanalyzers', documentName)
+      const docSnap = await getDoc(docRef)
+      if (docSnap.exists()) {
+        const data = docSnap.data()?.data || []
+        setHistoryRecords(Array.isArray(data) ? data.slice().reverse() : [])
+      } else {
+        setHistoryRecords([])
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error)
+      setHistoryRecords([])
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
+  return (
         <SafeAreaView style={styles.safeArea}>
             <KeyboardAvoidingView
                 style={styles.keyboardAvoidingView}
@@ -367,11 +403,63 @@ const GasAnalyzerCalibration = () => {
                                         {isUploading ? 'Uploading...' : 'Save'}
                                     </Text>
                                 </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.historyButton}
+                                    onPress={() => {
+                                        setModalVisible(true)
+                                        fetchHistoryForLocation(selectedLocation)
+                                    }}
+                                >
+                                    <Text style={styles.historyButtonText}>History</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
+            <Modal
+                visible={modalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <Text style={{fontSize:18,fontWeight:'bold'}}>History - {locationOptions.find(opt => opt.value === selectedLocation)?.label}</Text>
+                            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                                <Text style={{color:'#fff'}}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {loadingHistory ? (
+                            <ActivityIndicator size="large" style={{marginTop:20}} />
+                        ) : (
+                            <> 
+                                {(!historyRecords || historyRecords.length === 0) ? (
+                                    <Text style={{marginTop:20}}>No history records for this analyzer.</Text>
+                                ) : (
+                                    <FlatList
+                                        style={{marginTop:12}}
+                                        data={historyRecords}
+                                        keyExtractor={(item, index) => index.toString()}
+                                        renderItem={({item}) => (
+                                            <View style={styles.historyItem}>
+                                                <Text style={styles.historyDate}>{item.date || ''}</Text>
+                                                <Text style={styles.historyUser}>{item.user || ''}</Text>
+                                                <Text style={styles.historyText}>O2: {item['O2-reading'] ?? ''}</Text>
+                                                <Text style={styles.historyText}>CO: {item['CO-reading'] ?? ''}</Text>
+                                                {item['NOx-reading'] !== undefined && <Text style={styles.historyText}>NOx: {item['NOx-reading']}</Text>}
+                                                {item['SOx-reading'] !== undefined && <Text style={styles.historyText}>SOx: {item['SOx-reading']}</Text>}
+                                            </View>
+                                        )}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     )
 }
@@ -518,6 +606,72 @@ const styles = StyleSheet.create({
     uploadButtonDisabled: {
         backgroundColor: '#6c757d',
         opacity: 0.7,
+    },
+    historyButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        marginTop: 12,
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    historyButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        maxHeight: '90%',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    closeButton: {
+        backgroundColor: '#dc3545',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 6,
+    },
+    historyItem: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    historyDate: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    historyUser: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 8,
+        fontStyle: 'italic',
+    },
+    historyText: {
+        fontSize: 13,
+        color: '#495057',
+        marginBottom: 2,
     },
 })
 
