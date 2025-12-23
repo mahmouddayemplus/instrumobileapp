@@ -22,7 +22,7 @@ export default {
         backgroundColor: "#ffffff",
       },
     },
-    
+
 
     splash: {
       image: "./assets/splash-icon.png",
@@ -69,6 +69,6 @@ export default {
       favicon: "./assets/favicon.png",
     },
 
-    plugins: ["expo-sqlite",'expo-asset'],
+    plugins: ["expo-sqlite", 'expo-asset', "expo-font"],
   },
 };

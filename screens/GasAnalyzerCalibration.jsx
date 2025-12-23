@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, SafeAreaView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView, Alert, Modal, FlatList, ActivityIndicator } from 'react-native'
-import React, { useState } from 'react'
-
+import React, { useState, useLayoutEffect } from 'react'
+import { useNavigation } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors } from "../constants/color";
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { db } from '../firebase/firebaseConfig'
 import { collection, doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore'
@@ -9,6 +11,7 @@ import { useSelector } from "react-redux";
 import { formatDate } from '../utils/dateUtils';
 
 const GasAnalyzerCalibration = () => {
+    const navigation = useNavigation();
     const [selectedLocation, setSelectedLocation] = useState('kiln inlet')
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [showDatePicker, setShowDatePicker] = useState(false)
@@ -38,6 +41,21 @@ const GasAnalyzerCalibration = () => {
         { label: 'String B', value: 'string b' }
     ]
 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity
+                    onPress={() => {
+                        setModalVisible(true);
+                        fetchHistoryForLocation(selectedLocation);
+                    }}
+                    style={{ marginRight: 15 }}
+                >
+                    <MaterialCommunityIcons name="history" size={28} color={colors.primary} />
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation, selectedLocation]);
     const handleDateChange = (event, selectedDate) => {
         setShowDatePicker(false)
         if (selectedDate) {
@@ -399,15 +417,7 @@ const GasAnalyzerCalibration = () => {
                                         {isUploading ? 'Uploading...' : 'Save'}
                                     </Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.historyButton}
-                                    onPress={() => {
-                                        setModalVisible(true)
-                                        fetchHistoryForLocation(selectedLocation)
-                                    }}
-                                >
-                                    <Text style={styles.historyButtonText}>History</Text>
-                                </TouchableOpacity>
+
                             </View>
                         </View>
                     </ScrollView>
@@ -649,24 +659,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#6c757d',
         opacity: 0.7,
     },
-    historyButton: {
-        backgroundColor: '#007bff',
-        paddingVertical: 12,
-        paddingHorizontal: 24,
-        borderRadius: 8,
-        marginTop: 12,
-        alignItems: 'center',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
-    historyButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
+
     modalContainer: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
