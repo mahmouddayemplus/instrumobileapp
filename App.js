@@ -33,6 +33,7 @@ import OvertimeDetails from './screens/OvertimeDetails'
 import PlcModification from './screens/PlcModification'
 import PackersHistory from './screens/PackersHistory'
 import GasAnalyzerCalibration from './screens/GasAnalyzerCalibration'
+import BeltScale from './screens/BeltScale'
 
 
 
@@ -346,6 +347,24 @@ function RootStack() {
               component={GasAnalyzerCalibration}
               options={({ navigation }) => ({
                 title: "Gas Analyzers Calibration",
+
+                headerRight: () => (
+                  <MaterialCommunityIcons
+                    name="home"
+                    size={24}
+                    color="#43ad49"
+                    style={{ marginRight: 16 }}
+                    onPress={() => navigation.navigate("HomeTabs")}
+                  />
+                ),
+              })}
+
+            />
+            <Stack.Screen
+              name="BeltScale"
+              component={BeltScale}
+              options={({ navigation }) => ({
+                title: "Belt Scale",
 
                 headerRight: () => (
                   <MaterialCommunityIcons

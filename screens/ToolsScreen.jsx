@@ -163,10 +163,22 @@ const ToolsScreen = ({ navigation }) => {
               titleLine2="Calibration"
               screenName="GasAnalyzerCalibration"
             />
+            
 
-
-
-
+          </View>
+          <View style={styles.toolsGrid}>
+            <ToolComponent
+              iconName="calculator"
+              titleLine1="Belt Scale"
+              titleLine2=""
+              screenName="BeltScale"
+            />
+            <ToolComponent
+              iconName="calculator"
+              titleLine1="Belt Scale"
+              titleLine2=""
+              screenName="BeltScale"
+            />
           </View>
 
           {
